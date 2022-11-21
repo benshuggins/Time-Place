@@ -132,25 +132,34 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
       //updateGeotificationsCount()
     }
     
+    func remove(_ region: Region) {
+      guard let index = regions.firstIndex(of: region) else { return }
+      regions.remove(at: index)
+      mapView.removeAnnotation(region)
+      removeRadiusOverlay(forRegion: region)
+     // updateGeotificationsCount()
+    }
+    
     // MARK: Map overlay functions
     func addRadiusOverlay(forRegion region: Region) {
       mapView.addOverlay(MKCircle(center: region.coordinate, radius: region.radius))
     }
     
-//    func removeRadiusOverlay(forRegion region: Region) {
-//      // Find exactly one overlay which has the same coordinates & radius to remove
-//      guard let overlays = mapView?.overlays else { return }
-//      for overlay in overlays {
-//        guard let circleOverlay = overlay as? MKCircle else { continue }
-//        let coord = circleOverlay.coordinate
-//        if coord.latitude == region.coordinate.latitude &&
-//          coord.longitude == region.coordinate.longitude &&
-//          circleOverlay.radius == geotification.radius {
-//          mapView.removeOverlay(circleOverlay)
-//          break
-//        }
-//      }
-//    }
+    func removeRadiusOverlay(forRegion region: Region) {
+      // Find exactly one overlay which has the same coordinates & radius to remove
+//        guard let overlays = mapView.overlays else { return }
+    let overlays = mapView.overlays
+      for overlay in overlays {
+        guard let circleOverlay = overlay as? MKCircle else { continue }
+        let coord = circleOverlay.coordinate
+        if coord.latitude == region.coordinate.latitude &&
+          coord.longitude == region.coordinate.longitude &&
+          circleOverlay.radius == region.radius {
+          mapView.removeOverlay(circleOverlay)
+          break
+        }
+      }
+    }
     
     
     
@@ -376,8 +385,8 @@ extension MainMapVC: MKMapViewDelegate {
 
   func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
     // Delete geotification
-    guard let geotification = view.annotation as? Region else { return }
-  // remove(region)
+    guard let region = view.annotation as? Region else { return }
+   remove(region)
    // saveAllGeotifications()
   }
 }
