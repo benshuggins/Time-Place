@@ -7,14 +7,21 @@
 
 import UIKit
 import CoreData
+import CoreLocation
+import UserNotifications
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    let center = UNUserNotificationCenter.current()
+   // let locationManager = CLLocationManager()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        center.requestAuthorization(options: [.alert, .sound]) { granted, error in
+        }
+    //    locationManager.requestAlwaysAuthorization()
+        
         return true
     }
 

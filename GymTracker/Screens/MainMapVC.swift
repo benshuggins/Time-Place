@@ -5,11 +5,13 @@
 //  Created by Ben Huggins on 11/19/22.
 //
 
+// Check this is being updated
+
 import UIKit
 import MapKit
 import CoreLocation
 
-class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource, MKMapViewDelegate {
+class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     let locationManager = CLLocationManager()
     
@@ -17,6 +19,8 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource, M
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     private let regionMeters: Double = 10000
+    
+    var regions: [Region] = []  //SOT
     
     let mapView : MKMapView = {
             let map = MKMapView()
@@ -39,7 +43,7 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource, M
         vc.delegate = self
         
         mapView.delegate = self
-        title = "TodoList"
+        title = "GymTracker"
         view.addSubview(mapView)
         //xview.addSubview(tableView)
         getAllItems()
@@ -118,6 +122,42 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource, M
 //            mapView.setCameraZoomRange(zoomRange, animated: true)
         }
     }
+    
+    
+    // MARK: Functions that update the model/associated views with geotification changes
+    func add(_ region: Region) {
+      regions.append(region)
+      mapView.addAnnotation(region)
+      addRadiusOverlay(forRegion: region)
+      //updateGeotificationsCount()
+    }
+    
+    // MARK: Map overlay functions
+    func addRadiusOverlay(forRegion region: Region) {
+      mapView.addOverlay(MKCircle(center: region.coordinate, radius: region.radius))
+    }
+    
+//    func removeRadiusOverlay(forRegion region: Region) {
+//      // Find exactly one overlay which has the same coordinates & radius to remove
+//      guard let overlays = mapView?.overlays else { return }
+//      for overlay in overlays {
+//        guard let circleOverlay = overlay as? MKCircle else { continue }
+//        let coord = circleOverlay.coordinate
+//        if coord.latitude == region.coordinate.latitude &&
+//          coord.longitude == region.coordinate.longitude &&
+//          circleOverlay.radius == geotification.radius {
+//          mapView.removeOverlay(circleOverlay)
+//          break
+//        }
+//      }
+//    }
+    
+    
+    
+    // MARK: -
+    // MARK: LAYOUT CONFIGURATION
+    
+    //LAYOUT CONFIGURATION
     
     private func configureUI() {
         
@@ -206,6 +246,8 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource, M
             present(sheet, animated: true)
         
     }
+    
+    
     // CoreData
     func getAllItems() {
         do {
@@ -284,8 +326,58 @@ extension MainMapVC: AddLocationVCDelegate {
   
     func addLocationVC(_ controller: AddLocationVC, didAddRegion region: Region) {
       
-        controller.dismiss(animated: true, completion: nil)    
+        controller.dismiss(animated: true, completion: nil)
+        
+        region.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
+        
+        add(region)
     }
     
     
+}
+
+
+// annotation view is the tag on teh
+
+// THIS IS THE DELEGATE AND IT APPEARS TO UPDATE THE ANNOTATION
+// MARK: - MapView Delegate =>
+extension MainMapVC: MKMapViewDelegate {
+  
+  func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+    let identifier = "myGeotification"
+   
+    if annotation is Region {
+      var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKPinAnnotationView
+      if annotationView == nil {
+        annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+        annotationView?.canShowCallout = true
+        let removeButton = UIButton(type: .custom)
+        removeButton.frame = CGRect(x: 0, y: 0, width: 23, height: 23)
+        removeButton.setImage(UIImage(systemName: "trash.fill"), for: .normal)
+        annotationView?.leftCalloutAccessoryView = removeButton
+      } else {
+        annotationView?.annotation = annotation
+      }
+      return annotationView
+    }
+    return nil
+  }
+
+  func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+    if overlay is MKCircle {
+      let circleRenderer = MKCircleRenderer(overlay: overlay)
+      circleRenderer.lineWidth = 1.0
+      circleRenderer.strokeColor = .purple
+      circleRenderer.fillColor = UIColor.purple.withAlphaComponent(0.4)
+      return circleRenderer
+    }
+    return MKOverlayRenderer(overlay: overlay)
+  }
+
+  func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+    // Delete geotification
+    guard let geotification = view.annotation as? Region else { return }
+  // remove(region)
+   // saveAllGeotifications()
+  }
 }
