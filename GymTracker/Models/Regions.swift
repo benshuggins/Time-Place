@@ -9,12 +9,11 @@ import UIKit
 import MapKit
 import CoreLocation
 
-class Region: NSObject, MKAnnotation {
+class Regions: NSObject, MKAnnotation {
   let title: String?
   var radius: Double
   let identifier: String
   let coordinate: CLLocationCoordinate2D   // This is required for an MKAnnotation
-    
     
     var subtitle: String? {   // This is automatically called by MKAnnotation class and is the second title in tag on map
       return title

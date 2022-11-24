@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F506F011292BFCAD002BF373 /* Region+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = F506F00F292BFCAC002BF373 /* Region+CoreDataClass.swift */; };
+		F506F012292BFCAD002BF373 /* Region+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = F506F010292BFCAC002BF373 /* Region+CoreDataProperties.swift */; };
 		F59B42092929604A001F0269 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F59B42082929604A001F0269 /* AppDelegate.swift */; };
 		F59B420B2929604A001F0269 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F59B420A2929604A001F0269 /* SceneDelegate.swift */; };
 		F59B420D2929604A001F0269 /* MainMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F59B420C2929604A001F0269 /* MainMapVC.swift */; };
@@ -22,6 +24,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F506F00F292BFCAC002BF373 /* Region+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Region+CoreDataClass.swift"; sourceTree = "<group>"; };
+		F506F010292BFCAC002BF373 /* Region+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Region+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		F59B42052929604A001F0269 /* GymTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GymTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F59B42082929604A001F0269 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F59B420A2929604A001F0269 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -49,6 +53,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F506F00E292BF584002BF373 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F506F00F292BFCAC002BF373 /* Region+CoreDataClass.swift */,
+				F506F010292BFCAC002BF373 /* Region+CoreDataProperties.swift */,
+				F5D2D8CC292AC58700A065AD /* Regions.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		F59B41FC2929604A001F0269 = {
 			isa = PBXGroup;
 			children = (
@@ -70,7 +84,7 @@
 			children = (
 				F59B42082929604A001F0269 /* AppDelegate.swift */,
 				F59B420A2929604A001F0269 /* SceneDelegate.swift */,
-				F5D2D8CC292AC58700A065AD /* Regions.swift */,
+				F506F00E292BF584002BF373 /* Models */,
 				F5D2D8C92929A43D00A065AD /* Screens */,
 				F59B420E2929604A001F0269 /* Main.storyboard */,
 				F5D2D8CA2929A96E00A065AD /* Utilities.swift */,
@@ -172,7 +186,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F506F012292BFCAD002BF373 /* Region+CoreDataProperties.swift in Sources */,
 				F59B42132929604A001F0269 /* GymTracker.xcdatamodeld in Sources */,
+				F506F011292BFCAD002BF373 /* Region+CoreDataClass.swift in Sources */,
 				F59B420D2929604A001F0269 /* MainMapVC.swift in Sources */,
 				F59B42092929604A001F0269 /* AppDelegate.swift in Sources */,
 				F59B422129296238001F0269 /* ToDoListItem+CoreDataClass.swift in Sources */,

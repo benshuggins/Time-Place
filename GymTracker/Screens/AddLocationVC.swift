@@ -11,7 +11,7 @@ import CoreLocation
 
 
 protocol AddLocationVCDelegate: class {
-  func addLocationVC(_ controller: AddLocationVC, didAddRegion: Region)
+  func addLocationVC(_ controller: AddLocationVC, didAddRegion: Regions)
 }
 
 
@@ -81,7 +81,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     
     @objc func didEnterNoteTextField(_ textField: UITextField) {
         print(textField.text ?? "")
-        let radiusSet = 40
+        let radiusSet = 40                                          // wrong ???
         let noteSet = !(textField.text?.isEmpty ?? true)
         addRightButtonBar.isEnabled = (radiusSet != 0) && noteSet
     }
@@ -91,10 +91,12 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         
         print("didTapAddButton")
         let coordinate = mapView.centerCoordinate
+        
+        
         let radius: Double = 40
         let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
-        let region = Region(title: note, radius: radius, identifier: identifier, coordinate: coordinate)
+        let region = Regions(title: note, radius: radius, identifier: identifier, coordinate: coordinate)
         delegate?.addLocationVC(self, didAddRegion: region)
     }
     

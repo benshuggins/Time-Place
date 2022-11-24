@@ -20,7 +20,7 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     private let regionMeters: Double = 10000
     
-    var regions: [Region] = []  //SOT
+    var regions: [Regions] = []  //SOT
     
     let mapView : MKMapView = {
             let map = MKMapView()
@@ -39,23 +39,30 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
       
-        let vc = AddLocationVC()
-        vc.delegate = self
+//        let vc = AddLocationVC()
+//        vc.delegate = self
         
         mapView.delegate = self
-        title = "GymTracker"
+        title = "Geo Email Logger"
         view.addSubview(mapView)
         //xview.addSubview(tableView)
         getAllItems()
         tableView.delegate = self
         tableView.dataSource = self
        // tableView.frame = view.bounds
+        
+        let goToLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
+        
+        let addLocationImage = UIImage(systemName: "location.square.fill")
     
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapBarButton))
-        let add = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapAddLocationBarButton))
-        let zoom = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(goToYourLocation))
+       // let add = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapAddLocationBarButton))
+        let addLocation = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(didTapAddLocationBarButton))
+       // let add = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(goToYourLocation))
         
-        navigationItem.rightBarButtonItems = [add, zoom]
+        let zoom = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(goToYourLocation))
+        
+        navigationItem.rightBarButtonItems = [addLocation, zoom]
         
         
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.height))
@@ -125,14 +132,14 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     
     // MARK: Functions that update the model/associated views with geotification changes
-    func add(_ region: Region) {
+    func add(_ region: Regions) {
       regions.append(region)
       mapView.addAnnotation(region)
       addRadiusOverlay(forRegion: region)
       //updateGeotificationsCount()
     }
     
-    func remove(_ region: Region) {
+    func remove(_ region: Regions) {
       guard let index = regions.firstIndex(of: region) else { return }
       regions.remove(at: index)
       mapView.removeAnnotation(region)
@@ -141,11 +148,11 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     }
     
     // MARK: Map overlay functions
-    func addRadiusOverlay(forRegion region: Region) {
+    func addRadiusOverlay(forRegion region: Regions) {
       mapView.addOverlay(MKCircle(center: region.coordinate, radius: region.radius))
     }
     
-    func removeRadiusOverlay(forRegion region: Region) {
+    func removeRadiusOverlay(forRegion region: Regions) {
       // Find exactly one overlay which has the same coordinates & radius to remove
 //        guard let overlays = mapView.overlays else { return }
     let overlays = mapView.overlays
@@ -228,7 +235,7 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         let sheet = UIAlertController(title: "Edit", message: nil, preferredStyle: .actionSheet)
       
         sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-       
+
         sheet.addAction(UIAlertAction(title: "Edit", style: .default, handler: { _ in
            
             
@@ -328,34 +335,25 @@ extension MainMapVC: CLLocationManagerDelegate {
           showAlert(withTitle: "Warning", message: message)
         }
     }
-   
 }
 
 extension MainMapVC: AddLocationVCDelegate {
-  
-    func addLocationVC(_ controller: AddLocationVC, didAddRegion region: Region) {
-      
+   
+    func addLocationVC(_ controller: AddLocationVC, didAddRegion region: Regions) {
         controller.dismiss(animated: true, completion: nil)
-        
         region.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
-        
         add(region)
     }
-    
-    
 }
 
-
-// annotation view is the tag on teh
-
-// THIS IS THE DELEGATE AND IT APPEARS TO UPDATE THE ANNOTATION
-// MARK: - MapView Delegate =>
+// This adds an annotation to the map
+// MARK: - Map Annotation
 extension MainMapVC: MKMapViewDelegate {
   
   func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
     let identifier = "myGeotification"
    
-    if annotation is Region {
+    if annotation is Regions {
       var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKPinAnnotationView
       if annotationView == nil {
         annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: identifier)
@@ -385,7 +383,7 @@ extension MainMapVC: MKMapViewDelegate {
 
   func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
     // Delete geotification
-    guard let region = view.annotation as? Region else { return }
+    guard let region = view.annotation as? Regions else { return }
    remove(region)
    // saveAllGeotifications()
   }
