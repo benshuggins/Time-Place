@@ -19,8 +19,15 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     
     weak var delegate: AddLocationVCDelegate?
     
+    //MARK: - LAYOUT DECLARATIONS
+    var addRightButtonBar: UIBarButtonItem = {
+        let button = UIBarButtonItem()
+        return button
+    }()
+    
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
+        searchBar.placeholder = "Search for Gym"
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         return searchBar
     }()
@@ -53,11 +60,16 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
             return map
         }()
     
-    var addRightButtonBar: UIBarButtonItem = {
-       let button = UIBarButtonItem()
-       return button
+    private let mappinImageView: UIImageView = {
+        let image = UIImage(systemName: "mappin.circle")
+        let imageView = UIImageView(image: image)
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.tintColor = .red
+        
+        return imageView
     }()
-
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Add Your Gym"
@@ -66,16 +78,23 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         view.backgroundColor = .white
         view.addSubview(searchBar)
         view.addSubview(textFieldNote)
-       // view.addSubview(textFieldRadius)
         view.addSubview(mapView)
         mapView.delegate = self
         mapView.showsUserLocation = true
+        
+//mappinImageView.frame = CGRect(x: 150, y: 100, width: 20, height: 20)
+        mapView.addSubview(mappinImageView)
+        
+        
         configureUI()
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(didTapGoToYourLocationBarButton))
+        //MARK: - BUTTON BAR ITEMS
+        let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
+        let goToLocationImage = UIImage(systemName: "location.square.fill")
         
-        addRightButtonBar = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapSaveLocationBarButton))
-        navigationItem.rightBarButtonItem = addRightButtonBar
+        let zoomButton = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(didTapGoToYourLocationBarButton))
+        addRightButtonBar = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapSaveLocationBarButton))
+        navigationItem.rightBarButtonItems = [addRightButtonBar, zoomButton]
         addRightButtonBar.isEnabled = false
     }
     
@@ -86,13 +105,8 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         addRightButtonBar.isEnabled = (radiusSet != 0) && noteSet
     }
     
-    // This is where I build a model??
     @objc func didTapSaveLocationBarButton() {
-        
-        print("didTapAddButton")
         let coordinate = mapView.centerCoordinate
-        
-        
         let radius: Double = 40
         let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
@@ -105,6 +119,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         mapView.zoomToLocation(mapView.userLocation.location)
     }
     
+    //MARK: - LAYOUT CONSTRAINTS
     func configureUI() {
         
         NSLayoutConstraint.activate([
@@ -122,20 +137,27 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
             textFieldNote.heightAnchor.constraint(equalToConstant: 60),
             textFieldNote.bottomAnchor.constraint(equalTo: mapView.topAnchor)
         ])
-        
-//        NSLayoutConstraint.activate([
-//            textFieldRadius.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
-//            textFieldRadius.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-//            textFieldRadius.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-//            textFieldRadius.heightAnchor.constraint(equalToConstant: 60),
-//            textFieldRadius.bottomAnchor.constraint(equalTo: mapView.topAnchor)
-//        ])
-        
+
         NSLayoutConstraint.activate([
             mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
             mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+        
+        NSLayoutConstraint.activate([
+            mappinImageView.centerXAnchor.constraint(equalTo: mapView.centerXAnchor),
+            mappinImageView.centerYAnchor.constraint(equalTo: mapView.centerYAnchor),
+            
+        ])
     }
+}
+
+extension AddLocationVC: UISearchBarDelegate {
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        print(searchText)
+    }
+    
+
 }

@@ -43,7 +43,7 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
 //        vc.delegate = self
         
         mapView.delegate = self
-        title = "Geo Email Logger"
+        title = "GymTracker"
         view.addSubview(mapView)
         //xview.addSubview(tableView)
         getAllItems()
@@ -51,16 +51,18 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         tableView.dataSource = self
        // tableView.frame = view.bounds
         
-        let goToLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
+        let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
         
-        let addLocationImage = UIImage(systemName: "location.square.fill")
+        let goToLocationImage = UIImage(systemName: "location.square.fill")
     
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapBarButton))
        // let add = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapAddLocationBarButton))
-        let addLocation = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(didTapAddLocationBarButton))
+        
+        
+        let addLocation = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapAddLocationBarButton))
        // let add = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(goToYourLocation))
         
-        let zoom = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(goToYourLocation))
+        let zoom = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(goToYourLocation))
         
         navigationItem.rightBarButtonItems = [addLocation, zoom]
         
