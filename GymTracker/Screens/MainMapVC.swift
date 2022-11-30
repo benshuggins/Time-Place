@@ -43,7 +43,7 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
 //        vc.delegate = self
         
         mapView.delegate = self
-        title = "GymTracker"
+        title = "Gym Tracker"
         view.addSubview(mapView)
         //xview.addSubview(tableView)
         getAllItems()
@@ -52,9 +52,7 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
        // tableView.frame = view.bounds
         
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
-        
         let goToLocationImage = UIImage(systemName: "location.square.fill")
-    
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapBarButton))
        // let add = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapAddLocationBarButton))
         
@@ -194,7 +192,7 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     @objc func didTapAddLocationBarButton() {
         let addLocationVC = AddLocationVC()
         let navVC = UINavigationController(rootViewController: addLocationVC)
-        addLocationVC.delegate = self                                               // this is the delegate
+        addLocationVC.delegate = self   //2                                            // this is the delegate
         present(navVC, animated: true)
     }
     
@@ -339,7 +337,7 @@ extension MainMapVC: CLLocationManagerDelegate {
     }
 }
 
-extension MainMapVC: AddLocationVCDelegate {
+extension MainMapVC: AddLocationVCDelegate {  // 1
    
     func addLocationVC(_ controller: AddLocationVC, didAddRegion region: Regions) {
         controller.dismiss(animated: true, completion: nil)
@@ -360,10 +358,17 @@ extension MainMapVC: MKMapViewDelegate {
       if annotationView == nil {
         annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: identifier)
         annotationView?.canShowCallout = true
+        
+          
         let removeButton = UIButton(type: .custom)
         removeButton.frame = CGRect(x: 0, y: 0, width: 23, height: 23)
         removeButton.setImage(UIImage(systemName: "trash.fill"), for: .normal)
         annotationView?.leftCalloutAccessoryView = removeButton
+          //      view.canShowCallout = true
+          //      view.calloutOffset = CGPoint(x: -5, y: 5)
+         // let button = UIButton(type: .detailDisclosure)
+          annotationView?.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
+          //annotationView?.rightCalloutAccessoryView = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapGraphView))
       } else {
         annotationView?.annotation = annotation
       }
@@ -371,6 +376,11 @@ extension MainMapVC: MKMapViewDelegate {
     }
     return nil
   }
+    
+    @objc func didTapGraphView() {
+        
+        
+    }
 
   func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
     if overlay is MKCircle {
@@ -382,11 +392,26 @@ extension MainMapVC: MKMapViewDelegate {
     }
     return MKOverlayRenderer(overlay: overlay)
   }
-
+    
   func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
     // Delete geotification
     guard let region = view.annotation as? Regions else { return }
-   remove(region)
+      
+      
+      if control == view.leftCalloutAccessoryView {
+                  print("left accessory selected")
+          remove(region)
+          
+              } else if control == view.rightCalloutAccessoryView {
+                  
+                  
+                  print(region.title)
+                  let detailVC = DetailLocationVC()
+                  detailVC.titleString = region.title!
+                  navigationController?.pushViewController(detailVC, animated: true)
+                  print("right accessory selected")
+              }
+  
    // saveAllGeotifications()
   }
 }

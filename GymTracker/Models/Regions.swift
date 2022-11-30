@@ -4,6 +4,8 @@
 //
 //  Created by Ben Huggins on 11/20/22.
 //
+//
+//You could use the second option. But it'd be easier to store the latitude and longitude values separately as their own attributes. Then add a convenience method to your subclass that combines them and returns a CLLocationCoordinate2D.
 
 import UIKit
 import MapKit

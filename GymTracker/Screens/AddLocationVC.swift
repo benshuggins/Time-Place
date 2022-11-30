@@ -9,14 +9,14 @@ import UIKit
 import MapKit
 import CoreLocation
 
-
+//1
 protocol AddLocationVCDelegate: class {
   func addLocationVC(_ controller: AddLocationVC, didAddRegion: Regions)
 }
 
 
 class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
-    
+    //2
     weak var delegate: AddLocationVCDelegate?
     
     //MARK: - LAYOUT DECLARATIONS
@@ -61,7 +61,8 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         }()
     
     private let mappinImageView: UIImageView = {
-        let image = UIImage(systemName: "mappin.circle")
+        let config = UIImage.SymbolConfiguration(scale: .large)
+        let image = UIImage(systemName: "mappin.circle", withConfiguration: config)
         let imageView = UIImageView(image: image)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.tintColor = .red
@@ -82,7 +83,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         mapView.delegate = self
         mapView.showsUserLocation = true
         
-//mappinImageView.frame = CGRect(x: 150, y: 100, width: 20, height: 20)
+        //mappinImageView.frame = CGRect(x: 150, y: 100, width: 20, height: 20)
         mapView.addSubview(mappinImageView)
         
         
@@ -111,7 +112,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
         let region = Regions(title: note, radius: radius, identifier: identifier, coordinate: coordinate)
-        delegate?.addLocationVC(self, didAddRegion: region)
+        delegate?.addLocationVC(self, didAddRegion: region) //3
     }
     
     @objc func didTapGoToYourLocationBarButton() {
