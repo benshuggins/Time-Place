@@ -10,14 +10,24 @@
 import UIKit
 import MapKit
 import CoreLocation
+import CoreData
 
-class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
+
+class MainMapVC: UIViewController {
+   
+    // data for the map
+    var locations: [Locations]?
     
-    let locationManager = CLLocationManager()
     
-    private var models = [ToDoListItem]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    let locationManager = CLLocationManager()
+    var lastLocationError: Error?
+    let geoCoder = CLGeocoder()
+    var placeMark: CLPlacemark?
+    var performingReverseGeocoding = false
+    var lastGeocodingError: Error?
     
+  
     private let regionMeters: Double = 10000
     
     var regions: [Regions] = []  //SOT
@@ -45,11 +55,7 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         mapView.delegate = self
         title = "Gym Tracker"
         view.addSubview(mapView)
-        //xview.addSubview(tableView)
-        getAllItems()
-        tableView.delegate = self
-        tableView.dataSource = self
-       // tableView.frame = view.bounds
+       
         
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
         let goToLocationImage = UIImage(systemName: "location.square.fill")
@@ -73,7 +79,25 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
  
         configureUI()
         checkLocationServices()
-       
+        fetchLocations()
+    }
+    
+    
+    // MARK: - Core Data Fetch
+    
+    func fetchLocations() {
+        
+        do {
+            self.locations = try context.fetch(Locations.fetchRequest())
+            
+            print("Locations: ", locations?.count ?? "")
+        }
+        catch {
+            print("Error: ", error.localizedDescription)
+        }
+         
+        
+        
     }
     
     func setUpLocationManager() {
@@ -131,6 +155,23 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     }
     
     
+    // MARK: - Helper Methods - Alerts
+    func showLocationServicesDeniedAlert() {
+      let alert = UIAlertController(
+        title: "Location Services Disabled",
+        message: "Please enable location services for GymTracker in your iphone. Please go to Settings -> Privacy -> Location Services -> Enable Thankyou!",
+        preferredStyle: .alert)
+
+      let okAction = UIAlertAction(
+        title: "OK",
+        style: .default,
+        handler: nil)
+      alert.addAction(okAction)
+
+      present(alert, animated: true, completion: nil)
+    }
+    
+    
     // MARK: Functions that update the model/associated views with geotification changes
     func add(_ region: Regions) {
       regions.append(region)
@@ -138,6 +179,13 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
       addRadiusOverlay(forRegion: region)
       //updateGeotificationsCount()
     }
+//
+//    func add(_ location: Locations) {
+//     // regions.append(region)
+//      mapView.addAnnotation(location)
+//      addRadiusOverlay(forRegion: location)
+//      //updateGeotificationsCount()
+//    }
     
     func remove(_ region: Regions) {
       guard let index = regions.firstIndex(of: region) else { return }
@@ -168,8 +216,6 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
       }
     }
     
-    
-    
     // MARK: -
     // MARK: LAYOUT CONFIGURATION
     
@@ -185,7 +231,20 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         ])
     }
     
+  
+    
     @objc func goToYourLocation() {
+       
+        let authStatus = CLLocationManager.authorizationStatus()
+        
+        if authStatus == .notDetermined {
+            locationManager.requestWhenInUseAuthorization()
+            return
+        }
+        if authStatus == .denied || authStatus == .restricted {
+            showLocationServicesDeniedAlert()
+            return
+        }
         mapView.zoomToLocation(mapView.userLocation.location)
     }
     
@@ -204,111 +263,9 @@ class MainMapVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
             guard let field = alert.textFields?.first, let text = field.text, !text.isEmpty else {
                 return
             }
-            self?.createItem(name: text)
+          //  self?.createItem(name: text)
         }))
             present(alert, animated: true)
-    }
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return models.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let model = models[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        guard let name = model.name else {return cell}
-        guard let date = model.createdAt else {return cell}
-        
-        let formatter2 = DateFormatter()
-        formatter2.timeStyle = .medium
-        formatter2.dateStyle = .medium
-        //print(formatter2.string(from: today))
-        
-        cell.textLabel?.text =  "\(name) - \(formatter2.string(from: date))"
-   
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        let item = models[indexPath.row]
-        
-        let sheet = UIAlertController(title: "Edit", message: nil, preferredStyle: .actionSheet)
-      
-        sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-
-        sheet.addAction(UIAlertAction(title: "Edit", style: .default, handler: { _ in
-           
-            
-            
-            let alert = UIAlertController(title: "Edit Item", message: "add", preferredStyle: .alert)
-            alert.addTextField(configurationHandler: nil)
-            alert.textFields?.first?.text = item.name
-            alert.addAction(UIAlertAction(title: "Save", style: .cancel, handler: { [weak self] _ in
-            
-                guard let field = alert.textFields?.first, let newName = field.text, !newName.isEmpty else {
-                    return
-                }
-                self?.updateItem(item: item, newName: newName)
-            }))
-            self.present(alert, animated: true)
-            
-            
-            
-        }))
-        sheet.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self] _ in
-            
-            self?.deleteItem(item: item)
-        }))
-            present(sheet, animated: true)
-        
-    }
-    
-    
-    // CoreData
-    func getAllItems() {
-        do {
-            models = try context.fetch(ToDoListItem.fetchRequest())
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
-           
-        } catch {
-          // handle error
-        }
-    }
-    
-    func createItem(name: String) {
-        let newItem = ToDoListItem(context: context)
-        newItem.name = name
-        newItem.createdAt = Date()
-        
-        do {
-            try context.save()
-            getAllItems()
-        } catch {
-            
-        }
-    }
-    
-    func deleteItem(item: ToDoListItem) {
-        context.delete(item)
-        
-        do {
-            try context.save()
-            getAllItems()
-        } catch {
-            
-        }
-    }
-
-    func updateItem(item: ToDoListItem, newName: String ) {
-        item.name = newName
-        do {
-            try context.save()
-            getAllItems()
-        } catch {
-            
-        }
     }
 }
 
@@ -335,6 +292,52 @@ extension MainMapVC: CLLocationManagerDelegate {
           showAlert(withTitle: "Warning", message: message)
         }
     }
+    
+    // MARK: - HANDLE LOCATION MANAGER ERRORS
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("didFailWithError: \(error)")
+        
+        if (error as NSError).code == CLError.locationUnknown.rawValue {
+            return
+        }
+//        if (error as NSError).code == CLError. {
+//            return
+//        }
+        
+        if (error as NSError).code == CLError.regionMonitoringFailure.rawValue {
+            // SHOULD AN ALERT BE PRESENTED WHEN/ if there is a regional error
+            
+            
+            return
+        }
+        
+        lastLocationError = error
+        
+        
+    }
+    
+    
+    // Convert to a readable address.
+func string(from placemark: CLPlacemark) -> String {
+  var line1 = ""
+  if let tmp = placemark.subThoroughfare {
+    line1 += tmp + " "
+  }
+  if let tmp = placemark.thoroughfare {
+    line1 += tmp
+  }
+  var line2 = ""
+  if let tmp = placemark.locality {
+    line2 += tmp + " "
+  }
+  if let tmp = placemark.administrativeArea {
+    line2 += tmp + " "
+  }
+  if let tmp = placemark.postalCode {
+    line2 += tmp
+  }
+  return line1 + "\n" + line2
+}
 }
 
 extension MainMapVC: AddLocationVCDelegate {  // 1
@@ -343,6 +346,7 @@ extension MainMapVC: AddLocationVCDelegate {  // 1
         controller.dismiss(animated: true, completion: nil)
         region.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
         add(region)
+    
     }
 }
 
@@ -386,8 +390,8 @@ extension MainMapVC: MKMapViewDelegate {
     if overlay is MKCircle {
       let circleRenderer = MKCircleRenderer(overlay: overlay)
       circleRenderer.lineWidth = 1.0
-      circleRenderer.strokeColor = .purple
-      circleRenderer.fillColor = UIColor.purple.withAlphaComponent(0.4)
+      circleRenderer.strokeColor = .red
+      circleRenderer.fillColor = UIColor.red.withAlphaComponent(0.4)
       return circleRenderer
     }
     return MKOverlayRenderer(overlay: overlay)
@@ -403,7 +407,6 @@ extension MainMapVC: MKMapViewDelegate {
           remove(region)
           
               } else if control == view.rightCalloutAccessoryView {
-                  
                   
                   print(region.title)
                   let detailVC = DetailLocationVC()

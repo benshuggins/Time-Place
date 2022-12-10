@@ -8,29 +8,52 @@
 import UIKit
 import MapKit
 import CoreLocation
+import CoreData
 
 //1
 protocol AddLocationVCDelegate: class {
   func addLocationVC(_ controller: AddLocationVC, didAddRegion: Regions)
 }
 
+private let dateFormatter: DateFormatter = {
+   let formatter = DateFormatter()
+    formatter.dateStyle = .medium
+    formatter.timeStyle = .short
+    return formatter
+    }()
+
 
 class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
+    
+    var location: [Locations]?  // SOT
+    
+   // var location = Location()
     //2
     weak var delegate: AddLocationVCDelegate?
+    
+    //var managedObjectContext: NSManagedObjectContext?
+    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
+    let geoCoder = CLGeocoder()
+    var placeMark: CLPlacemark?
+    var performingReverseGeocoding = false
+    var lastGeocodingError: Error?
+    
+    var address: String = ""
     
     //MARK: - LAYOUT DECLARATIONS
     var addRightButtonBar: UIBarButtonItem = {
         let button = UIBarButtonItem()
         return button
-    }()
+        }()
     
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = "Search for Gym"
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         return searchBar
-    }()
+        }()
     
     private let textFieldNote: UITextField = {
        let textField = UITextField()
@@ -43,7 +66,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
             attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray])
         textField.addTarget(self, action: #selector(didEnterNoteTextField), for: .editingChanged)
         return textField
-    }()
+        }()
     
     private let textFieldRadius: UITextField = {
        let textField = UITextField()
@@ -51,7 +74,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         textField.textAlignment = .left
         textField.placeholder = "Enter radius of circle"
         return textField
-    }()
+        }()
     
     let mapView : MKMapView = {
             let map = MKMapView()
@@ -86,7 +109,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         //mappinImageView.frame = CGRect(x: 150, y: 100, width: 20, height: 20)
         mapView.addSubview(mappinImageView)
         
-        
         configureUI()
         
         //MARK: - BUTTON BAR ITEMS
@@ -106,14 +128,71 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         addRightButtonBar.isEnabled = (radiusSet != 0) && noteSet
     }
     
+    //MARK: - DELEGATE PASS BACK MODEL
     @objc func didTapSaveLocationBarButton() {
+        
         let coordinate = mapView.centerCoordinate
+        
+        let latitude = coordinate.latitude
+        let longitude = coordinate.longitude
+        
+        let location1 = CLLocation(latitude: latitude, longitude: longitude)  // location Object
+        
+        performingReverseGeocoding = true
+        
+        geoCoder.reverseGeocodeLocation(location1, completionHandler: { [self]
+            
+          placemarks, error in
+            self.lastGeocodingError = error
+            
+            print("PlaceMarks: \(placemarks?.last)")
+            
+          
+            
+            if error == nil, let p = placemarks, !p.isEmpty {
+                self.placeMark = p.last!
+                print("Address👹👹👹👹👹👹: \(p)")
+            }
+
+            self.performingReverseGeocoding = false
+        })
+        
+        let date = Date()
+        
+        print("😇😇😇😇😇😇😇date: \(format(date: date))")
+        
+ 
         let radius: Double = 40
         let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
-        let region = Regions(title: note, radius: radius, identifier: identifier, coordinate: coordinate)
-        delegate?.addLocationVC(self, didAddRegion: region) //3
+        let region = Regions(title: note, radius: radius, identifier: identifier, coordinate: coordinate, placeMark: placeMark, date: date)
+        
+        let locations = Locations(context: self.context)
+        locations.placeMark = placeMark
+        locations.title = note
+        locations.radius = radius
+        locations.longitude = longitude
+        locations.latitude = latitude
+        locations.identifier = NSUUID().uuidString
+        locations.date = Date()
+        
+        do {
+            try context.save()
+        } catch {
+            //print(error)
+            fatalCoreDataError(error)
+        }
+        
+        
+        
+        delegate?.addLocationVC(self, didAddRegion: region) //3 }
+    
     }
+    
+    func format(date: Date) -> String {
+        return dateFormatter.string(from: date)
+    }
+  
     
     @objc func didTapGoToYourLocationBarButton() {
         print("DidTapZoomBarButton")
