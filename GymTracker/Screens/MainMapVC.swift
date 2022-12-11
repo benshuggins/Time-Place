@@ -16,7 +16,7 @@ import CoreData
 class MainMapVC: UIViewController {
    
     // data for the map
-    var locations: [Locations]?
+    var locations = [Locations]()
     
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -79,25 +79,46 @@ class MainMapVC: UIViewController {
  
         configureUI()
         checkLocationServices()
-        fetchLocations()
+       // fetchLocations()
+       fetchLocations()
     }
     
     
     // MARK: - Core Data Fetch
     
+//    func updateLocations() {
+//
+//        mapView.removeAnnotation(locations as! MKAnnotation)
+//        let entity = locations.entity()
+//
+//        let fetchRequest = NSFetchRequest<Locations>()
+//        fetchRequest.entity = entity
+//
+//        locations = try! context.fetch(Locations.fetchRequest())
+//        mapView.addAnnotations(locations)
+//
+//
+//    }
+    
+    
+
     func fetchLocations() {
-        
+       
+       // mapView.removeAnnotation(locations as! MKAnnotation)
+
         do {
             self.locations = try context.fetch(Locations.fetchRequest())
-            
-            print("Locations: ", locations?.count ?? "")
+            print("😅😅😅😅😅😅\(locations)")
+            mapView.addAnnotations(locations)
+           // addRadiusOverlay(forLocation: locations)
+           
         }
         catch {
             print("Error: ", error.localizedDescription)
         }
-         
-        
-        
+
+
+
     }
     
     func setUpLocationManager() {
@@ -176,7 +197,7 @@ class MainMapVC: UIViewController {
     func add(_ region: Regions) {
       regions.append(region)
       mapView.addAnnotation(region)
-      addRadiusOverlay(forRegion: region)
+      //addRadiusOverlay(forLocation: locations)
       //updateGeotificationsCount()
     }
 //
@@ -196,8 +217,8 @@ class MainMapVC: UIViewController {
     }
     
     // MARK: Map overlay functions
-    func addRadiusOverlay(forRegion region: Regions) {
-      mapView.addOverlay(MKCircle(center: region.coordinate, radius: region.radius))
+    func addRadiusOverlay(forLocation locations: Locations) {
+      mapView.addOverlay(MKCircle(center: locations.coordinate, radius: locations.radius))
     }
     
     func removeRadiusOverlay(forRegion region: Regions) {
@@ -344,8 +365,8 @@ extension MainMapVC: AddLocationVCDelegate {  // 1
    
     func addLocationVC(_ controller: AddLocationVC, didAddRegion region: Regions) {
         controller.dismiss(animated: true, completion: nil)
-        region.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
-        add(region)
+        //region.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
+       // add(region)
     
     }
 }
