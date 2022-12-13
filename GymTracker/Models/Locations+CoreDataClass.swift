@@ -9,16 +9,24 @@
 import Foundation
 import CoreData
 import MapKit
+import CoreLocation
 
 @objc(Locations)
 public class Locations: NSManagedObject, MKAnnotation {
+   
     public var coordinate: CLLocationCoordinate2D {
-        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        return CLLocationCoordinate2DMake(latitude, longitude)
     }
     
+
+
     
     public var subtitle: String? {   // This is automatically called by MKAnnotation class and is the second title in tag on map
-      return title
+      return String(radius)
+    }
+    
+    func clampRadius(maxRadius: CLLocationDegrees) {
+      radius = min(radius, maxRadius)
     }
     
   

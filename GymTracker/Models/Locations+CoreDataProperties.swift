@@ -8,6 +8,8 @@
 
 import Foundation
 import CoreData
+import MapKit
+import CoreLocation
 
 
 extension Locations {
@@ -20,8 +22,8 @@ extension Locations {
     @NSManaged public var identifier: String?
     @NSManaged public var latitude: Double
     @NSManaged public var longitude: Double
-    @NSManaged public var placeMark: NSObject?
-    @NSManaged public var radius: Double
+    @NSManaged public var placeMark: CLPlacemark?
+    @NSManaged public var radius: CLLocationDistance
     @NSManaged public var title: String?
 
 }

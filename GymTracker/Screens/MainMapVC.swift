@@ -30,7 +30,7 @@ class MainMapVC: UIViewController {
   
     private let regionMeters: Double = 10000
     
-    var regions: [Regions] = []  //SOT
+  
     
     let mapView : MKMapView = {
             let map = MKMapView()
@@ -59,10 +59,8 @@ class MainMapVC: UIViewController {
         
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
         let goToLocationImage = UIImage(systemName: "location.square.fill")
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapBarButton))
-       // let add = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapAddLocationBarButton))
-        
-        
+       
+   
         let addLocation = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapAddLocationBarButton))
        // let add = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(goToYourLocation))
         
@@ -100,8 +98,6 @@ class MainMapVC: UIViewController {
 //
 //    }
     
-    
-
     func fetchLocations() {
        
        // mapView.removeAnnotation(locations as! MKAnnotation)
@@ -109,15 +105,18 @@ class MainMapVC: UIViewController {
         do {
             self.locations = try context.fetch(Locations.fetchRequest())
             print("😅😅😅😅😅😅\(locations)")
-            mapView.addAnnotations(locations)
+            
+            DispatchQueue.main.async {
+                
+                self.mapView.addAnnotations(self.locations)
+               
+            }
            // addRadiusOverlay(forLocation: locations)
            
         }
         catch {
             print("Error: ", error.localizedDescription)
         }
-
-
 
     }
     
@@ -192,45 +191,48 @@ class MainMapVC: UIViewController {
       present(alert, animated: true, completion: nil)
     }
     
-    
-    // MARK: Functions that update the model/associated views with geotification changes
-    func add(_ region: Regions) {
-      regions.append(region)
-      mapView.addAnnotation(region)
-      //addRadiusOverlay(forLocation: locations)
+    func add(_ location: Locations) {
+        locations.append(location)
+      mapView.addAnnotation(location)
+      //addRadiusOverlay(forLocation: location)
       //updateGeotificationsCount()
+        mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
     }
-//
-//    func add(_ location: Locations) {
-//     // regions.append(region)
-//      mapView.addAnnotation(location)
-//      addRadiusOverlay(forRegion: location)
-//      //updateGeotificationsCount()
-//    }
     
-    func remove(_ region: Regions) {
-      guard let index = regions.firstIndex(of: region) else { return }
-      regions.remove(at: index)
-      mapView.removeAnnotation(region)
-      removeRadiusOverlay(forRegion: region)
+    func remove(_ location: Locations) {
+      guard let index = locations.firstIndex(of: location) else { return }
+      locations.remove(at: index)
+      mapView.removeAnnotation(location)
+      removeRadiusOverlay(forLocation: location)
+        
+        
+        
+        
+        //MARK: - CORE DATA DELETE
+        try context.delete(location)
+        do {
+           try context.save()
+        } catch {
+            print("Error: \(error.localizedDescription)")
+        }
      // updateGeotificationsCount()
     }
     
     // MARK: Map overlay functions
-    func addRadiusOverlay(forLocation locations: Locations) {
-      mapView.addOverlay(MKCircle(center: locations.coordinate, radius: locations.radius))
+    func addRadiusOverlay(forLocation location: Locations) {
+      mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
     }
     
-    func removeRadiusOverlay(forRegion region: Regions) {
+    func removeRadiusOverlay(forLocation location: Locations) {
       // Find exactly one overlay which has the same coordinates & radius to remove
-//        guard let overlays = mapView.overlays else { return }
+  // let overlays = mapView.overlays else { return }
     let overlays = mapView.overlays
       for overlay in overlays {
         guard let circleOverlay = overlay as? MKCircle else { continue }
         let coord = circleOverlay.coordinate
-        if coord.latitude == region.coordinate.latitude &&
-          coord.longitude == region.coordinate.longitude &&
-          circleOverlay.radius == region.radius {
+        if coord.latitude == location.coordinate.latitude &&
+          coord.longitude == location.coordinate.longitude &&
+          circleOverlay.radius == location.radius {
           mapView.removeOverlay(circleOverlay)
           break
         }
@@ -239,8 +241,6 @@ class MainMapVC: UIViewController {
     
     // MARK: -
     // MARK: LAYOUT CONFIGURATION
-    
-    //LAYOUT CONFIGURATION
     
     private func configureUI() {
         
@@ -251,8 +251,6 @@ class MainMapVC: UIViewController {
             mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-    
-  
     
     @objc func goToYourLocation() {
        
@@ -276,18 +274,7 @@ class MainMapVC: UIViewController {
         present(navVC, animated: true)
     }
     
-    @objc func didTapBarButton() {
-        let alert = UIAlertController(title: "Add Entry", message: "add", preferredStyle: .alert)
-        alert.addTextField(configurationHandler: nil)
-        alert.addAction(UIAlertAction(title: "Add item", style: .cancel, handler: { [weak self] _ in
-        
-            guard let field = alert.textFields?.first, let text = field.text, !text.isEmpty else {
-                return
-            }
-          //  self?.createItem(name: text)
-        }))
-            present(alert, animated: true)
-    }
+  
 }
 
 extension MainMapVC: CLLocationManagerDelegate {
@@ -321,9 +308,6 @@ extension MainMapVC: CLLocationManagerDelegate {
         if (error as NSError).code == CLError.locationUnknown.rawValue {
             return
         }
-//        if (error as NSError).code == CLError. {
-//            return
-//        }
         
         if (error as NSError).code == CLError.regionMonitoringFailure.rawValue {
             // SHOULD AN ALERT BE PRESENTED WHEN/ if there is a regional error
@@ -363,10 +347,10 @@ func string(from placemark: CLPlacemark) -> String {
 
 extension MainMapVC: AddLocationVCDelegate {  // 1
    
-    func addLocationVC(_ controller: AddLocationVC, didAddRegion region: Regions) {
+    func addLocationVC(_ controller: AddLocationVC, didAddLocation location: Locations) {
         controller.dismiss(animated: true, completion: nil)
-        //region.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
-       // add(region)
+        location.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
+        add(location)
     
     }
 }
@@ -378,7 +362,7 @@ extension MainMapVC: MKMapViewDelegate {
   func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
     let identifier = "myGeotification"
    
-    if annotation is Regions {
+    if annotation is Locations {
       var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKPinAnnotationView
       if annotationView == nil {
         annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: identifier)
@@ -408,8 +392,8 @@ extension MainMapVC: MKMapViewDelegate {
     }
 
   func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-    if overlay is MKCircle {
-      let circleRenderer = MKCircleRenderer(overlay: overlay)
+      if let circleOverlay = overlay as? MKCircle {
+      let circleRenderer = MKCircleRenderer(overlay: circleOverlay)
       circleRenderer.lineWidth = 1.0
       circleRenderer.strokeColor = .red
       circleRenderer.fillColor = UIColor.red.withAlphaComponent(0.4)
@@ -420,18 +404,18 @@ extension MainMapVC: MKMapViewDelegate {
     
   func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
     // Delete geotification
-    guard let region = view.annotation as? Regions else { return }
+    guard let location = view.annotation as? Locations else { return }
       
       
       if control == view.leftCalloutAccessoryView {
                   print("left accessory selected")
-          remove(region)
+          remove(location)
           
               } else if control == view.rightCalloutAccessoryView {
                   
-                  print(region.title)
+                 
                   let detailVC = DetailLocationVC()
-                  detailVC.titleString = region.title!
+                  detailVC.titleString = location.title!
                   navigationController?.pushViewController(detailVC, animated: true)
                   print("right accessory selected")
               }

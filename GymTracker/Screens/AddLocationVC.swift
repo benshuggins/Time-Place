@@ -12,7 +12,7 @@ import CoreData
 
 //1
 protocol AddLocationVCDelegate: class {
-  func addLocationVC(_ controller: AddLocationVC, didAddRegion: Regions)
+  func addLocationVC(_ controller: AddLocationVC, didAddLocation: Locations)
 }
 
 private let dateFormatter: DateFormatter = {
@@ -27,11 +27,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     
     var location: [Locations]?  // SOT
     
-   // var location = Location()
-    //2
     weak var delegate: AddLocationVCDelegate?
-    
-    //var managedObjectContext: NSManagedObjectContext?
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
@@ -119,6 +115,19 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         addRightButtonBar = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapSaveLocationBarButton))
         navigationItem.rightBarButtonItems = [addRightButtonBar, zoomButton]
         addRightButtonBar.isEnabled = false
+        setupKeyBoard()
+    }
+    
+    
+    
+    private func setupKeyBoard() {
+        setupKeyboardHiding() // add
+    }
+
+    private func setupKeyboardHiding() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     @objc func didEnterNoteTextField(_ textField: UITextField) {
@@ -137,9 +146,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         let longitude = coordinate.longitude
         
         let location1 = CLLocation(latitude: latitude, longitude: longitude)  // location Object
-        
         performingReverseGeocoding = true
-        
         geoCoder.reverseGeocodeLocation(location1, completionHandler: { [self]
             
           placemarks, error in
@@ -162,10 +169,10 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         print("😇😇😇😇😇😇😇date: \(format(date: date))")
         
  
-        let radius: Double = 40
+        let radius: Double = 100
         let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
-        let region = Regions(title: note, radius: radius, identifier: identifier, coordinate: coordinate, placeMark: placeMark, date: date)
+//        let region = Regions(title: note, radius: radius, identifier: identifier, coordinate: coordinate, placeMark: placeMark, date: date)
         
         let locations = Locations(context: self.context)
         locations.placeMark = placeMark
@@ -183,9 +190,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
             fatalCoreDataError(error)
         }
         
-        
-        
-        delegate?.addLocationVC(self, didAddRegion: region) //3 }
+        delegate?.addLocationVC(self, didAddLocation: locations) //3 }
     
     }
     
@@ -241,3 +246,15 @@ extension AddLocationVC: UISearchBarDelegate {
     
 
 }
+
+// MARK: Keyboard
+extension AddLocationVC {
+    @objc func keyboardWillShow(sender: NSNotification) {
+        view.frame.origin.y = view.frame.origin.y - 170
+    }
+
+    @objc func keyboardWillHide(notification: NSNotification) {
+        view.frame.origin.y = 0
+    }
+}
+
