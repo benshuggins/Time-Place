@@ -19,7 +19,7 @@ extension Locations {
     }
 
     @NSManaged public var date: Date?
-    @NSManaged public var identifier: String?
+    @NSManaged public var identifier: String
     @NSManaged public var latitude: Double
     @NSManaged public var longitude: Double
     @NSManaged public var placeMark: CLPlacemark?

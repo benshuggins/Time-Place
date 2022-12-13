@@ -4,21 +4,14 @@
 //
 //  Created by Ben Huggins on 11/19/22.
 //
-
-// Check this is being updated
-
 import UIKit
 import MapKit
 import CoreLocation
 import CoreData
 
-
 class MainMapVC: UIViewController {
    
-    // data for the map
     var locations = [Locations]()
-    
-    
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     let locationManager = CLLocationManager()
     var lastLocationError: Error?
@@ -26,11 +19,7 @@ class MainMapVC: UIViewController {
     var placeMark: CLPlacemark?
     var performingReverseGeocoding = false
     var lastGeocodingError: Error?
-    
-  
     private let regionMeters: Double = 10000
-    
-  
     
     let mapView : MKMapView = {
             let map = MKMapView()
@@ -48,37 +37,20 @@ class MainMapVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-      
-//        let vc = AddLocationVC()
-//        vc.delegate = self
-        
         mapView.delegate = self
         title = "Gym Tracker"
         view.addSubview(mapView)
-       
-        
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
         let goToLocationImage = UIImage(systemName: "location.square.fill")
-       
-   
         let addLocation = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapAddLocationBarButton))
        // let add = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(goToYourLocation))
         
         let zoom = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(goToYourLocation))
-        
         navigationItem.rightBarButtonItems = [addLocation, zoom]
-        
-        
-        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.height))
-                headerView.clipsToBounds = true
-        
-//        headerView.addSubview(mapView)
-//        tableView.tableHeaderView = headerView
- 
+    
         configureUI()
         checkLocationServices()
-       // fetchLocations()
-       fetchLocations()
+        fetchLocations()
     }
     
     
@@ -99,31 +71,22 @@ class MainMapVC: UIViewController {
 //    }
     
     func fetchLocations() {
-       
-       // mapView.removeAnnotation(locations as! MKAnnotation)
-
         do {
             self.locations = try context.fetch(Locations.fetchRequest())
-            print("😅😅😅😅😅😅\(locations)")
-            
+          
             DispatchQueue.main.async {
-                
                 self.mapView.addAnnotations(self.locations)
-               
+                self.locations.forEach { self.add($0) }
             }
-           // addRadiusOverlay(forLocation: locations)
-           
         }
         catch {
             print("Error: ", error.localizedDescription)
         }
-
     }
     
     func setUpLocationManager() {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        
     }
     
     func checkLocationServices() {
@@ -141,7 +104,7 @@ class MainMapVC: UIViewController {
             mapView.showsUserLocation = true
            // centerViewOnUsersLocation()
             locationManager.startUpdatingLocation()
-            
+
             break
         case .authorizedWhenInUse:
             break
@@ -153,7 +116,6 @@ class MainMapVC: UIViewController {
         case .restricted:
             // Parental Control: Show Alert
             break
-        
         }
     }
     
@@ -187,26 +149,21 @@ class MainMapVC: UIViewController {
         style: .default,
         handler: nil)
       alert.addAction(okAction)
-
       present(alert, animated: true, completion: nil)
     }
     
     func add(_ location: Locations) {
         locations.append(location)
       mapView.addAnnotation(location)
-      //addRadiusOverlay(forLocation: location)
       //updateGeotificationsCount()
         mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
     }
-    
+    //MARK: - DELETING
     func remove(_ location: Locations) {
       guard let index = locations.firstIndex(of: location) else { return }
       locations.remove(at: index)
       mapView.removeAnnotation(location)
       removeRadiusOverlay(forLocation: location)
-        
-        
-        
         
         //MARK: - CORE DATA DELETE
         try context.delete(location)
@@ -218,14 +175,12 @@ class MainMapVC: UIViewController {
      // updateGeotificationsCount()
     }
     
-    // MARK: Map overlay functions
+    // MARK: MAP OVERLAY
     func addRadiusOverlay(forLocation location: Locations) {
       mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
     }
     
     func removeRadiusOverlay(forLocation location: Locations) {
-      // Find exactly one overlay which has the same coordinates & radius to remove
-  // let overlays = mapView.overlays else { return }
     let overlays = mapView.overlays
       for overlay in overlays {
         guard let circleOverlay = overlay as? MKCircle else { continue }
@@ -239,11 +194,8 @@ class MainMapVC: UIViewController {
       }
     }
     
-    // MARK: -
     // MARK: LAYOUT CONFIGURATION
-    
     private func configureUI() {
-        
         NSLayoutConstraint.activate([
             mapView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -253,9 +205,7 @@ class MainMapVC: UIViewController {
     }
     
     @objc func goToYourLocation() {
-       
         let authStatus = CLLocationManager.authorizationStatus()
-        
         if authStatus == .notDetermined {
             locationManager.requestWhenInUseAuthorization()
             return
@@ -317,11 +267,8 @@ extension MainMapVC: CLLocationManagerDelegate {
         }
         
         lastLocationError = error
-        
-        
     }
-    
-    
+
     // Convert to a readable address.
 func string(from placemark: CLPlacemark) -> String {
   var line1 = ""
@@ -350,12 +297,14 @@ extension MainMapVC: AddLocationVCDelegate {  // 1
     func addLocationVC(_ controller: AddLocationVC, didAddLocation location: Locations) {
         controller.dismiss(animated: true, completion: nil)
         location.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
+       
+        
+        startMonitoring(location: location) ///Call start monitoring function 
+        
         add(location)
-    
     }
 }
 
-// This adds an annotation to the map
 // MARK: - Map Annotation
 extension MainMapVC: MKMapViewDelegate {
   
@@ -367,8 +316,7 @@ extension MainMapVC: MKMapViewDelegate {
       if annotationView == nil {
         annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: identifier)
         annotationView?.canShowCallout = true
-        
-          
+    
         let removeButton = UIButton(type: .custom)
         removeButton.frame = CGRect(x: 0, y: 0, width: 23, height: 23)
         removeButton.setImage(UIImage(systemName: "trash.fill"), for: .normal)
@@ -403,17 +351,14 @@ extension MainMapVC: MKMapViewDelegate {
   }
     
   func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-    // Delete geotification
     guard let location = view.annotation as? Locations else { return }
       
-      
+      //MARK: - MAP MARKER ACCESSORY VIEW RIGHT AND LEFT BUTTONS
       if control == view.leftCalloutAccessoryView {
                   print("left accessory selected")
           remove(location)
-          
               } else if control == view.rightCalloutAccessoryView {
-                  
-                 
+
                   let detailVC = DetailLocationVC()
                   detailVC.titleString = location.title!
                   navigationController?.pushViewController(detailVC, animated: true)
@@ -423,3 +368,38 @@ extension MainMapVC: MKMapViewDelegate {
    // saveAllGeotifications()
   }
 }
+
+
+//MARK: - REGION MONITORING
+extension MainMapVC {
+    
+    func startMonitoring(location: Locations) {
+      // 1
+      if !CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self) {
+        showAlert(
+          withTitle: "Error",
+          message: "Geofencing is not supported on this device!")
+        return
+      }
+
+      // 2
+      let fenceRegion = location.region
+      // 3
+      locationManager.startMonitoring(for: fenceRegion)
+    }
+    
+    
+    func stopMonitoring(location: Locations) {
+      for region in locationManager.monitoredRegions {
+        guard let circularRegion = location as? CLCircularRegion, circularRegion.identifier == location.identifier else { continue }
+        locationManager.stopMonitoring(for: circularRegion)
+      }
+    }
+    
+    
+    
+   
+    
+}
+
+

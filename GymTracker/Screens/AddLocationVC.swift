@@ -10,7 +10,6 @@ import MapKit
 import CoreLocation
 import CoreData
 
-//1
 protocol AddLocationVCDelegate: class {
   func addLocationVC(_ controller: AddLocationVC, didAddLocation: Locations)
 }
@@ -22,20 +21,15 @@ private let dateFormatter: DateFormatter = {
     return formatter
     }()
 
-
 class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
-    
-    var location: [Locations]?  // SOT
-    
+
+    var locations: [Locations] = []
     weak var delegate: AddLocationVCDelegate?
-    
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
     let geoCoder = CLGeocoder()
     var placeMark: CLPlacemark?
     var performingReverseGeocoding = false
     var lastGeocodingError: Error?
-    
     var address: String = ""
     
     //MARK: - LAYOUT DECLARATIONS
@@ -89,7 +83,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         return imageView
     }()
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Add Your Gym"
@@ -101,24 +94,19 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         view.addSubview(mapView)
         mapView.delegate = self
         mapView.showsUserLocation = true
-        
-        //mappinImageView.frame = CGRect(x: 150, y: 100, width: 20, height: 20)
         mapView.addSubview(mappinImageView)
-        
         configureUI()
         
         //MARK: - BUTTON BAR ITEMS
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
         let goToLocationImage = UIImage(systemName: "location.square.fill")
-        
         let zoomButton = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(didTapGoToYourLocationBarButton))
         addRightButtonBar = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapSaveLocationBarButton))
         navigationItem.rightBarButtonItems = [addRightButtonBar, zoomButton]
+        navigationItem.rightBarButtonItem?.isEnabled = (locations.count < 20) // Only allow a maximum of 20 tags
         addRightButtonBar.isEnabled = false
         setupKeyBoard()
     }
-    
-    
     
     private func setupKeyBoard() {
         setupKeyboardHiding() // add
@@ -126,7 +114,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 
     private func setupKeyboardHiding() {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
@@ -139,12 +126,9 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     
     //MARK: - DELEGATE PASS BACK MODEL
     @objc func didTapSaveLocationBarButton() {
-        
         let coordinate = mapView.centerCoordinate
-        
         let latitude = coordinate.latitude
         let longitude = coordinate.longitude
-        
         let location1 = CLLocation(latitude: latitude, longitude: longitude)  // location Object
         performingReverseGeocoding = true
         geoCoder.reverseGeocodeLocation(location1, completionHandler: { [self]
@@ -153,8 +137,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
             self.lastGeocodingError = error
             
             print("PlaceMarks: \(placemarks?.last)")
-            
-          
             
             if error == nil, let p = placemarks, !p.isEmpty {
                 self.placeMark = p.last!
@@ -168,12 +150,9 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         
         print("😇😇😇😇😇😇😇date: \(format(date: date))")
         
- 
         let radius: Double = 100
         let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
-//        let region = Regions(title: note, radius: radius, identifier: identifier, coordinate: coordinate, placeMark: placeMark, date: date)
-        
         let locations = Locations(context: self.context)
         locations.placeMark = placeMark
         locations.title = note
@@ -183,22 +162,19 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         locations.identifier = NSUUID().uuidString
         locations.date = Date()
         
+        //MARK: - CORE DATA SAVE
         do {
             try context.save()
         } catch {
-            //print(error)
             fatalCoreDataError(error)
         }
-        
         delegate?.addLocationVC(self, didAddLocation: locations) //3 }
-    
     }
     
     func format(date: Date) -> String {
         return dateFormatter.string(from: date)
     }
-  
-    
+
     @objc func didTapGoToYourLocationBarButton() {
         print("DidTapZoomBarButton")
         mapView.zoomToLocation(mapView.userLocation.location)
@@ -206,7 +182,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     
     //MARK: - LAYOUT CONSTRAINTS
     func configureUI() {
-        
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -214,7 +189,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
             searchBar.bottomAnchor.constraint(equalTo: textFieldNote.topAnchor),
             searchBar.heightAnchor.constraint(equalToConstant: 60)
         ])
-       
         NSLayoutConstraint.activate([
             textFieldNote.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
             textFieldNote.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -222,29 +196,23 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
             textFieldNote.heightAnchor.constraint(equalToConstant: 60),
             textFieldNote.bottomAnchor.constraint(equalTo: mapView.topAnchor)
         ])
-
         NSLayoutConstraint.activate([
             mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
             mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-        
         NSLayoutConstraint.activate([
             mappinImageView.centerXAnchor.constraint(equalTo: mapView.centerXAnchor),
             mappinImageView.centerYAnchor.constraint(equalTo: mapView.centerYAnchor),
-            
         ])
     }
 }
 
 extension AddLocationVC: UISearchBarDelegate {
-    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         print(searchText)
     }
-    
-
 }
 
 // MARK: Keyboard
@@ -252,7 +220,6 @@ extension AddLocationVC {
     @objc func keyboardWillShow(sender: NSNotification) {
         view.frame.origin.y = view.frame.origin.y - 170
     }
-
     @objc func keyboardWillHide(notification: NSNotification) {
         view.frame.origin.y = 0
     }
