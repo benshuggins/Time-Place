@@ -253,7 +253,7 @@ extension MainMapVC: CLLocationManagerDelegate {
     
     // MARK: - HANDLE LOCATION MANAGER ERRORS
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("didFailWithError: \(error)")
+        print("Location Manager Did fail with error: \(error)")
         
         if (error as NSError).code == CLError.locationUnknown.rawValue {
             return
@@ -292,15 +292,13 @@ func string(from placemark: CLPlacemark) -> String {
 }
 }
 
+//MARK: - CALL BACK FROM ADDLOCATIONVC
 extension MainMapVC: AddLocationVCDelegate {  // 1
    
     func addLocationVC(_ controller: AddLocationVC, didAddLocation location: Locations) {
         controller.dismiss(animated: true, completion: nil)
         location.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
-       
-        
-        startMonitoring(location: location) ///Call start monitoring function 
-        
+        startMonitoring(location: location) ///Call start monitoring function
         add(location)
     }
 }
@@ -376,15 +374,34 @@ extension MainMapVC {
         return
       }
       let fenceRegion = location.region
+       
 
       locationManager.startMonitoring(for: fenceRegion)
     }
     func stopMonitoring(location: Locations) {
       for region in locationManager.monitoredRegions {
-        guard let circularRegion = location as? CLCircularRegion, circularRegion.identifier == location.identifier else { continue }
+        guard let circularRegion = region as? CLCircularRegion, circularRegion.identifier == location.identifier else { continue }
         locationManager.stopMonitoring(for: circularRegion)
       }
     }
+    
+    func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
+      guard let region = region else {
+        print("Monitoring failed for unknown region")
+        return
+      }
+      print("Monitoring failed for region with identifier: \(region.identifier)")
+    }
+
+//    func locationManager(_ manager: CLLocationManager,
+//      didFailWithError error: Error
+//    ) {
+//      print("Location Manager failed with the following error: \(error)")
+//    }
 }
 
 
+
+
+// Need to add region monitoring
+// NSFetchRsultsController ?

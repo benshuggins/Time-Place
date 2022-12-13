@@ -7,10 +7,12 @@
 
 import UIKit
 import CoreData
+import CoreLocation
 
-class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelegate {
 
     var window: UIWindow?
+    let locationManager = CLLocationManager()
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -32,6 +34,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //        controller2.managedObjectContext = managedObjectContext
         
         listenForFatalCoreDataNotifications()
+        
+        locationManager.delegate = self
+        locationManager.requestAlwaysAuthorization()
         
     }
 
@@ -87,10 +92,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
       return container
     }()
     
-    
-    
     // MARK: - Core Data Saving support
-
     func saveContext () {
       let context = persistentContainer.viewContext
       if context.hasChanges {
@@ -134,8 +136,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
           completion: nil)
       }
     }
-    
-
-
 }
 
+// MARK: - Location Manager Delegate
+extension SceneDelegate {
+  func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
+    if region is CLCircularRegion {
+      handleEvent(for: region)
+    }
+  }
+
+  func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
+    if region is CLCircularRegion {
+      handleEvent(for: region)
+    }
+  }
+
+  func handleEvent(for region: CLRegion) {
+    print("Geofence triggered!")
+  }
+}
