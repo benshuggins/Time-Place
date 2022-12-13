@@ -355,21 +355,15 @@ extension MainMapVC: MKMapViewDelegate {
       
       //MARK: - MAP MARKER ACCESSORY VIEW RIGHT AND LEFT BUTTONS
       if control == view.leftCalloutAccessoryView {
-                  print("left accessory selected")
           remove(location)
+          stopMonitoring(location: location) /// Stop monitoring a region
               } else if control == view.rightCalloutAccessoryView {
-
                   let detailVC = DetailLocationVC()
                   detailVC.titleString = location.title!
                   navigationController?.pushViewController(detailVC, animated: true)
-                  print("right accessory selected")
               }
-  
-   // saveAllGeotifications()
-  }
+        }
 }
-
-
 //MARK: - REGION MONITORING
 extension MainMapVC {
     
@@ -381,25 +375,16 @@ extension MainMapVC {
           message: "Geofencing is not supported on this device!")
         return
       }
-
-      // 2
       let fenceRegion = location.region
-      // 3
+
       locationManager.startMonitoring(for: fenceRegion)
     }
-    
-    
     func stopMonitoring(location: Locations) {
       for region in locationManager.monitoredRegions {
         guard let circularRegion = location as? CLCircularRegion, circularRegion.identifier == location.identifier else { continue }
         locationManager.stopMonitoring(for: circularRegion)
       }
     }
-    
-    
-    
-   
-    
 }
 
 
