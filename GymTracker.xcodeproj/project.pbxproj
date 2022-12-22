@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		F518B3F62943EF1B00AB34FB /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F518B3F42943EF1B00AB34FB /* DataModel.xcdatamodeld */; };
 		F518B3FC294404FC00AB34FB /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F518B3FB294404FC00AB34FB /* Functions.swift */; };
+		F5908E7F29491419006AC559 /* SimulatedLocations.gpx in Resources */ = {isa = PBXBuildFile; fileRef = F5908E7E29491419006AC559 /* SimulatedLocations.gpx */; };
+		F5908E8129491426006AC559 /* Google.gpx in Resources */ = {isa = PBXBuildFile; fileRef = F5908E8029491426006AC559 /* Google.gpx */; };
+		F5908E832949142F006AC559 /* Apple.gpx in Resources */ = {isa = PBXBuildFile; fileRef = F5908E822949142F006AC559 /* Apple.gpx */; };
 		F59B42092929604A001F0269 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F59B42082929604A001F0269 /* AppDelegate.swift */; };
 		F59B420B2929604A001F0269 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F59B420A2929604A001F0269 /* SceneDelegate.swift */; };
 		F59B420D2929604A001F0269 /* MainMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F59B420C2929604A001F0269 /* MainMapVC.swift */; };
@@ -26,6 +29,9 @@
 /* Begin PBXFileReference section */
 		F518B3F52943EF1B00AB34FB /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
 		F518B3FB294404FC00AB34FB /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
+		F5908E7E29491419006AC559 /* SimulatedLocations.gpx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = SimulatedLocations.gpx; sourceTree = "<group>"; };
+		F5908E8029491426006AC559 /* Google.gpx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Google.gpx; sourceTree = "<group>"; };
+		F5908E822949142F006AC559 /* Apple.gpx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Apple.gpx; sourceTree = "<group>"; };
 		F59B42052929604A001F0269 /* GymTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GymTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F59B42082929604A001F0269 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F59B420A2929604A001F0269 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -90,6 +96,9 @@
 				F59B420E2929604A001F0269 /* Main.storyboard */,
 				F5D2D8CA2929A96E00A065AD /* Utilities.swift */,
 				F518B3FB294404FC00AB34FB /* Functions.swift */,
+				F5908E822949142F006AC559 /* Apple.gpx */,
+				F5908E8029491426006AC559 /* Google.gpx */,
+				F5908E7E29491419006AC559 /* SimulatedLocations.gpx */,
 				F59B42142929604D001F0269 /* Assets.xcassets */,
 				F59B42162929604D001F0269 /* LaunchScreen.storyboard */,
 				F59B42192929604D001F0269 /* Info.plist */,
@@ -173,9 +182,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F5908E832949142F006AC559 /* Apple.gpx in Resources */,
 				F59B42182929604D001F0269 /* LaunchScreen.storyboard in Resources */,
 				F59B42152929604D001F0269 /* Assets.xcassets in Resources */,
+				F5908E8129491426006AC559 /* Google.gpx in Resources */,
 				F59B42102929604A001F0269 /* Main.storyboard in Resources */,
+				F5908E7F29491419006AC559 /* SimulatedLocations.gpx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

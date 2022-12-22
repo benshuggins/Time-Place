@@ -374,10 +374,9 @@ extension MainMapVC {
         return
       }
       let fenceRegion = location.region
-       
-
-      locationManager.startMonitoring(for: fenceRegion)
+      locationManager.startMonitoring(for: fenceRegion) // Here is where we initiate region monitoring
     }
+    
     func stopMonitoring(location: Locations) {
       for region in locationManager.monitoredRegions {
         guard let circularRegion = region as? CLCircularRegion, circularRegion.identifier == location.identifier else { continue }
@@ -388,16 +387,13 @@ extension MainMapVC {
     func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
       guard let region = region else {
         print("Monitoring failed for unknown region")
+          
+          // NEED TO ADD ALERT ACTIONS TO INFORM THE USER OF FAILURE
         return
       }
       print("Monitoring failed for region with identifier: \(region.identifier)")
+        // NEED TO ADD ALERT ACTIONS TO INFORM THE USER OF FAILURE
     }
-
-//    func locationManager(_ manager: CLLocationManager,
-//      didFailWithError error: Error
-//    ) {
-//      print("Location Manager failed with the following error: \(error)")
-//    }
 }
 
 

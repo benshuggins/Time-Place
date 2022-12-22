@@ -13,6 +13,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
 
     var window: UIWindow?
     let locationManager = CLLocationManager()
+    
+    var location: [Locations]?
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -76,12 +78,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
     lazy var managedObjectContext: NSManagedObjectContext = self.persistentContainer.viewContext
 
     lazy var persistentContainer: NSPersistentContainer = {
-      /*
-       The persistent container for the application. This implementation
-       creates and returns a container, having loaded the store for the
-       application to it. This property is optional since there are legitimate
-       error conditions that could cause the creation of the store to fail.
-       */
+     
       let container = NSPersistentContainer(name: "DataModel")
       container.loadPersistentStores(completionHandler: { (storeDescription, error) in
         if let error = error as NSError? {
@@ -94,7 +91,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
     
     // MARK: - Core Data Saving support
     func saveContext () {
-      let context = persistentContainer.viewContext
+    let context = persistentContainer.viewContext
       if context.hasChanges {
         do {
           try context.save()
@@ -115,16 +112,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
 
         Press OK to terminate the app. Sorry for the inconvenience.
         """
-        let alert = UIAlertController(
-          title: "Internal Error",
-          message: message,
-          preferredStyle: .alert)
+        let alert = UIAlertController(title: "Internal Error", message: message, preferredStyle: .alert)
 
         let action = UIAlertAction(title: "OK", style: .default) { _ in
-          let exception = NSException(
-            name: NSExceptionName.internalInconsistencyException,
-            reason: "Fatal Core Data error",
-            userInfo: nil)
+          let exception = NSException(name: NSExceptionName.internalInconsistencyException, reason: "Fatal Core Data error", userInfo: nil)
           exception.raise()
         }
         alert.addAction(action)
@@ -136,7 +127,51 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
           completion: nil)
       }
     }
-}
+    
+    // How is this old identifier matching this new ideentifier HOW THE FUCK ARE YOU TRIGGERING REGIONS AND THEN GETTING THE CORRECT DATA FOR THIOSE REGIONS, TODAY I REALIZED ONE DATA MODEL WILL WORK!!!!!
+    func note(from identifier: String) -> String? {
+       
+        do {
+            let request = Locations.fetchRequest() as NSFetchRequest<Locations>
+            let pred = NSPredicate(format: "identifier == %@", identifier)
+            request.predicate = pred
+            location = try managedObjectContext.fetch(request)
+            print("Is this the name? : \(location?.first?.title)")
+        } catch {
+            print("Error: \(error)")
+                
+        }
+        
+        return location?.first?.title
+        
+    }
+    
+    func handleEvent(for region: CLRegion) {
+        // If app is opoen show an alert... Do I need this ?
+        if UIApplication.shared.applicationState == .active {
+            guard let alertMessage = note(from: region.identifier) else { return }
+            window?.rootViewController?.showAlert(withTitle: nil, message: alertMessage)
+        } else {
+            // Otherwise present a local notification
+            guard let body = note(from: region.identifier) else { return }
+            let notificationContent = UNMutableNotificationContent()
+            notificationContent.body = body
+            notificationContent.sound = .default
+            notificationContent.badge = UIApplication.shared.applicationIconBadgeNumber + 1 as NSNumber
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+            let request = UNNotificationRequest(
+              identifier: "location_change",
+              content: notificationContent,
+              trigger: trigger)
+            UNUserNotificationCenter.current().add(request) { error in
+              if let error = error {
+                print("Error: \(error)")
+              }
+            }
+          }
+        }
+    }
+
 
 // MARK: - Location Manager Delegate
 extension SceneDelegate {
@@ -152,7 +187,9 @@ extension SceneDelegate {
     }
   }
 
-  func handleEvent(for region: CLRegion) {
-    print("Geofence triggered!")
-  }
+
 }
+
+
+///WHEN AN EVENT HAPPENS WE NEED TO FIND THE NAME OF THE LOCATION THAT WAS TRIGGERED AND START A TIMER IF THEY JUST ENTERED
+

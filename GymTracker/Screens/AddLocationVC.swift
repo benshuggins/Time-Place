@@ -103,7 +103,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         let zoomButton = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(didTapGoToYourLocationBarButton))
         addRightButtonBar = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapSaveLocationBarButton))
         navigationItem.rightBarButtonItems = [addRightButtonBar, zoomButton]
-        navigationItem.rightBarButtonItem?.isEnabled = (locations.count < 20) // Only allow a maximum of 20 tags
+        navigationItem.rightBarButtonItem?.isEnabled = (locations.count < 20) // Only allow a maximum of 20 tags according to apple, disable the add button
         addRightButtonBar.isEnabled = false
         setupKeyBoard()
     }
@@ -150,8 +150,8 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         
         print("😇😇😇😇😇😇😇date: \(format(date: date))")
         
-        let radius: Double = 100
-        let identifier = NSUUID().uuidString
+        let radius: Double = 500
+        let identifier = NSUUID().uuidString // This is a unique randomly generated identifier for each location
         let note = textFieldNote.text ?? ""
         let locations = Locations(context: self.context)
         locations.placeMark = placeMark
