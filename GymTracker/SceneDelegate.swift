@@ -128,9 +128,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
       }
     }
     
-    // How is this old identifier matching this new ideentifier HOW THE FUCK ARE YOU TRIGGERING REGIONS AND THEN GETTING THE CORRECT DATA FOR THIOSE REGIONS, TODAY I REALIZED ONE DATA MODEL WILL WORK!!!!!
     func note(from identifier: String) -> String? {
-       
         do {
             let request = Locations.fetchRequest() as NSFetchRequest<Locations>
             let pred = NSPredicate(format: "identifier == %@", identifier)
@@ -139,11 +137,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
             print("Is this the name? : \(location?.first?.title)")
         } catch {
             print("Error: \(error)")
-                
         }
         
         return location?.first?.title
-        
     }
     
     func handleEvent(for region: CLRegion) {
@@ -171,7 +167,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
           }
         }
     }
-
 
 // MARK: - Location Manager Delegate
 extension SceneDelegate {
