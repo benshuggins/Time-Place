@@ -8,8 +8,16 @@
         <attribute name="placeMark" optional="YES" attributeType="Transformable"/>
         <attribute name="radius" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="title" attributeType="String"/>
+        <relationship name="regionEvent" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RegionEvent" inverseName="locations" inverseEntity="RegionEvent"/>
+    </entity>
+    <entity name="RegionEvent" representedClassName="RegionEvent" syncable="YES">
+        <attribute name="enterRegionTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="exitRegionTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="totalRegionTime" optional="YES" attributeType="String"/>
+        <relationship name="locations" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Locations" inverseName="regionEvent" inverseEntity="Locations"/>
     </entity>
     <elements>
-        <element name="Locations" positionX="-63" positionY="-18" width="128" height="134"/>
+        <element name="Locations" positionX="-63" positionY="-18" width="128" height="149"/>
+        <element name="RegionEvent" positionX="-54" positionY="45" width="128" height="89"/>
     </elements>
 </model>

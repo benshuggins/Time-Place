@@ -21,10 +21,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         print("Here is documents directory: ", applicationsDocumentsDirectory)
-        ///THIS METHOD REQUESTS AUTHOIZATION TO USE PUSH NOTIFICATIONS
+        ///THIS METHOD REQUESTS AUTHORIZATION TO USE PUSH NOTIFICATIONS
         let options: UNAuthorizationOptions = [.badge, .sound, .alert]
         UNUserNotificationCenter.current().requestAuthorization(options: options) { _, error in
           if let error = error {
+              ///NEED TO HANDLE THE ERROR!!!
             print("Error: \(error)")
           }
         }
@@ -53,7 +54,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     // MARK: - Core Data stack
-    
     lazy var managedObjectContext: NSManagedObjectContext = self.persistentContainer.viewContext
 
     lazy var persistentContainer: NSPersistentContainer = {
@@ -66,18 +66,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       let container = NSPersistentContainer(name: "DataModel")
       container.loadPersistentStores(completionHandler: { (storeDescription, error) in
         if let error = error as NSError? {
-        
           fatalError("Unresolved error \(error), \(error.userInfo)")
-           
         }
       })
       return container
     }()
     
-    
-    
     // MARK: - Core Data Saving support
-
     func saveContext () {
       let context = persistentContainer.viewContext
       if context.hasChanges {

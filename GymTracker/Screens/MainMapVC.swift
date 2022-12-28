@@ -31,7 +31,6 @@ class MainMapVC: UIViewController {
     let tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        
        return table
     }()
     
@@ -73,7 +72,6 @@ class MainMapVC: UIViewController {
     func fetchLocations() {
         do {
             self.locations = try context.fetch(Locations.fetchRequest())
-          
             DispatchQueue.main.async {
                 self.mapView.addAnnotations(self.locations)
                 self.locations.forEach { self.add($0) }
@@ -136,14 +134,12 @@ class MainMapVC: UIViewController {
         }
     }
     
-    
     // MARK: - Helper Methods - Alerts
     func showLocationServicesDeniedAlert() {
       let alert = UIAlertController(
         title: "Location Services Disabled",
         message: "Please enable location services for GymTracker in your iphone. Please go to Settings -> Privacy -> Location Services -> Enable Thankyou!",
         preferredStyle: .alert)
-
       let okAction = UIAlertAction(
         title: "OK",
         style: .default,
@@ -223,8 +219,6 @@ class MainMapVC: UIViewController {
         addLocationVC.delegate = self   //2                                            // this is the delegate
         present(navVC, animated: true)
     }
-    
-  
 }
 
 extension MainMapVC: CLLocationManagerDelegate {
@@ -261,8 +255,6 @@ extension MainMapVC: CLLocationManagerDelegate {
         
         if (error as NSError).code == CLError.regionMonitoringFailure.rawValue {
             // SHOULD AN ALERT BE PRESENTED WHEN/ if there is a regional error
-            
-            
             return
         }
         
@@ -333,7 +325,6 @@ extension MainMapVC: MKMapViewDelegate {
   }
     
     @objc func didTapGraphView() {
-        
         
     }
 

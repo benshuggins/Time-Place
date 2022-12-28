@@ -2,7 +2,7 @@
 //  Locations+CoreDataProperties.swift
 //  GymTracker
 //
-//  Created by Ben Huggins on 12/9/22.
+//  Created by Ben Huggins on 12/27/22.
 //
 //
 
@@ -25,6 +25,24 @@ extension Locations {
     @NSManaged public var placeMark: CLPlacemark?
     @NSManaged public var radius: CLLocationDistance
     @NSManaged public var title: String?
+    @NSManaged public var regionEvent: NSSet?
+
+}
+
+// MARK: Generated accessors for regionEvent
+extension Locations {
+
+    @objc(addRegionEventObject:)
+    @NSManaged public func addToRegionEvent(_ value: RegionEvent)
+
+    @objc(removeRegionEventObject:)
+    @NSManaged public func removeFromRegionEvent(_ value: RegionEvent)
+
+    @objc(addRegionEvent:)
+    @NSManaged public func addToRegionEvent(_ values: NSSet)
+
+    @objc(removeRegionEvent:)
+    @NSManaged public func removeFromRegionEvent(_ values: NSSet)
 
 }
 

@@ -14,7 +14,7 @@ protocol AddLocationVCDelegate: class {
   func addLocationVC(_ controller: AddLocationVC, didAddLocation: Locations)
 }
 
-private let dateFormatter: DateFormatter = {
+let dateFormatter: DateFormatter = {
    let formatter = DateFormatter()
     formatter.dateStyle = .medium
     formatter.timeStyle = .short

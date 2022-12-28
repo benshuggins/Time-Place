@@ -2,14 +2,14 @@
 //  Locations+CoreDataClass.swift
 //  GymTracker
 //
-//  Created by Ben Huggins on 12/9/22.
+//  Created by Ben Huggins on 12/27/22.
 //
 //
 
 import Foundation
 import CoreData
-import MapKit
 import CoreLocation
+import MapKit
 
 @objc(Locations)
 public class Locations: NSManagedObject, MKAnnotation {
@@ -25,9 +25,9 @@ public class Locations: NSManagedObject, MKAnnotation {
     func clampRadius(maxRadius: CLLocationDegrees) {
       radius = min(radius, maxRadius)
     }
-
+ 
 }
-
+ 
 extension Locations {
     
     var region: CLCircularRegion {
@@ -36,7 +36,7 @@ extension Locations {
         center: coordinate,
         radius: radius,
         identifier: identifier)
-
+ 
       // 2
       region.notifyOnEntry = true
       region.notifyOnExit = true
