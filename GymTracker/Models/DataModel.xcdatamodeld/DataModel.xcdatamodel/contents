@@ -17,7 +17,7 @@
         <relationship name="locations" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Locations" inverseName="regionEvent" inverseEntity="Locations"/>
     </entity>
     <elements>
-        <element name="Locations" positionX="-63" positionY="-18" width="128" height="149"/>
-        <element name="RegionEvent" positionX="-54" positionY="45" width="128" height="89"/>
+        <element name="Locations" positionX="-158.22265625" positionY="-18" width="223.22265625" height="163"/>
+        <element name="RegionEvent" positionX="174.0390625" positionY="-21.625" width="128" height="103"/>
     </elements>
 </model>

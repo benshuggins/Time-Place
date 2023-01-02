@@ -46,7 +46,7 @@ class MainMapVC: UIViewController {
         
         let zoom = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(goToYourLocation))
         navigationItem.rightBarButtonItems = [addLocation, zoom]
-    
+        locationManager.allowsBackgroundLocationUpdates = true
         configureUI()
         checkLocationServices()
         fetchLocations()
@@ -102,6 +102,7 @@ class MainMapVC: UIViewController {
             mapView.showsUserLocation = true
            // centerViewOnUsersLocation()
             locationManager.startUpdatingLocation()
+            locationManager.allowsBackgroundLocationUpdates = true   // this is the second declaration one in viewDidLoad
 
             break
         case .authorizedWhenInUse:
@@ -147,6 +148,8 @@ class MainMapVC: UIViewController {
       alert.addAction(okAction)
       present(alert, animated: true, completion: nil)
     }
+    
+  
     
     func add(_ location: Locations) {
         locations.append(location)

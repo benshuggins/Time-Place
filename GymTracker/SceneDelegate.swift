@@ -14,6 +14,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
     var window: UIWindow?
     let locationManager = CLLocationManager()
     var location: [Locations]?
+    var enterT: Date!
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
@@ -115,19 +116,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
       }
     }
     // Matches MKAnnotation name using it's identifier from map to match a region identifier (link mkannotation to name
-    func note(from identifier: String) -> String? {
-        do {
-            let request = Locations.fetchRequest() as NSFetchRequest<Locations>
-            let pred = NSPredicate(format: "identifier == %@", identifier)
-            request.predicate = pred
-            location = try managedObjectContext.fetch(request)
-            
-            print("Is this the name? : \(String(describing: location?.first?.title))")
-        } catch {
-            print("Error: \(error)")
-        }
-        return location?.first?.title
-    }
+//    func note(from identifier: String) -> String? {
+//        do {
+//            let request = Locations.fetchRequest() as NSFetchRequest<Locations>
+//            let pred = NSPredicate(format: "identifier == %@", identifier)
+//            request.predicate = pred
+//            location = try managedObjectContext.fetch(request)
+//
+//            print("Is this the name? : \(String(describing: location?.first?.title))")
+//        } catch {
+//            print("Error: \(error)")
+//        }
+//
+//
+//        return location?.first?.title
+//    }
     
     // Make a function that accepts a region identifier and returns the appropriate Locations object for which we can add the entrance and exit time to!!!
     func matchLocation(from identifier: String) -> Locations? {
@@ -137,47 +140,75 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
             request.predicate = pred
             location = try managedObjectContext.fetch(request)
             
-            print("Is this the name? : \(String(describing: location?.first?.title))")
+            print("Is this the name? : \(String(describing: location?.first))")
         } catch {
             print("Error: \(error)")
         }
         return location?.first
     }
     
+    func format(date: Date) -> String {
+        return dateFormatter.string(from: date)
+    }
+    
+    
+    // Note that if app isn't open then the
     func handleEvent(for region: CLRegion, travel: String) {
+        
+       // var enterT: Date
         // If app is opoen show an alert... Do I need this ?
         if UIApplication.shared.applicationState == .active {
-            guard let alertMessage = note(from: region.identifier) else { return }
-           // window?.rootViewController?.showAlert(withTitle: nil, message: alertMessage)
-        } else {
             
+            guard let alertMessage = matchLocation(from: region.identifier) else { return }
+            if travel == "Entering" {
+             enterT = Date()
+              let enterTimeFormat = format(date: enterT)
+                
+                window?.rootViewController?.showAlert(withTitle: alertMessage.title, message: "Entering at: \(enterTimeFormat)")
+            } else if travel == "Exiting" {
+                let exitT = Date()
+                let exitTimeFormat = format(date: exitT)
+                let delta = exitT.timeIntervalSince(enterT)
+                window?.rootViewController?.showAlert(withTitle: alertMessage.title, message: "E: \(exitTimeFormat), T: \(delta.stringTime)")
+            }
+        } else {
             // get currect location object that matches
             guard let thisLocation = matchLocation(from: region.identifier) else { return }
-          
-            guard let title = note(from: region.identifier) else { return }
+           
+           // guard let title = note(from: region.identifier) else { return }
     
             let notificationContent = UNMutableNotificationContent()
-            
+            let regionEvent = RegionEvent(context: managedObjectContext)
+           
             if travel == "Entering" {
+                enterT = Date()
+                regionEvent.enterRegionTime = enterT
                 
-                let regionEvent = RegionEvent(context: managedObjectContext)
-                regionEvent.enterRegionTime = Date()
                 
+                notificationContent.title = "Entering: \(thisLocation.title ?? "")"
+               
+                let enterTimeFormatted = format(date: enterT)
+               
+                notificationContent.body = enterTimeFormatted
                 // Add the enterTime
-                notificationContent.title = "Entering \(title)"
                 thisLocation.addToRegionEvent(regionEvent)
               //  title.
                 try! managedObjectContext.save()
                 
-                
             } else if travel == "Exiting" {
-                notificationContent.title = "Leaving \(title)"
-            }
+                // need to fetch the current time from the correct region that is triggered
+                let regionExitTime = Date()
+                regionEvent.exitRegionTime = regionExitTime
+                let regionExitTimeFormatted = format(date: regionExitTime)
+                let delta = regionExitTime.timeIntervalSince(enterT)
+                notificationContent.title = "Leaving: \(thisLocation.title ?? "")"
+                notificationContent.body = "Left: \(regionExitTimeFormatted) Total: \(delta.stringTime)"
+                regionEvent.totalRegionTime = delta.stringTime
             
-            notificationContent.body = title
+            }
             notificationContent.sound = .default
             notificationContent.badge = UIApplication.shared.applicationIconBadgeNumber + 1 as NSNumber
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)             // trigger after 1 second
             let request = UNNotificationRequest(
               identifier: "location_change",
               content: notificationContent,
@@ -197,20 +228,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
 // HOW DO I GET THE CORRECT NOTE AND THEN ADD AN ENTRY TIME TO IT?
 extension SceneDelegate {
     
-//    func format(date: Date) -> String {
-//        return dateFormatter.string(from: date)
-//    }
-    
   func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
     if region is CLCircularRegion {
         // If handle func is called from here just give use the time we arrived, send time from here
         handleEvent(for: region, travel: "Entering")
-     
         // deal with time
-        
-        let regionEvent = RegionEvent(context: managedObjectContext)
-        regionEvent.enterRegionTime = Date()
-        
     }
   }
 
@@ -225,6 +247,28 @@ extension SceneDelegate {
   }
 }
 
-
-///WHEN AN EVENT HAPPENS WE NEED TO FIND THE NAME OF THE LOCATION THAT WAS TRIGGERED AND START A TIMER IF THEY JUST ENTERED
-
+extension TimeInterval {
+    private var milliseconds: Int {
+        return Int((truncatingRemainder(dividingBy: 1)) * 1000)
+    }
+    private var seconds: Int {
+        return Int(self) % 60
+    }
+    private var minutes: Int {
+        return (Int(self) / 60 ) % 60
+    }
+    private var hours: Int {
+        return Int(self) / 3600
+    }
+    var stringTime: String {
+        if hours != 0 {
+            return "\(hours)h \(minutes)m \(seconds)s"
+        } else if minutes != 0 {
+            return "\(minutes)m \(seconds)s"
+        } else if milliseconds != 0 {
+            return "\(seconds)s \(milliseconds)ms"
+        } else {
+            return "\(seconds)s"
+        }
+    }
+}

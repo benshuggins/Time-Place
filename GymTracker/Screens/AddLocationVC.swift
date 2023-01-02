@@ -9,6 +9,7 @@ import UIKit
 import MapKit
 import CoreLocation
 import CoreData
+import AudioToolbox
 
 protocol AddLocationVCDelegate: class {
   func addLocationVC(_ controller: AddLocationVC, didAddLocation: Locations)
@@ -31,6 +32,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     var performingReverseGeocoding = false
     var lastGeocodingError: Error?
     var address: String = ""
+    var soundID: SystemSoundID = 0
     
     //MARK: - LAYOUT DECLARATIONS
     var addRightButtonBar: UIBarButtonItem = {
@@ -126,6 +128,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     
     //MARK: - DELEGATE PASS BACK MODEL
     @objc func didTapSaveLocationBarButton() {
+        self.playSoundEffect()
         let coordinate = mapView.centerCoordinate
         let latitude = coordinate.latitude
         let longitude = coordinate.longitude
@@ -150,7 +153,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         
         print("😇😇😇😇😇😇😇date: \(format(date: date))")
         
-        let radius: Double = 500
+        let radius: Double = 400
         let identifier = NSUUID().uuidString // This is a unique randomly generated identifier for each location
         let note = textFieldNote.text ?? ""
         let locations = Locations(context: self.context)
@@ -168,11 +171,33 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         } catch {
             fatalCoreDataError(error)
         }
+      
         delegate?.addLocationVC(self, didAddLocation: locations) //3 }
     }
     
     func format(date: Date) -> String {
         return dateFormatter.string(from: date)
+    }
+    
+    
+    // MARK: - Sound effects
+    func loadSoundEffect(_ name: String) {
+      if let path = Bundle.main.path(forResource: name, ofType: nil) {
+        let fileURL = URL(fileURLWithPath: path, isDirectory: false)
+        let error = AudioServicesCreateSystemSoundID(fileURL as CFURL, &soundID)
+        if error != kAudioServicesNoError {
+          print("Error code \(error) loading sound: \(path)")
+        }
+      }
+    }
+
+    func unloadSoundEffect() {
+      AudioServicesDisposeSystemSoundID(soundID)
+      soundID = 0
+    }
+
+    func playSoundEffect() {
+      AudioServicesPlaySystemSound(soundID)
     }
 
     @objc func didTapGoToYourLocationBarButton() {

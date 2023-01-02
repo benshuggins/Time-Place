@@ -1,23 +1,38 @@
 <?xml version="1.0"?>
 <gpx version="1.1" creator="Xcode">
-  <wpt lat="37.3349285" lon="-122.011033">
-    <name>Apple</name>
-    <time>2014-09-24T14:00:00Z</time>
-  </wpt>
+    <wpt lat="37.422" lon="-122.084058">
+      <name>Google</name>
+      <time>2014-09-24T14:00:0Z</time>
+    </wpt>
+    <wpt lat="37.422" lon="-122.084059">
+      <name>Google</name>
+      <time>2014-09-24T14:00:20Z</time>
+    </wpt>
+    <wpt lat="37.422" lon="-122.08">
+      <name>Other</name>
+      <time>2014-09-24T14:00:03Z</time>
+    </wpt>
+    
+<!--  <wpt lat="37.3349285" lon="-122.011033">-->
+<!--    <name>Apple</name>-->
+<!--    <time>2014-09-24T14:00:00Z</time>-->
+<!--  </wpt>-->
   <wpt lat="37.3349283" lon="-122.011033">
     <name>Apple2</name>
-    <time>2014-09-24T14:00:01Z</time>
+    <time>2014-09-24T14:00:08Z</time>
   </wpt>
   <wpt lat="37.334929" lon="-122.011033">
     <name>Apple3</name>
-    <time>2014-09-24T14:00:02Z</time>
+    <time>2014-09-24T14:01:10Z</time>
   </wpt>
-  <wpt lat="37.33492" lon="-122.011033">
-    <name>Apple4</name>
-    <time>2014-09-24T14:00:04Z</time>
-  </wpt>
-  <wpt lat="37.422" lon="-122.084058">
-    <name>Google</name>
-    <time>2014-09-24T14:00:20Z</time>
-  </wpt>
+<!--  <wpt lat="37.33492" lon="-122.011033">-->
+<!--    <name>Apple4</name>-->
+<!--    <time>2014-09-24T14:00:04Z</time>-->
+<!--  </wpt>-->
+<!--  <wpt lat="37.422" lon="-122.084058">-->
+<!--    <name>Google</name>-->
+<!--    <time>2014-09-24T14:00:20Z</time>-->
+<!--  </wpt>-->
+<!--  -->
+
 </gpx>
