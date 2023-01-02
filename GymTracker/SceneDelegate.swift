@@ -23,7 +23,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
         guard let windowScene = (scene as? UIWindowScene) else { return }
                 let window = UIWindow(windowScene: windowScene)
                 window.makeKeyAndVisible()
-                let navVC = UINavigationController(rootViewController: MainMapVC())
+                let navVC = UINavigationController(rootViewController: LoginVC())
                 window.rootViewController = navVC
                 self.window = window
         

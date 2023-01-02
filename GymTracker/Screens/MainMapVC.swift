@@ -21,6 +21,11 @@ class MainMapVC: UIViewController {
     var lastGeocodingError: Error?
     private let regionMeters: Double = 10000
     
+    var userIdentifierLabel = ""
+    var givenNameLabel = ""
+    var familyNameLabel = ""
+    var emailLabel = ""
+    
     let mapView : MKMapView = {
             let map = MKMapView()
             map.translatesAutoresizingMaskIntoConstraints = false
