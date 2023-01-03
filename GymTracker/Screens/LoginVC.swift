@@ -25,7 +25,6 @@ class LoginVC: UIViewController {
         super.viewDidLoad()
         view.addSubview(appleSignInButton)
         view.addSubview(logoImageView)
-        
         appleSignInButton.addTarget(self, action: #selector(didTapSignInButton), for: .touchUpInside)
     }
     
@@ -45,12 +44,9 @@ class LoginVC: UIViewController {
         appleSignInButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 2).isActive = true
         appleSignInButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -2).isActive = true
         appleSignInButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
-        
-        
     }
     
     func logoImageViewConstraints() {
-    
         logoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         logoImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 50).isActive = true
         logoImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
@@ -62,7 +58,6 @@ class LoginVC: UIViewController {
         let provider = ASAuthorizationAppleIDProvider()
         let request = provider.createRequest()
         request.requestedScopes = [.fullName, .email]
-        
         let controller = ASAuthorizationController(authorizationRequests: [request])
         controller.delegate = self
         controller.presentationContextProvider = self
@@ -75,10 +70,8 @@ class LoginVC: UIViewController {
         appleSignInButtonConstraints()
     }
 
-    // - Tag: perform_appleid_password_request
-    /// Prompts the user if an existing iCloud Keychain credential or Apple ID credential is found.
+    // Prepare requests for both Apple ID and password providers.
     func performExistingAccountSetupFlows() {
-        // Prepare requests for both Apple ID and password providers.
         let requests = [ASAuthorizationAppleIDProvider().createRequest(),
                         ASAuthorizationPasswordProvider().createRequest()]
         
@@ -100,18 +93,7 @@ extension LoginVC: ASAuthorizationControllerDelegate {
             let userIdentifier = appleIDCredential.user
             let fullName = appleIDCredential.fullName
             let email = appleIDCredential.email
-            
-            // For the purpose of this demo app, store the `userIdentifier` in the keychain.
             self.saveUserInKeychain(userIdentifier)
-            
-//            // This is where I jump to after logging in.
-//            let navController = UINavigationController(rootViewController: countrySelectionVC)
-//            navController.modalPresentationStyle = .fullScreen
-//           // self.present(navController, animated:true, completion: nil)
-//            self.show(navController, sender: nil)
-//
-//
-            
             let tabBar = UITabBarController()
             tabBar.tabBar.barTintColor = .gray
             let vc1 = UINavigationController(rootViewController: MainMapVC())
@@ -134,7 +116,6 @@ extension LoginVC: ASAuthorizationControllerDelegate {
             let username = passwordCredential.user
             let password = passwordCredential.password
             
-            // For the purpose of this demo app, show the password credential as an alert.
             DispatchQueue.main.async {
                 self.showPasswordCredentialAlert(username: username, password: password)
             }
@@ -179,15 +160,13 @@ extension LoginVC: ASAuthorizationControllerDelegate {
         alertController.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
         self.present(alertController, animated: true, completion: nil)
     }
-    
-    /// - Tag: did_complete_error
+
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         // Handle error.
     }
 }
 
 extension LoginVC: ASAuthorizationControllerPresentationContextProviding {
-    /// - Tag: provide_presentation_anchor
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         return self.view.window!
     }
@@ -197,7 +176,7 @@ extension UIViewController {
     func showLoginViewController() {
         let loginViewController = LoginVC()
         loginViewController.modalPresentationStyle = .fullScreen
-        self.navigationController?.present(loginViewController, animated: true)
+        present(loginViewController, animated: true)
         }
     }
 

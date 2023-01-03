@@ -6,11 +6,12 @@
 //
 
 import UIKit
+import AuthenticationServices
 
 class LeftMenuVC: UIViewController {
     
-    var sectionTitles = ["About Demo App", "Developer", "Api Used", "Get Code"]
-        var sectionContent = [["How App Works"],["Linkedin","Github"],["Api: Covid19api.com"],["Get Repo: GitHub"]]
+    var sectionTitles = ["About Demo App", "Developer", "Api Used", "Get Code", "LOGOUT"]
+        var sectionContent = [["How App Works"],["Linkedin","Github"],["Api: Covid19api.com"],["Get Repo: GitHub"], ["LOGOUT"]]
        
     let tableView: UITableView = {
        let table = UITableView()
@@ -64,20 +65,21 @@ class LeftMenuVC: UIViewController {
                 
                 switch section {
                 case 0:
-                    return sectionContent[0].count      // section 0 is the 1st/Top section 'App'
+                    return sectionContent[0].count      // section 0 is ABOUT APP
                 case 1:
                     return sectionContent[1].count      // section 1 is the 2nd section 'Api Used'
                 case 2:
                     return sectionContent[2].count      // section 2 is the 3rd section 'Get Code'
                 case 3:
                     return sectionContent[3].count      // section 2 is the 3rd section 'Get Code'
+                case 4:
+                    return sectionContent[4].count
                 default:
                     return sectionContent[0].count
                 }
         }
     
             func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-                    
                 return sectionTitles[section]  // section 0 is the 1st section
             }
         
@@ -89,14 +91,20 @@ class LeftMenuVC: UIViewController {
                 
                 switch (indexPath as NSIndexPath).section {
                     
-                case 0:  // Section 0 App
+                case 0:  // Section 0 ABOUT APP
                     cell.accessoryType = .disclosureIndicator
                    
                 case 1: // Section 1 Developer
                     cell.accessoryType = .none
                     
-                case 2:  // Section 2 Logout
+                case 2:  // Section 2 API USED
                     cell.accessoryType = .none
+                    
+                case 3:  // Section 3 LOGOUT
+                    cell.accessoryType = .none
+                case 4:  // Section 3 LOGOUT
+                    cell.accessoryType = .none
+                    
                 
         default: break
                 }
@@ -152,6 +160,18 @@ class LeftMenuVC: UIViewController {
             case 0:
                 if let url = URL(string: "https://github.com/benshuggins/CovidDash") {
                 UIApplication.shared.open(url)
+                }
+            default:
+            print(#function, "Error in Switch")
+            }
+            
+        case 4: // Section 4 LOGOUT
+            switch (indexPath as NSIndexPath).row {
+            case 0:
+                print("Log Out Button Tapped")
+                KeychainItem.deleteUserIdentifierFromKeychain()
+                DispatchQueue.main.async {
+                    self.showLoginViewController()
                 }
             default:
             print(#function, "Error in Switch")
