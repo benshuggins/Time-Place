@@ -62,14 +62,20 @@ class MainMapVC: UIViewController {
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
         let goToLocationImage = UIImage(systemName: "location.square.fill")
         let leftMenuButton = UIImage(systemName: "text.justify.left")
-        
+        let centerLocation = UIImage(systemName: "rectangle.center.inset.filled")
         
         let addLocation = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapAddLocationBarButton))
-        let leftMenu = UIBarButtonItem(image: leftMenuButton, style: .plain, target: self, action: #selector(openLeftMenuButtonTapped))
-        
         let zoom = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(goToYourLocation))
         navigationItem.rightBarButtonItems = [addLocation, zoom]
-        navigationItem.leftBarButtonItem = leftMenu
+       
+        let leftMenu = UIBarButtonItem(image: leftMenuButton, style: .plain, target: self, action: #selector(openLeftMenuButtonTapped))
+        let centerOverLocations = UIBarButtonItem(image: centerLocation, style: .plain, target: self, action: #selector(showLocations))
+        
+        navigationItem.leftBarButtonItems = [leftMenu, centerOverLocations]
+        
+        if !locations.isEmpty {
+            showLocations()
+        }
         
         locationManager.allowsBackgroundLocationUpdates = true
         configureUI()
@@ -77,23 +83,53 @@ class MainMapVC: UIViewController {
         fetchLocations()
     }
     
+    // Centers the screen over many annotations
+    func region(for annotations: [MKAnnotation]) -> MKCoordinateRegion {
+      let region: MKCoordinateRegion
+
+      switch annotations.count {
+      case 0:
+        region = MKCoordinateRegion(center: mapView.userLocation.coordinate,latitudinalMeters: 1000,longitudinalMeters: 1000)
+
+      case 1:
+        let annotation = annotations[annotations.count - 1]
+        region = MKCoordinateRegion(center: annotation.coordinate,latitudinalMeters: 1000,longitudinalMeters: 1000)
+
+      default:
+        var topLeft = CLLocationCoordinate2D(latitude: -90,longitude: 180)
+        var bottomRight = CLLocationCoordinate2D(latitude: 90,longitude: -180)
+
+        for annotation in annotations {
+          topLeft.latitude = max(topLeft.latitude,
+                                 annotation.coordinate.latitude)
+          topLeft.longitude = min(topLeft.longitude,
+                                  annotation.coordinate.longitude)
+          bottomRight.latitude = min(bottomRight.latitude,
+                                     annotation.coordinate.latitude)
+          bottomRight.longitude = max(
+            bottomRight.longitude,
+            annotation.coordinate.longitude)
+        }
+
+        let center = CLLocationCoordinate2D(
+          latitude: topLeft.latitude - (topLeft.latitude - bottomRight.latitude) / 2,
+          longitude: topLeft.longitude - (topLeft.longitude - bottomRight.longitude) / 2)
+
+        let extraSpace = 1.1
+        let span = MKCoordinateSpan(
+          latitudeDelta: abs(topLeft.latitude - bottomRight.latitude) * extraSpace,
+          longitudeDelta: abs(topLeft.longitude - bottomRight.longitude) * extraSpace)
+
+        region = MKCoordinateRegion(center: center, span: span)
+      }
+
+      return mapView.regionThatFits(region)
+    }
+    
+    
+    
     
     // MARK: - Core Data Fetch
-    
-//    func updateLocations() {
-//
-//        mapView.removeAnnotation(locations as! MKAnnotation)
-//        let entity = locations.entity()
-//
-//        let fetchRequest = NSFetchRequest<Locations>()
-//        fetchRequest.entity = entity
-//
-//        locations = try! context.fetch(Locations.fetchRequest())
-//        mapView.addAnnotations(locations)
-//
-//
-//    }
-    
     func fetchLocations() {
         do {
             self.locations = try context.fetch(Locations.fetchRequest())
@@ -226,6 +262,11 @@ class MainMapVC: UIViewController {
             mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+    
+    @objc func showLocations() {
+        let theRegion = region(for: locations)
+        mapView.setRegion(theRegion, animated: true)
     }
     
     @objc func openLeftMenuButtonTapped() {
