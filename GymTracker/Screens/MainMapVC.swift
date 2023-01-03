@@ -10,6 +10,8 @@ import CoreLocation
 import CoreData
 
 class MainMapVC: UIViewController {
+    
+    let defaults = UserDefaults.standard
    
     var locations = [Locations]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -43,6 +45,17 @@ class MainMapVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        //MARK: - Only show login screen once
+        if defaults.bool(forKey: "First Launch") == true {
+            print("Second or more app launch")
+            defaults.set(true, forKey: "First Launch")
+        } else {
+            print("First Launch -- Open Sign In With Apple Screen")
+            showLoginViewController()
+            defaults.set(true, forKey: "First Launch")
+        }
+        
         mapView.delegate = self
         title = "Map"
         view.addSubview(mapView)
@@ -351,9 +364,6 @@ extension MainMapVC: MKMapViewDelegate {
     return nil
   }
     
-    @objc func didTapGraphView() {
-        
-    }
 
   func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
       if let circleOverlay = overlay as? MKCircle {
