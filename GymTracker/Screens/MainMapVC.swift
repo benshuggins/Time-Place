@@ -26,6 +26,8 @@ class MainMapVC: UIViewController {
     var familyNameLabel = ""
     var emailLabel = ""
     
+    private var slideInTransitionDelegate: SlideInPresentationManager!
+    
     let mapView : MKMapView = {
             let map = MKMapView()
             map.translatesAutoresizingMaskIntoConstraints = false
@@ -42,15 +44,20 @@ class MainMapVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
-        title = "Gym Tracker"
+        title = "Map"
         view.addSubview(mapView)
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
         let goToLocationImage = UIImage(systemName: "location.square.fill")
+        let leftMenuButton = UIImage(systemName: "text.justify.left")
+        
+        
         let addLocation = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapAddLocationBarButton))
-       // let add = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(goToYourLocation))
+        let leftMenu = UIBarButtonItem(image: leftMenuButton, style: .plain, target: self, action: #selector(openLeftMenuButtonTapped))
         
         let zoom = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(goToYourLocation))
         navigationItem.rightBarButtonItems = [addLocation, zoom]
+        navigationItem.leftBarButtonItem = leftMenu
+        
         locationManager.allowsBackgroundLocationUpdates = true
         configureUI()
         checkLocationServices()
@@ -206,6 +213,18 @@ class MainMapVC: UIViewController {
             mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+    
+    @objc func openLeftMenuButtonTapped() {
+        let controller2 = LeftMenuVC()
+        slideInTransitionDelegate = SlideInPresentationManager()
+        slideInTransitionDelegate.direction = .left
+        controller2.modalPresentationStyle = .custom
+        controller2.transitioningDelegate = slideInTransitionDelegate
+        present(controller2, animated: true, completion: nil)
+        print("Left BAR BUTTON WAS TAPPED")
+        
+        
     }
     
     @objc func goToYourLocation() {

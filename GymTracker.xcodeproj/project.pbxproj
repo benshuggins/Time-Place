@@ -24,6 +24,11 @@
 		F5D493382932A82200776B07 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D493372932A82200776B07 /* LocationManager.swift */; };
 		F5DD12EE29626B0B003B5BD7 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DD12ED29626B0B003B5BD7 /* LoginVC.swift */; };
 		F5DD12F029626D80003B5BD7 /* KeychainItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DD12EF29626D80003B5BD7 /* KeychainItem.swift */; };
+		F5DD12F329627A9B003B5BD7 /* SlideInPresentationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DD12F229627A9B003B5BD7 /* SlideInPresentationManager.swift */; };
+		F5DD12F529627C23003B5BD7 /* SlideInPresentationAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DD12F429627C23003B5BD7 /* SlideInPresentationAnimator.swift */; };
+		F5DD12F729627CAB003B5BD7 /* SlideInPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DD12F629627CAB003B5BD7 /* SlideInPresentationController.swift */; };
+		F5DD12F929627D0A003B5BD7 /* LeftMenuVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DD12F829627D0A003B5BD7 /* LeftMenuVC.swift */; };
+		F5DD12FE29627F79003B5BD7 /* LeftMenuTVCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DD12FD29627F79003B5BD7 /* LeftMenuTVCell.swift */; };
 		F5F3ED02295B80570038B64F /* Locations+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5F3ED00295B80570038B64F /* Locations+CoreDataClass.swift */; };
 		F5F3ED03295B80570038B64F /* Locations+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5F3ED01295B80570038B64F /* Locations+CoreDataProperties.swift */; };
 		F5F3ED06295B83730038B64F /* RegionEvent+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5F3ED04295B83730038B64F /* RegionEvent+CoreDataClass.swift */; };
@@ -53,6 +58,11 @@
 		F5DD12ED29626B0B003B5BD7 /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		F5DD12EF29626D80003B5BD7 /* KeychainItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainItem.swift; sourceTree = "<group>"; };
 		F5DD12F1296270EC003B5BD7 /* GymTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GymTracker.entitlements; sourceTree = "<group>"; };
+		F5DD12F229627A9B003B5BD7 /* SlideInPresentationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideInPresentationManager.swift; sourceTree = "<group>"; };
+		F5DD12F429627C23003B5BD7 /* SlideInPresentationAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideInPresentationAnimator.swift; sourceTree = "<group>"; };
+		F5DD12F629627CAB003B5BD7 /* SlideInPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideInPresentationController.swift; sourceTree = "<group>"; };
+		F5DD12F829627D0A003B5BD7 /* LeftMenuVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeftMenuVC.swift; sourceTree = "<group>"; };
+		F5DD12FD29627F79003B5BD7 /* LeftMenuTVCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeftMenuTVCell.swift; sourceTree = "<group>"; };
 		F5F3ED00295B80570038B64F /* Locations+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Locations+CoreDataClass.swift"; sourceTree = "<group>"; };
 		F5F3ED01295B80570038B64F /* Locations+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Locations+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		F5F3ED04295B83730038B64F /* RegionEvent+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RegionEvent+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -113,6 +123,10 @@
 				F5D493392932A82F00776B07 /* Managers */,
 				F59B420E2929604A001F0269 /* Main.storyboard */,
 				F5D2D8CA2929A96E00A065AD /* Utilities.swift */,
+				F5DD12FC29627EDC003B5BD7 /* Cells */,
+				F5DD12F429627C23003B5BD7 /* SlideInPresentationAnimator.swift */,
+				F5DD12F229627A9B003B5BD7 /* SlideInPresentationManager.swift */,
+				F5DD12F629627CAB003B5BD7 /* SlideInPresentationController.swift */,
 				F518B3FB294404FC00AB34FB /* Functions.swift */,
 				F5DD12EF29626D80003B5BD7 /* KeychainItem.swift */,
 				F5908E822949142F006AC559 /* Apple.gpx */,
@@ -130,6 +144,7 @@
 			children = (
 				F5DD12ED29626B0B003B5BD7 /* LoginVC.swift */,
 				F59B420C2929604A001F0269 /* MainMapVC.swift */,
+				F5DD12F829627D0A003B5BD7 /* LeftMenuVC.swift */,
 				F5D2D8C72929A40B00A065AD /* AddLocationVC.swift */,
 				F59FD2B52933CD2100EEAC30 /* DetailLocationVC.swift */,
 			);
@@ -142,6 +157,14 @@
 				F5D493372932A82200776B07 /* LocationManager.swift */,
 			);
 			path = Managers;
+			sourceTree = "<group>";
+		};
+		F5DD12FC29627EDC003B5BD7 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				F5DD12FD29627F79003B5BD7 /* LeftMenuTVCell.swift */,
+			);
+			path = Cells;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -220,7 +243,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5F3ED06295B83730038B64F /* RegionEvent+CoreDataClass.swift in Sources */,
+				F5DD12F529627C23003B5BD7 /* SlideInPresentationAnimator.swift in Sources */,
 				F59B420D2929604A001F0269 /* MainMapVC.swift in Sources */,
+				F5DD12FE29627F79003B5BD7 /* LeftMenuTVCell.swift in Sources */,
 				F59B42092929604A001F0269 /* AppDelegate.swift in Sources */,
 				F5F3ED09295B8C4A0038B64F /* DataManager.swift in Sources */,
 				F5D493382932A82200776B07 /* LocationManager.swift in Sources */,
@@ -231,10 +256,13 @@
 				F518B3F62943EF1B00AB34FB /* DataModel.xcdatamodeld in Sources */,
 				F5F3ED07295B83730038B64F /* RegionEvent+CoreDataProperties.swift in Sources */,
 				F5D2D8CB2929A96E00A065AD /* Utilities.swift in Sources */,
+				F5DD12F329627A9B003B5BD7 /* SlideInPresentationManager.swift in Sources */,
 				F59B420B2929604A001F0269 /* SceneDelegate.swift in Sources */,
 				F5F3ED03295B80570038B64F /* Locations+CoreDataProperties.swift in Sources */,
+				F5DD12F929627D0A003B5BD7 /* LeftMenuVC.swift in Sources */,
 				F518B3FC294404FC00AB34FB /* Functions.swift in Sources */,
 				F5DD12EE29626B0B003B5BD7 /* LoginVC.swift in Sources */,
+				F5DD12F729627CAB003B5BD7 /* SlideInPresentationController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

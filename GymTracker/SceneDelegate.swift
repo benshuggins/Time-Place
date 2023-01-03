@@ -150,13 +150,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
     func format(date: Date) -> String {
         return dateFormatter.string(from: date)
     }
-    
-    
-    // Note that if app isn't open then the
+
     func handleEvent(for region: CLRegion, travel: String) {
-        
-       // var enterT: Date
-        // If app is opoen show an alert... Do I need this ?
         if UIApplication.shared.applicationState == .active {
             
             guard let alertMessage = matchLocation(from: region.identifier) else { return }
@@ -174,27 +169,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
         } else {
             // get currect location object that matches
             guard let thisLocation = matchLocation(from: region.identifier) else { return }
-           
-           // guard let title = note(from: region.identifier) else { return }
-    
             let notificationContent = UNMutableNotificationContent()
             let regionEvent = RegionEvent(context: managedObjectContext)
-           
             if travel == "Entering" {
                 enterT = Date()
                 regionEvent.enterRegionTime = enterT
-                
-                
                 notificationContent.title = "Entering: \(thisLocation.title ?? "")"
-               
                 let enterTimeFormatted = format(date: enterT)
-               
                 notificationContent.body = enterTimeFormatted
                 // Add the enterTime
                 thisLocation.addToRegionEvent(regionEvent)
-              //  title.
                 try! managedObjectContext.save()
-                
             } else if travel == "Exiting" {
                 // need to fetch the current time from the correct region that is triggered
                 let regionExitTime = Date()
