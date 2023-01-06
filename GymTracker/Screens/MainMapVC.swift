@@ -12,7 +12,6 @@ import CoreData
 class MainMapVC: UIViewController {
     
     let defaults = UserDefaults.standard
-   
     var locations = [Locations]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     let locationManager = CLLocationManager()
@@ -22,30 +21,25 @@ class MainMapVC: UIViewController {
     var performingReverseGeocoding = false
     var lastGeocodingError: Error?
     private let regionMeters: Double = 10000
-    
+    private var slideInTransitionDelegate: SlideInPresentationManager!
     var userIdentifierLabel = ""
     var givenNameLabel = ""
     var familyNameLabel = ""
     var emailLabel = ""
     
-    private var slideInTransitionDelegate: SlideInPresentationManager!
-    
     let mapView : MKMapView = {
-            let map = MKMapView()
-            map.translatesAutoresizingMaskIntoConstraints = false
-            map.overrideUserInterfaceStyle = .dark
-            return map
-        }()
+        let map = MKMapView()
+        map.translatesAutoresizingMaskIntoConstraints = false
+        map.overrideUserInterfaceStyle = .dark
+        return map}()
 
     let tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-       return table
-    }()
+       return table}()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         //MARK: - Only show login screen once
         if defaults.bool(forKey: "First Launch") == true {
             print("Second or more app launch")
@@ -63,71 +57,47 @@ class MainMapVC: UIViewController {
         let goToLocationImage = UIImage(systemName: "location.square.fill")
         let leftMenuButton = UIImage(systemName: "text.justify.left")
         let centerLocation = UIImage(systemName: "rectangle.center.inset.filled")
-        
         let addLocation = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapAddLocationBarButton))
         let zoom = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(goToYourLocation))
         navigationItem.rightBarButtonItems = [addLocation, zoom]
-       
         let leftMenu = UIBarButtonItem(image: leftMenuButton, style: .plain, target: self, action: #selector(openLeftMenuButtonTapped))
         let centerOverLocations = UIBarButtonItem(image: centerLocation, style: .plain, target: self, action: #selector(showLocations))
-        
         navigationItem.leftBarButtonItems = [leftMenu, centerOverLocations]
-        
-        if !locations.isEmpty {
-            showLocations()
-        }
-        
         locationManager.allowsBackgroundLocationUpdates = true
         configureUI()
         checkLocationServices()
         fetchLocations()
+        
+        if !locations.isEmpty {
+            showLocations()
+        }
     }
     
-    // Centers the screen over many annotations
+    // Centers the screen over All the Map annotations Perfectly
     func region(for annotations: [MKAnnotation]) -> MKCoordinateRegion {
       let region: MKCoordinateRegion
-
       switch annotations.count {
       case 0:
         region = MKCoordinateRegion(center: mapView.userLocation.coordinate,latitudinalMeters: 1000,longitudinalMeters: 1000)
-
       case 1:
         let annotation = annotations[annotations.count - 1]
         region = MKCoordinateRegion(center: annotation.coordinate,latitudinalMeters: 1000,longitudinalMeters: 1000)
-
       default:
         var topLeft = CLLocationCoordinate2D(latitude: -90,longitude: 180)
         var bottomRight = CLLocationCoordinate2D(latitude: 90,longitude: -180)
-
-        for annotation in annotations {
-          topLeft.latitude = max(topLeft.latitude,
-                                 annotation.coordinate.latitude)
-          topLeft.longitude = min(topLeft.longitude,
-                                  annotation.coordinate.longitude)
-          bottomRight.latitude = min(bottomRight.latitude,
-                                     annotation.coordinate.latitude)
-          bottomRight.longitude = max(
-            bottomRight.longitude,
-            annotation.coordinate.longitude)
-        }
-
-        let center = CLLocationCoordinate2D(
-          latitude: topLeft.latitude - (topLeft.latitude - bottomRight.latitude) / 2,
+        for annotation in annotations {topLeft.latitude = max(topLeft.latitude,annotation.coordinate.latitude)
+          topLeft.longitude = min(topLeft.longitude,annotation.coordinate.longitude)
+          bottomRight.latitude = min(bottomRight.latitude, annotation.coordinate.latitude)
+          bottomRight.longitude = max(bottomRight.longitude,annotation.coordinate.longitude)}
+        let center = CLLocationCoordinate2D(latitude: topLeft.latitude - (topLeft.latitude - bottomRight.latitude) / 2,
           longitude: topLeft.longitude - (topLeft.longitude - bottomRight.longitude) / 2)
-
         let extraSpace = 1.1
-        let span = MKCoordinateSpan(
-          latitudeDelta: abs(topLeft.latitude - bottomRight.latitude) * extraSpace,
+        let span = MKCoordinateSpan(latitudeDelta: abs(topLeft.latitude - bottomRight.latitude) * extraSpace,
           longitudeDelta: abs(topLeft.longitude - bottomRight.longitude) * extraSpace)
-
         region = MKCoordinateRegion(center: center, span: span)
       }
-
       return mapView.regionThatFits(region)
     }
-    
-    
-    
     
     // MARK: - Core Data Fetch
     func fetchLocations() {
@@ -142,7 +112,7 @@ class MainMapVC: UIViewController {
             print("Error: ", error.localizedDescription)
         }
     }
-    
+    // Keep Battery Level drainage manageable
     func setUpLocationManager() {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -210,8 +180,6 @@ class MainMapVC: UIViewController {
       present(alert, animated: true, completion: nil)
     }
     
-  
-    
     func add(_ location: Locations) {
         locations.append(location)
       mapView.addAnnotation(location)
@@ -276,9 +244,6 @@ class MainMapVC: UIViewController {
         controller2.modalPresentationStyle = .custom
         controller2.transitioningDelegate = slideInTransitionDelegate
         present(controller2, animated: true, completion: nil)
-        print("Left BAR BUTTON WAS TAPPED")
-        
-        
     }
     
     @objc func goToYourLocation() {
@@ -297,7 +262,8 @@ class MainMapVC: UIViewController {
     @objc func didTapAddLocationBarButton() {
         let addLocationVC = AddLocationVC()
         let navVC = UINavigationController(rootViewController: addLocationVC)
-        addLocationVC.delegate = self   //2                                            // this is the delegate
+        addLocationVC.delegate = self
+       // navVC.modalPresentationStyle = .overFullScreen
         present(navVC, animated: true)
     }
 }
@@ -312,10 +278,8 @@ extension MainMapVC: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         // we will be back
         let status = manager.authorizationStatus
-
         // This is what shows the blue dot on the screen
         mapView.showsUserLocation = (status == .authorizedAlways)
-
         // 3
         if status != .authorizedAlways {
           let message = """
@@ -326,19 +290,17 @@ extension MainMapVC: CLLocationManagerDelegate {
         }
     }
     
-    // MARK: - HANDLE LOCATION MANAGER ERRORS
+    // MARK: - HANDLE LOCATION MANAGER ERROR HANDLING
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("Location Manager Did fail with error: \(error)")
         
         if (error as NSError).code == CLError.locationUnknown.rawValue {
             return
         }
-        
         if (error as NSError).code == CLError.regionMonitoringFailure.rawValue {
             // SHOULD AN ALERT BE PRESENTED WHEN/ if there is a regional error
             return
         }
-        
         lastLocationError = error
     }
 
@@ -366,8 +328,7 @@ func string(from placemark: CLPlacemark) -> String {
 }
 
 //MARK: - CALL BACK FROM ADDLOCATIONVC
-extension MainMapVC: AddLocationVCDelegate {  // 1
-   
+extension MainMapVC: AddLocationVCDelegate {
     func addLocationVC(_ controller: AddLocationVC, didAddLocation location: Locations) {
         controller.dismiss(animated: true, completion: nil)
         location.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
@@ -378,16 +339,13 @@ extension MainMapVC: AddLocationVCDelegate {  // 1
 
 // MARK: - Map Annotation
 extension MainMapVC: MKMapViewDelegate {
-  
   func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
     let identifier = "myGeotification"
-   
     if annotation is Locations {
       var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKPinAnnotationView
       if annotationView == nil {
         annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: identifier)
         annotationView?.canShowCallout = true
-    
         let removeButton = UIButton(type: .custom)
         removeButton.frame = CGRect(x: 0, y: 0, width: 23, height: 23)
         removeButton.setImage(UIImage(systemName: "trash.fill"), for: .normal)
@@ -405,12 +363,11 @@ extension MainMapVC: MKMapViewDelegate {
     return nil
   }
     
-
   func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
       if let circleOverlay = overlay as? MKCircle {
       let circleRenderer = MKCircleRenderer(overlay: circleOverlay)
       circleRenderer.lineWidth = 1.0
-      circleRenderer.strokeColor = .red
+      circleRenderer.strokeColor = .green
       circleRenderer.fillColor = UIColor.red.withAlphaComponent(0.4)
       return circleRenderer
     }
@@ -419,7 +376,6 @@ extension MainMapVC: MKMapViewDelegate {
     
   func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
     guard let location = view.annotation as? Locations else { return }
-      
       //MARK: - MAP MARKER ACCESSORY VIEW RIGHT AND LEFT BUTTONS
       if control == view.leftCalloutAccessoryView {
           remove(location)
@@ -433,9 +389,7 @@ extension MainMapVC: MKMapViewDelegate {
 }
 //MARK: - REGION MONITORING
 extension MainMapVC {
-    
     func startMonitoring(location: Locations) {
-      // 1
       if !CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self) {
         showAlert(
           withTitle: "Error",
@@ -465,8 +419,3 @@ extension MainMapVC {
     }
 }
 
-
-
-
-// Need to add region monitoring
-// NSFetchRsultsController ?

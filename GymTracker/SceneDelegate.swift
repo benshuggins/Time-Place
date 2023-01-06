@@ -17,9 +17,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
     var enterT: Date!
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
                 let window = UIWindow(windowScene: windowScene)
                 window.makeKeyAndVisible()
@@ -133,13 +130,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
 //    }
     
     // Make a function that accepts a region identifier and returns the appropriate Locations object for which we can add the entrance and exit time to!!!
+    
+    
+    
     func matchLocation(from identifier: String) -> Locations? {
         do {
             let request = Locations.fetchRequest() as NSFetchRequest<Locations>
             let pred = NSPredicate(format: "identifier == %@", identifier)
             request.predicate = pred
             location = try managedObjectContext.fetch(request)
-            
             print("Is this the name? : \(String(describing: location?.first))")
         } catch {
             print("Error: \(error)")

@@ -105,7 +105,6 @@ struct KeychainItem {
     }
     
     // MARK: Convenience
-    
     private static func keychainQuery(withService service: String, account: String? = nil, accessGroup: String? = nil) -> [String: AnyObject] {
         var query = [String: AnyObject]()
         query[kSecClass as String] = kSecClassGenericPassword

@@ -11,7 +11,6 @@ import CoreData
 import MapKit
 import CoreLocation
 
-
 extension Locations {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<Locations> {
@@ -25,7 +24,7 @@ extension Locations {
     @NSManaged public var placeMark: CLPlacemark?
     @NSManaged public var radius: CLLocationDistance
     @NSManaged public var title: String?
-    @NSManaged public var regionEvent: NSSet?
+    @NSManaged public var regionEvent: RegionEvent?
 
 }
 
@@ -43,7 +42,6 @@ extension Locations {
 
     @objc(removeRegionEvent:)
     @NSManaged public func removeFromRegionEvent(_ values: NSSet)
-
 }
 
 extension Locations : Identifiable {

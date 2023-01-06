@@ -93,7 +93,6 @@ class SlideInPresentationController: UIPresentationController {
         return CGSize(width: parentSize.width, height: parentSize.height*(2.0/3.0))
       }
     }
-
 }
 // MARK: - Private
 private extension SlideInPresentationController {

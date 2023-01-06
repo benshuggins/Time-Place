@@ -23,7 +23,7 @@ class LoginVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .lightGray
         view.addSubview(appleSignInButton)
         view.addSubview(logoImageView)
         appleSignInButton.addTarget(self, action: #selector(didTapSignInButton), for: .touchUpInside)
@@ -71,12 +71,10 @@ class LoginVC: UIViewController {
         appleSignInButtonConstraints()
     }
 
-    // Prepare requests for both Apple ID and password providers.
     func performExistingAccountSetupFlows() {
         let requests = [ASAuthorizationAppleIDProvider().createRequest(),
                         ASAuthorizationPasswordProvider().createRequest()]
         
-        // Create an authorization controller with the given requests.
         let authorizationController = ASAuthorizationController(authorizationRequests: requests)
         authorizationController.delegate = self
         authorizationController.presentationContextProvider = self
@@ -85,12 +83,9 @@ class LoginVC: UIViewController {
 }
 
 extension LoginVC: ASAuthorizationControllerDelegate {
-    /// - Tag: did_complete_authorization
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         switch authorization.credential {
         case let appleIDCredential as ASAuthorizationAppleIDCredential:
-            
-            // Create an account in your system.
             let userIdentifier = appleIDCredential.user
             let fullName = appleIDCredential.fullName
             let email = appleIDCredential.email

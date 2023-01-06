@@ -10,8 +10,8 @@ import AuthenticationServices
 
 class LeftMenuVC: UIViewController {
     
-    var sectionTitles = ["About Demo App", "Developer", "Api Used", "Get Code", "LOGOUT"]
-        var sectionContent = [["How App Works"],["Linkedin","Github"],["Api: Covid19api.com"],["Get Repo: GitHub"], ["LOGOUT"]]
+    var sectionTitles = ["About Demo App", "Developer", "Ben Huggins URL", "Get Code", "LOGOUT"]
+        var sectionContent = [["How App Works"],["Linkedin","Github"],["My Website"],["Youtube"], ["LOGOUT"]]
        
     let tableView: UITableView = {
        let table = UITableView()
@@ -21,7 +21,7 @@ class LeftMenuVC: UIViewController {
     }()
     
 //    override func viewWillAppear(_ animated: Bool) {
-//        AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.portrait, andRotateTo: UIInterfaceOrientation.portrait)
+//        AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.all, andRotateTo: UIInterfaceOrientation.portrait)
 //    }
     
     override func viewDidLoad() {
@@ -115,7 +115,6 @@ class LeftMenuVC: UIViewController {
                 
         switch (indexPath as NSIndexPath).section {
                
-         
             // Section 0 About App
         case 0:
             switch (indexPath as NSIndexPath).row {
@@ -148,7 +147,7 @@ class LeftMenuVC: UIViewController {
         case 2: // Section 2 Api Used:
             switch (indexPath as NSIndexPath).row {
             case 0:
-                if let url = URL(string: "https://www.covid19api.com") {
+                if let url = URL(string: "https://www.youtube.com/watch?v=Wq1KXrKN9Ao&t=45s&ab_channel=Benjammin") {
                 UIApplication.shared.open(url)
                 }
             default:
@@ -158,7 +157,7 @@ class LeftMenuVC: UIViewController {
         case 3: // Section 3 Get Code:
             switch (indexPath as NSIndexPath).row {
             case 0:
-                if let url = URL(string: "https://github.com/benshuggins/CovidDash") {
+                if let url = URL(string: "https://www.youtube.com/watch?v=Wq1KXrKN9Ao&t=45s&ab_channel=Benjammin") {
                 UIApplication.shared.open(url)
                 }
             default:

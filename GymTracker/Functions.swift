@@ -24,7 +24,5 @@ func fatalCoreDataError(_ error: Error) {
 
 // Used for HudView
 func afterDelay(_ seconds: Double, run: @escaping () -> Void) {
-  DispatchQueue.main.asyncAfter(
-    deadline: .now() + seconds,
-    execute: run)
+  DispatchQueue.main.asyncAfter(deadline: .now() + seconds, execute: run)
 }

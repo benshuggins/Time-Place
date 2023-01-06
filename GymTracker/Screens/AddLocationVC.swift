@@ -11,6 +11,7 @@ import CoreLocation
 import CoreData
 import AudioToolbox
 
+
 protocol AddLocationVCDelegate: class {
   func addLocationVC(_ controller: AddLocationVC, didAddLocation: Locations)
 }
@@ -42,7 +43,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.placeholder = "Search for Gym"
+        searchBar.placeholder = "Search"
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         return searchBar
         }()
@@ -52,10 +53,11 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.tintColor = .black
         textField.textColor = .black
+        textField.backgroundColor = .darkGray
         textField.textAlignment = .left
         textField.attributedPlaceholder = NSAttributedString(
-            string: "Enter Gym Name - Place Pin over Gym - Tap +",
-            attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray])
+            string: "Enter Location Name",
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.black])
         textField.addTarget(self, action: #selector(didEnterNoteTextField), for: .editingChanged)
         return textField
         }()
@@ -105,8 +107,10 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         let zoomButton = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(didTapGoToYourLocationBarButton))
         addRightButtonBar = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapSaveLocationBarButton))
         navigationItem.rightBarButtonItems = [addRightButtonBar, zoomButton]
-        navigationItem.rightBarButtonItem?.isEnabled = (locations.count < 20) // Only allow a maximum of 20 tags according to apple, disable the add button
+        navigationItem.rightBarButtonItem?.isEnabled = (locations.count < 20)
+        navigationController?.navigationBar.backgroundColor = .darkGray
         addRightButtonBar.isEnabled = false
+        self.hideKeyboardWhenTappedAround()
         setupKeyBoard()
     }
     
@@ -115,9 +119,57 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     }
 
     private func setupKeyboardHiding() {
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+//
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+//
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handle(keyboardShowNotification:)),
+                                               name: UIResponder.keyboardDidShowNotification,
+                                               object: nil)
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handle2(keyboardWillHideNotification:)),
+                                               name: UIResponder.keyboardDidShowNotification,
+                                               object: nil)
     }
+    
+
+    @objc private func handle(keyboardShowNotification notification: Notification) {
+        // 1
+        print("Keyboard show notification")
+        
+        // 2
+        if let userInfo = notification.userInfo,
+            // 3
+            let keyboardRectangle = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+            mappinImageView.frame.origin.y = keyboardRectangle.height + 50
+        }
+    }
+    
+    @objc private func handle2(keyboardWillHideNotification notification: Notification) {
+        // 1
+        print("Keyboard Hide notification")
+        
+        // 2
+        if let userInfo = notification.userInfo,
+            // 3
+            let keyboardRectangle = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+            mappinImageView.frame.origin.y = keyboardRectangle.height - 50
+           
+        }
+    }
+    
+//    @objc func keyboardWillShow(sender: NSNotification) {
+//       // view.frame.origin.y = view.frame.origin.y - 170
+//
+//
+//        mappinImageView.frame.origin.y = mappinImageView.frame.origin.y - 170
+//    }
+//    @objc func keyboardWillHide(notification: NSNotification) {
+//      //  view.frame.origin.y = 0
+//        mappinImageView.frame.origin.y = mapView.frame.height/2
+//    }
     
     @objc func didEnterNoteTextField(_ textField: UITextField) {
         print(textField.text ?? "")
@@ -129,6 +181,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     //MARK: - DELEGATE PASS BACK MODEL
     @objc func didTapSaveLocationBarButton() {
         self.playSoundEffect()
+    
         let coordinate = mapView.centerCoordinate
         let latitude = coordinate.latitude
         let longitude = coordinate.longitude
@@ -154,7 +207,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         print("😇😇😇😇😇😇😇date: \(format(date: date))")
         
         let radius: Double = 400
-        let identifier = NSUUID().uuidString // This is a unique randomly generated identifier for each location
+        //let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
         let locations = Locations(context: self.context)
         locations.placeMark = placeMark
@@ -171,14 +224,21 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         } catch {
             fatalCoreDataError(error)
         }
-      
-        delegate?.addLocationVC(self, didAddLocation: locations) //3 }
+        
+        //MARK: - HudView
+       // let hudView = HudView.hud(inView: navigationController!.view, aninated: true)
+        let hudView = HudView.hud(inView: view, aninated: true)
+          hudView.text = "Tagged"
+          afterDelay(0.7) {
+              hudView.hide()
+              self.delegate?.addLocationVC(self, didAddLocation: locations) //3 }
+          }
+//        delegate?.addLocationVC(self, didAddLocation: locations) //3 }
     }
     
     func format(date: Date) -> String {
         return dateFormatter.string(from: date)
     }
-    
     
     // MARK: - Sound effects
     func loadSoundEffect(_ name: String) {
@@ -218,7 +278,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
             textFieldNote.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
             textFieldNote.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             textFieldNote.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            textFieldNote.heightAnchor.constraint(equalToConstant: 60),
+            textFieldNote.heightAnchor.constraint(equalToConstant: 40),
             textFieldNote.bottomAnchor.constraint(equalTo: mapView.topAnchor)
         ])
         NSLayoutConstraint.activate([
@@ -240,13 +300,13 @@ extension AddLocationVC: UISearchBarDelegate {
     }
 }
 
-// MARK: Keyboard
-extension AddLocationVC {
-    @objc func keyboardWillShow(sender: NSNotification) {
-        view.frame.origin.y = view.frame.origin.y - 170
+extension UIViewController {
+    func hideKeyboardWhenTappedAround() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
     }
-    @objc func keyboardWillHide(notification: NSNotification) {
-        view.frame.origin.y = 0
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
 }
-
