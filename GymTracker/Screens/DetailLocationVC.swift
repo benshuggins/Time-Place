@@ -23,8 +23,8 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
  
     var titleString: String = ""
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    var locations = [Locations]()
-    var location: Locations!
+//    var locations = [Locations]()
+    var location = Location()
     var regionEvent = [RegionEvent]()
     
     var locationsPredicate: NSPredicate?
@@ -51,7 +51,7 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
             view.backgroundColor = .white
             tableView.frame = view.bounds
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(changeFilter))
-            let location2 = loadSavedData()
+         loadSavedData()
            // loadRegion(location2)
         }
     
@@ -83,6 +83,11 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
                 self.locationsPredicate = nil
                 self.loadSavedData()
             })
+            
+            ac.addAction(UIAlertAction(title: "Show Total Time for Location", style: .default) { [unowned self] _ in
+                self.locationsPredicate = nil
+                self.loadSavedData()
+            })
             // 4 show everything again
             ac.addAction(UIAlertAction(title: "Show All", style: .default) { [unowned self] _ in
                 self.locationsPredicate = nil
@@ -94,20 +99,21 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
         }
     
 
-    func loadSavedData() -> Locations {
+    func loadSavedData()  {
         // Just get the Locations Associated with the title
+       
         do {
-        let request = Locations.fetchRequest() as NSFetchRequest<Locations>
-            let pred = NSPredicate(format: "title == %@", title!)
+        let request = Location.fetchRequest() as NSFetchRequest<Location>
+            let pred = NSPredicate(format: "title == %@", titleString)
         request.predicate = pred
-        location = try! context.fetch(request).first
+            location = try! context.fetch(request).first!
         print("😇😇😇😇😇😇😇Location: \(location)")
             
         } catch {
             print("Error: \(error)")
         }
         
-        return location
+     
     }
     
   
@@ -138,12 +144,12 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
 //            tableView.reloadData()
 //        } catch {
 //            print("Fetch failed")
-//        }
+//        }s
 //    }
 //
    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return locations.count
+        return 2
         
     }
 
@@ -151,8 +157,8 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
 
       
-         cell.textLabel!.text = locations[indexPath.row].title
-      //  cell.detailTextLabel!.text = commit.date.description
+         cell.textLabel!.text = "Hey"
+        // cell.detailTextLabel!.text = "\(locations.regionEvent.first)"
 
         return cell
     }

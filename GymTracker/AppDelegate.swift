@@ -16,6 +16,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   //  let center = UNUserNotificationCenter.current()
    // let locationManager = CLLocationManager()
     
+    
+    
     var window: UIWindow?
     var orientationLock = UIInterfaceOrientationMask.all
 

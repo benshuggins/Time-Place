@@ -13,7 +13,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
 
     var window: UIWindow?
     let locationManager = CLLocationManager()
-    var location: [Locations]?
+    var location: [Location]?
     var enterT: Date!
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -23,12 +23,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
                 let navVC = UINavigationController(rootViewController: LoginVC())
                 window.rootViewController = navVC
                 self.window = window
-        
-//        let controller1 = navVC.viewControllers.first as! MainMapVC
-//        controller1.managedObjectContext = managedObjectContext
-//        
-//        let controller2 = AddLocationVC()
-//        controller2.managedObjectContext = managedObjectContext
         
         listenForFatalCoreDataNotifications()
         locationManager.delegate = self
@@ -66,6 +60,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
     
     // MARK: - Core Data stack
     lazy var managedObjectContext: NSManagedObjectContext = self.persistentContainer.viewContext
+   
     lazy var persistentContainer: NSPersistentContainer = {
      
       let container = NSPersistentContainer(name: "DataModel")
@@ -133,9 +128,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
     
     
     
-    func matchLocation(from identifier: String) -> Locations? {
+    func matchLocation(from identifier: String) -> Location? {
         do {
-            let request = Locations.fetchRequest() as NSFetchRequest<Locations>
+            let request = Location.fetchRequest() as NSFetchRequest<Location>
             let pred = NSPredicate(format: "identifier == %@", identifier)
             request.predicate = pred
             location = try managedObjectContext.fetch(request)
@@ -180,6 +175,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
                 thisLocation.addToRegionEvent(regionEvent)
                 try! managedObjectContext.save()
             } else if travel == "Exiting" {
+                // I am not fetching the entrance time aI am just saving it locally 
+                
                 // need to fetch the current time from the correct region that is triggered
                 let regionExitTime = Date()
                 regionEvent.exitRegionTime = regionExitTime
@@ -188,7 +185,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
                 notificationContent.title = "Leaving: \(thisLocation.title ?? "")"
                 notificationContent.body = "Left: \(regionExitTimeFormatted) Total: \(delta.stringTime)"
                 regionEvent.totalRegionTime = delta.stringTime
-            
+                try! managedObjectContext.save()
             }
             notificationContent.sound = .default
             notificationContent.badge = UIApplication.shared.applicationIconBadgeNumber + 1 as NSNumber

@@ -2,7 +2,7 @@
 //  RegionEvent+CoreDataClass.swift
 //  GymTracker
 //
-//  Created by Ben Huggins on 12/27/22.
+//  Created by Ben Huggins on 1/8/23.
 //
 //
 

@@ -12,7 +12,7 @@ import CoreData
 class MainMapVC: UIViewController {
     
     let defaults = UserDefaults.standard
-    var locations = [Locations]()
+    var locations = [Location]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     let locationManager = CLLocationManager()
     var lastLocationError: Error?
@@ -54,9 +54,9 @@ class MainMapVC: UIViewController {
         title = "Map"
         view.addSubview(mapView)
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
-        let goToLocationImage = UIImage(systemName: "location.square.fill")
+        let goToLocationImage = UIImage(systemName: "mappin.and.ellipse")
         let leftMenuButton = UIImage(systemName: "text.justify.left")
-        let centerLocation = UIImage(systemName: "rectangle.center.inset.filled")
+        let centerLocation = UIImage(systemName: "mappin.square")
         let addLocation = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapAddLocationBarButton))
         let zoom = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(goToYourLocation))
         navigationItem.rightBarButtonItems = [addLocation, zoom]
@@ -102,7 +102,7 @@ class MainMapVC: UIViewController {
     // MARK: - Core Data Fetch
     func fetchLocations() {
         do {
-            self.locations = try context.fetch(Locations.fetchRequest())
+            self.locations = try context.fetch(Location.fetchRequest())
             DispatchQueue.main.async {
                 self.mapView.addAnnotations(self.locations)
                 self.locations.forEach { self.add($0) }
@@ -115,7 +115,9 @@ class MainMapVC: UIViewController {
     // Keep Battery Level drainage manageable
     func setUpLocationManager() {
         locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest // 
+        
+        
     }
     
     func checkLocationServices() {
@@ -180,14 +182,14 @@ class MainMapVC: UIViewController {
       present(alert, animated: true, completion: nil)
     }
     
-    func add(_ location: Locations) {
+    func add(_ location: Location) {
         locations.append(location)
       mapView.addAnnotation(location)
       //updateGeotificationsCount()
         mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
     }
     //MARK: - DELETING
-    func remove(_ location: Locations) {
+    func remove(_ location: Location) {
       guard let index = locations.firstIndex(of: location) else { return }
       locations.remove(at: index)
       mapView.removeAnnotation(location)
@@ -204,11 +206,11 @@ class MainMapVC: UIViewController {
     }
     
     // MARK: MAP OVERLAY
-    func addRadiusOverlay(forLocation location: Locations) {
+    func addRadiusOverlay(forLocation location: Location) {
       mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
     }
     
-    func removeRadiusOverlay(forLocation location: Locations) {
+    func removeRadiusOverlay(forLocation location: Location) {
     let overlays = mapView.overlays
       for overlay in overlays {
         guard let circleOverlay = overlay as? MKCircle else { continue }
@@ -329,19 +331,18 @@ func string(from placemark: CLPlacemark) -> String {
 
 //MARK: - CALL BACK FROM ADDLOCATIONVC
 extension MainMapVC: AddLocationVCDelegate {
-    func addLocationVC(_ controller: AddLocationVC, didAddLocation location: Locations) {
+    func addLocationVC(_ controller: AddLocationVC, didAddLocation location: Location) {
         controller.dismiss(animated: true, completion: nil)
         location.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
         startMonitoring(location: location) ///Call start monitoring function
         add(location)
     }
 }
-
 // MARK: - Map Annotation
 extension MainMapVC: MKMapViewDelegate {
   func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
     let identifier = "myGeotification"
-    if annotation is Locations {
+    if annotation is Location {
       var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKPinAnnotationView
       if annotationView == nil {
         annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: identifier)
@@ -375,7 +376,7 @@ extension MainMapVC: MKMapViewDelegate {
   }
     
   func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-    guard let location = view.annotation as? Locations else { return }
+    guard let location = view.annotation as? Location else { return }
       //MARK: - MAP MARKER ACCESSORY VIEW RIGHT AND LEFT BUTTONS
       if control == view.leftCalloutAccessoryView {
           remove(location)
@@ -389,7 +390,7 @@ extension MainMapVC: MKMapViewDelegate {
 }
 //MARK: - REGION MONITORING
 extension MainMapVC {
-    func startMonitoring(location: Locations) {
+    func startMonitoring(location: Location) {
       if !CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self) {
         showAlert(
           withTitle: "Error",
@@ -400,7 +401,7 @@ extension MainMapVC {
       locationManager.startMonitoring(for: fenceRegion) // Here is where we initiate region monitoring
     }
     
-    func stopMonitoring(location: Locations) {
+    func stopMonitoring(location: Location) {
       for region in locationManager.monitoredRegions {
         guard let circularRegion = region as? CLCircularRegion, circularRegion.identifier == location.identifier else { continue }
         locationManager.stopMonitoring(for: circularRegion)

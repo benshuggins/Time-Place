@@ -2,7 +2,7 @@
 //  RegionEvent+CoreDataProperties.swift
 //  GymTracker
 //
-//  Created by Ben Huggins on 12/27/22.
+//  Created by Ben Huggins on 1/8/23.
 //
 //
 
@@ -19,7 +19,7 @@ extension RegionEvent {
     @NSManaged public var enterRegionTime: Date?
     @NSManaged public var exitRegionTime: Date?
     @NSManaged public var totalRegionTime: String?
-    @NSManaged public var locations: Locations?
+    @NSManaged public var locations: Location?
 
 }
 

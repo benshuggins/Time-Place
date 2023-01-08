@@ -98,6 +98,7 @@ extension LoginVC: ASAuthorizationControllerDelegate {
             let vc2 = UINavigationController(rootViewController: AddLocationVC())
             vc2.navigationController?.navigationBar.backgroundColor = .gray
             vc2.title = "Add Location Tracker"
+           // vc2.modalPresentationStyle = .fullScreen
             
             tabBar.setViewControllers([vc1, vc2], animated: false)
             tabBar.modalPresentationStyle = .fullScreen

@@ -13,7 +13,7 @@ import AudioToolbox
 
 
 protocol AddLocationVCDelegate: class {
-  func addLocationVC(_ controller: AddLocationVC, didAddLocation: Locations)
+  func addLocationVC(_ controller: AddLocationVC, didAddLocation: Location)
 }
 
 let dateFormatter: DateFormatter = {
@@ -25,7 +25,7 @@ let dateFormatter: DateFormatter = {
 
 class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 
-    var locations: [Locations] = []
+    var locations: [Location] = []
     weak var delegate: AddLocationVCDelegate?
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     let geoCoder = CLGeocoder()
@@ -137,25 +137,42 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 
     @objc private func handle(keyboardShowNotification notification: Notification) {
         // 1
-        print("Keyboard show notification")
+        print("👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻Keyboard show notification")
         
         // 2
         if let userInfo = notification.userInfo,
             // 3
             let keyboardRectangle = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-            mappinImageView.frame.origin.y = keyboardRectangle.height + 50
+           // mappinImageView.frame.origin.y = keyboardRectangle.height + 50
+            
+            NSLayoutConstraint.activate([
+                mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
+                mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+                mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+               // mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -60)
+            ])
+    
         }
     }
     
     @objc private func handle2(keyboardWillHideNotification notification: Notification) {
         // 1
-        print("Keyboard Hide notification")
+        print("👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻Keyboard Hide notification")
         
         // 2
         if let userInfo = notification.userInfo,
             // 3
             let keyboardRectangle = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-            mappinImageView.frame.origin.y = keyboardRectangle.height - 50
+          //  mappinImageView.frame.origin.y = keyboardRectangle.height - 50
+            
+            NSLayoutConstraint.activate([
+                mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
+                mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+                mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+                mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+               // mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 60)
+            ])
            
         }
     }
@@ -182,11 +199,13 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     @objc func didTapSaveLocationBarButton() {
         self.playSoundEffect()
     
-        let coordinate = mapView.centerCoordinate
+        let coordinate = mapView.centerCoordinate   // This is how I get long, lat, know where you placed your pin
         let latitude = coordinate.latitude
         let longitude = coordinate.longitude
         let location1 = CLLocation(latitude: latitude, longitude: longitude)  // location Object
         performingReverseGeocoding = true
+       
+        // This may fail Used to get address!!!!!!
         geoCoder.reverseGeocodeLocation(location1, completionHandler: { [self]
             
           placemarks, error in
@@ -201,29 +220,15 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 
             self.performingReverseGeocoding = false
         })
-        
+       
+      
         let date = Date()
-        
-        print("😇😇😇😇😇😇😇date: \(format(date: date))")
-        
         let radius: Double = 400
-        //let identifier = NSUUID().uuidString
+        let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
-        let locations = Locations(context: self.context)
-        locations.placeMark = placeMark
-        locations.title = note
-        locations.radius = radius
-        locations.longitude = longitude
-        locations.latitude = latitude
-        locations.identifier = NSUUID().uuidString
-        locations.date = Date()
         
-        //MARK: - CORE DATA SAVE
-        do {
-            try context.save()
-        } catch {
-            fatalCoreDataError(error)
-        }
+        let location = DataManager.shared.location(title: note, date: date, identifier: identifier, latitude: latitude, longitude: longitude, radius: radius, placeMark: "No Address")
+        DataManager.shared.saveContext()
         
         //MARK: - HudView
        // let hudView = HudView.hud(inView: navigationController!.view, aninated: true)
@@ -231,9 +236,8 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
           hudView.text = "Tagged"
           afterDelay(0.7) {
               hudView.hide()
-              self.delegate?.addLocationVC(self, didAddLocation: locations) //3 }
+              self.delegate?.addLocationVC(self, didAddLocation: location) 
           }
-//        delegate?.addLocationVC(self, didAddLocation: locations) //3 }
     }
     
     func format(date: Date) -> String {
@@ -300,13 +304,25 @@ extension AddLocationVC: UISearchBarDelegate {
     }
 }
 
-extension UIViewController {
+extension AddLocationVC {
     func hideKeyboardWhenTappedAround() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(AddLocationVC.dismissKeyboard))
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
     }
     @objc func dismissKeyboard() {
+        NSLayoutConstraint.activate([
+            mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
+            mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+           // mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 60)
+        ])
+    
         view.endEditing(true)
+        
+     
+        
+        
     }
 }

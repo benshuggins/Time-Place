@@ -1,35 +1,34 @@
 //
-//  Locations+CoreDataProperties.swift
+//  Location+CoreDataProperties.swift
 //  GymTracker
 //
-//  Created by Ben Huggins on 12/27/22.
+//  Created by Ben Huggins on 1/8/23.
 //
 //
 
 import Foundation
 import CoreData
-import MapKit
-import CoreLocation
 
-extension Locations {
 
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<Locations> {
-        return NSFetchRequest<Locations>(entityName: "Locations")
+extension Location {
+
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<Location> {
+        return NSFetchRequest<Location>(entityName: "Location")
     }
 
     @NSManaged public var date: Date?
     @NSManaged public var identifier: String
     @NSManaged public var latitude: Double
     @NSManaged public var longitude: Double
-    @NSManaged public var placeMark: CLPlacemark?
-    @NSManaged public var radius: CLLocationDistance
+    @NSManaged public var placeMark: String?
+    @NSManaged public var radius: Double
     @NSManaged public var title: String?
-    @NSManaged public var regionEvent: RegionEvent?
+    @NSManaged public var regionEvent: NSSet?
 
 }
 
 // MARK: Generated accessors for regionEvent
-extension Locations {
+extension Location {
 
     @objc(addRegionEventObject:)
     @NSManaged public func addToRegionEvent(_ value: RegionEvent)
@@ -42,8 +41,9 @@ extension Locations {
 
     @objc(removeRegionEvent:)
     @NSManaged public func removeFromRegionEvent(_ values: NSSet)
+
 }
 
-extension Locations : Identifiable {
+extension Location : Identifiable {
 
 }

@@ -1,19 +1,26 @@
 //
-//  Locations+CoreDataClass.swift
+//  Location+CoreDataClass.swift
 //  GymTracker
 //
-//  Created by Ben Huggins on 12/27/22.
+//  Created by Ben Huggins on 1/8/23.
 //
 //
 
+//
+//  Location+CoreDataClass.swift
+//  GymTracker
+//
+//  Created by Ben Huggins on 1/8/23.
+//
+//
 import Foundation
 import CoreData
 import CoreLocation
 import MapKit
 
-@objc(Locations)
-public class Locations: NSManagedObject, MKAnnotation {
-   
+@objc(Location)
+public class Location: NSManagedObject, MKAnnotation {
+    
     public var coordinate: CLLocationCoordinate2D {
         return CLLocationCoordinate2DMake(latitude, longitude)
     }
@@ -27,7 +34,7 @@ public class Locations: NSManagedObject, MKAnnotation {
     }
 }
  
-extension Locations {
+extension Location {
     var region: CLCircularRegion {
       let region = CLCircularRegion(
         center: coordinate,
@@ -37,4 +44,5 @@ extension Locations {
       region.notifyOnExit = true
       return region
     }
+
 }
