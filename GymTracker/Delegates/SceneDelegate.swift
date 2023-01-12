@@ -13,14 +13,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
 
     var window: UIWindow?
     let locationManager = CLLocationManager()
-    var location: [Location]?
+   // var location: [Location]?
     var enterT: Date!
+    var regionEvents: [RegionEvent]?
+    
+   // var regionEvent: RegionEvent?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
                 let window = UIWindow(windowScene: windowScene)
                 window.makeKeyAndVisible()
-                let navVC = UINavigationController(rootViewController: LoginVC())
+                let navVC = UINavigationController(rootViewController: MainMapVC())
                 window.rootViewController = navVC
                 self.window = window
         
@@ -107,62 +110,70 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
           completion: nil)
       }
     }
-    // Matches MKAnnotation name using it's identifier from map to match a region identifier (link mkannotation to name
-//    func note(from identifier: String) -> String? {
-//        do {
-//            let request = Locations.fetchRequest() as NSFetchRequest<Locations>
-//            let pred = NSPredicate(format: "identifier == %@", identifier)
-//            request.predicate = pred
-//            location = try managedObjectContext.fetch(request)
-//
-//            print("Is this the name? : \(String(describing: location?.first?.title))")
-//        } catch {
-//            print("Error: \(error)")
-//        }
-//
-//
-//        return location?.first?.title
-//    }
-    
-    // Make a function that accepts a region identifier and returns the appropriate Locations object for which we can add the entrance and exit time to!!!
-    
-    
-    
-    func matchLocation(from identifier: String) -> Location? {
-        do {
-            let request = Location.fetchRequest() as NSFetchRequest<Location>
-            let pred = NSPredicate(format: "identifier == %@", identifier)
-            request.predicate = pred
-            location = try managedObjectContext.fetch(request)
-            print("Is this the name? : \(String(describing: location?.first))")
-        } catch {
-            print("Error: \(error)")
-        }
-        return location?.first
-    }
-    
+
     func format(date: Date) -> String {
         return dateFormatter.string(from: date)
     }
+    
+    // A regionEvent is only added when the app is closed right now
+    
+    // Solve the problem as if the app was open
+    
+    
+    // should I hold the time in an instance variable and then save all at once once I get an exit time or should I
 
+    
+    // I have to go get the location object off of the phones harddrive
+    
     func handleEvent(for region: CLRegion, travel: String) {
         if UIApplication.shared.applicationState == .active {
             
-            guard let alertMessage = matchLocation(from: region.identifier) else { return }
+            guard let location = DataManager.shared.matchLocation(from: region.identifier) else {return}
+            
+            // add the location.identifier to the region
+            
+            let regionEvent = RegionEvent(context: managedObjectContext)
             if travel == "Entering" {
+             
              enterT = Date()
               let enterTimeFormat = format(date: enterT)
+             
+                // Instantiate the object
                 
-                window?.rootViewController?.showAlert(withTitle: alertMessage.title, message: "Entering at: \(enterTimeFormat)")
+                //1 can this function not save exitREGIONTIME AT ALL?
+                
+                // save the regions identifier to this model and then fetch it below
+                
+//                var regionEvent = DataManager.shared.regionEvent(enterRegionTime: enterT, exitRegionTime: nil, totalRegionTime: "", regionIdentifer: location.identifier, location: location)
+                
+               // regionEvents.append(regionEvent)
+                DataManager.shared.save()
+                window?.rootViewController?.showAlert(withTitle: location.title, message: "Entering at: \(enterTimeFormat)")
+                
             } else if travel == "Exiting" {
+                
+               // get the location.regionEvent from the identifer
+                
                 let exitT = Date()
                 let exitTimeFormat = format(date: exitT)
-                let delta = exitT.timeIntervalSince(enterT)
-                window?.rootViewController?.showAlert(withTitle: alertMessage.title, message: "E: \(exitTimeFormat), T: \(delta.stringTime)")
+                let deltaT = exitT.timeIntervalSince(enterT ?? Date())
+                
+               // let updateRegionModel = DataManager.sh
+                
+                // updating all exitRegionTimes
+                location.regionEvent?.setValue(exitT, forKey: "exitRegionTime")      // This is updating an existing model
+                
+                location.regionEvent?.setValue("\(deltaT.stringTime)", forKey: "totalRegionTime")
+                
+                DataManager.shared.save()
+                window?.rootViewController?.showAlert(withTitle: location.title, message: "E: \(exitTimeFormat), T: \(deltaT.stringTime)")
+                
             }
         } else {
             // get currect location object that matches
-            guard let thisLocation = matchLocation(from: region.identifier) else { return }
+           // guard let thisLocation = matchLocation(from: region.identifier) else { return }
+            guard let thisLocation = DataManager.shared.matchLocation(from: region.identifier) else {return}
+            
             let notificationContent = UNMutableNotificationContent()
             let regionEvent = RegionEvent(context: managedObjectContext)
             if travel == "Entering" {
@@ -223,7 +234,6 @@ extension SceneDelegate {
         handleEvent(for: region, travel: "Exiting")
         
         // deal with time
-        
     }
   }
 }

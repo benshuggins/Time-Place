@@ -199,36 +199,29 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     @objc func didTapSaveLocationBarButton() {
         self.playSoundEffect()
     
-        let coordinate = mapView.centerCoordinate   // This is how I get long, lat, know where you placed your pin
+        let coordinate = mapView.centerCoordinate
         let latitude = coordinate.latitude
         let longitude = coordinate.longitude
-        let location1 = CLLocation(latitude: latitude, longitude: longitude)  // location Object
+        let location1 = CLLocation(latitude: latitude, longitude: longitude)
         performingReverseGeocoding = true
        
-        // This may fail Used to get address!!!!!!
         geoCoder.reverseGeocodeLocation(location1, completionHandler: { [self]
-            
           placemarks, error in
             self.lastGeocodingError = error
-            
-            print("PlaceMarks: \(placemarks?.last)")
-            
+    
             if error == nil, let p = placemarks, !p.isEmpty {
                 self.placeMark = p.last!
-                print("Address👹👹👹👹👹👹: \(p)")
             }
-
             self.performingReverseGeocoding = false
         })
        
-      
         let date = Date()
         let radius: Double = 400
         let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
         
         let location = DataManager.shared.location(title: note, date: date, identifier: identifier, latitude: latitude, longitude: longitude, radius: radius, placeMark: "No Address")
-        DataManager.shared.saveContext()
+        DataManager.shared.save()
         
         //MARK: - HudView
        // let hudView = HudView.hud(inView: navigationController!.view, aninated: true)
@@ -236,7 +229,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
           hudView.text = "Tagged"
           afterDelay(0.7) {
               hudView.hide()
-              self.delegate?.addLocationVC(self, didAddLocation: location) 
+              self.delegate?.addLocationVC(self, didAddLocation: location)
           }
     }
     
@@ -318,11 +311,6 @@ extension AddLocationVC {
             mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
            // mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 60)
         ])
-    
         view.endEditing(true)
-        
-     
-        
-        
     }
 }

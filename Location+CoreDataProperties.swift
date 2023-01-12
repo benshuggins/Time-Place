@@ -2,7 +2,7 @@
 //  Location+CoreDataProperties.swift
 //  GymTracker
 //
-//  Created by Ben Huggins on 1/8/23.
+//  Created by Ben Huggins on 1/9/23.
 //
 //
 
@@ -23,7 +23,7 @@ extension Location {
     @NSManaged public var placeMark: String?
     @NSManaged public var radius: Double
     @NSManaged public var title: String?
-    @NSManaged public var regionEvent: NSSet?
+    @NSManaged public var regionEvent: RegionEvent?
 
 }
 

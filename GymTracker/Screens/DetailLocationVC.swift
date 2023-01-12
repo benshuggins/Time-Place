@@ -25,7 +25,8 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 //    var locations = [Locations]()
     var location = Location()
-    var regionEvent = [RegionEvent]()
+   // var regionEvent = [RegionEvent]()
+    var regionEvents: [RegionEvent] = []
     
     var locationsPredicate: NSPredicate?
     
@@ -37,7 +38,7 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
     
     let tableView: UITableView = {
         let table = UITableView()
-        table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        table.register(DetailTableViewCell.self, forCellReuseIdentifier: DetailTableViewCell.identifier)
        return table
     }()
     
@@ -97,6 +98,7 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
             ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             present(ac, animated: true)
         }
+   
     
 
     func loadSavedData()  {
@@ -113,54 +115,45 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
             print("Error: \(error)")
         }
         
-     
-    }
-    
-  
-//
-//        do {
-//            let request1 = RegionEvent.fetchRequest() as NSFetchRequest<RegionEvent>
-//            let pred = NSPredicate(format: "locations == %@", locations)
-//            request1.predicate = pred
-//            var regionEvents = [RegionEvent]()
-//            regionEvents = try! context.fetch(request1)
-//            print("RegionEvents: \(regionEvents)")
-//        } catch {
-//            print("Error: \(error)")
-//        }
-   
+
+        do {
+            let request = RegionEvent.fetchRequest() as NSFetchRequest<RegionEvent>
+            let pred = NSPredicate(format: "regionIdentifier == %@", location.identifier)
+            request.predicate = pred
+            regionEvents = try! context.fetch(request)
+
+
+        } catch {
+            print("Error: \(error)")
+
+        }
+        
+        print("RegionEvents: ", regionEvents)
+        
+        print(regionEvents.count)
        
-//
-//    func loadSavedData2() {
-//        let request = Locations.fetchRequest()
-//        let sort = NSSortDescriptor(key: "date", ascending: false)
-//        request.sortDescriptors = [sort]
-//
-//        request.predicate = locationsPredicate
-//
-//        do {
-//            self.locations = try context.fetch(Locations.fetchRequest())
-//            print("😅😅😅😅😅😅😅Got \(locations.count) locations")
-//            tableView.reloadData()
-//        } catch {
-//            print("Fetch failed")
-//        }s
-//    }
-//
+        print(regionEvents.first?.enterRegionTime)
+    }
+   
    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
+        return regionEvents.count
         
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 100
     }
 
      func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+         let regionEvent = regionEvents[indexPath.row]
+       
+         let cell = tableView.dequeueReusableCell(withIdentifier: DetailTableViewCell.identifier, for: indexPath) as? DetailTableViewCell 
+             
+         cell?.configure(regionEvent: regionEvent)
+         
 
-      
-         cell.textLabel!.text = "Hey"
-        // cell.detailTextLabel!.text = "\(locations.regionEvent.first)"
-
-        return cell
+         return cell!
     }
     
 }

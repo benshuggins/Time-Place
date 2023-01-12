@@ -153,55 +153,35 @@ class MainMapVC: UIViewController {
     
     func centerViewOnUsersLocation() {
         mapView.tintColor = .blue
-        
         if let location = locationManager.location?.coordinate {
             let region = MKCoordinateRegion.init(center: location, latitudinalMeters: regionMeters, longitudinalMeters: regionMeters)
             mapView.setRegion(region, animated: true)
-            
-            
-//            mapView.setCameraBoundary(
-//              MKMapView.CameraBoundary(coordinateRegion: region),
-//              animated: true)
-//
-//            let zoomRange = MKMapView.CameraZoomRange(maxCenterCoordinateDistance: 200000)
-//            mapView.setCameraZoomRange(zoomRange, animated: true)
         }
     }
     
     // MARK: - Helper Methods - Alerts
     func showLocationServicesDeniedAlert() {
-      let alert = UIAlertController(
-        title: "Location Services Disabled",
-        message: "Please enable location services for GymTracker in your iphone. Please go to Settings -> Privacy -> Location Services -> Enable Thankyou!",
+      let alert = UIAlertController(title: "Location Services Disabled", message: "Please enable location services for GymTracker in your iphone. Please go to Settings -> Privacy -> Location Services -> Enable Thankyou!",
         preferredStyle: .alert)
-      let okAction = UIAlertAction(
-        title: "OK",
-        style: .default,
-        handler: nil)
-      alert.addAction(okAction)
+      let okAction = UIAlertAction(title: "OK",style: .default,handler: nil)
+        alert.addAction(okAction)
       present(alert, animated: true, completion: nil)
     }
-    
+    //MARK: - ADDING A LOCATION
     func add(_ location: Location) {
         locations.append(location)
       mapView.addAnnotation(location)
       //updateGeotificationsCount()
         mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
     }
-    //MARK: - DELETING
+    //MARK: - DELETING A LOCATION
     func remove(_ location: Location) {
       guard let index = locations.firstIndex(of: location) else { return }
       locations.remove(at: index)
       mapView.removeAnnotation(location)
       removeRadiusOverlay(forLocation: location)
         
-        //MARK: - CORE DATA DELETE
-        try context.delete(location)
-        do {
-           try context.save()
-        } catch {
-            print("Error: \(error.localizedDescription)")
-        }
+      DataManager.shared.deleteLocation(location: location)
      // updateGeotificationsCount()
     }
     
@@ -392,9 +372,7 @@ extension MainMapVC: MKMapViewDelegate {
 extension MainMapVC {
     func startMonitoring(location: Location) {
       if !CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self) {
-        showAlert(
-          withTitle: "Error",
-          message: "Geofencing is not supported on this device!")
+        showAlert(withTitle: "Error", message: "Geofencing is not supported on this device!")
         return
       }
       let fenceRegion = location.region
