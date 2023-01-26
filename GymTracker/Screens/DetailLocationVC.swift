@@ -5,15 +5,6 @@
 //  Created by Ben Huggins on 11/27/22.
 //
 
-// This is the detail setup page
-
-// Local Push notifications
-// Graph
-// Log
-
-
-
-
 import UIKit
 import CoreLocation
 import CoreData
@@ -114,46 +105,78 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
         } catch {
             print("Error: \(error)")
         }
-        
-
+       
         do {
             let request = RegionEvent.fetchRequest() as NSFetchRequest<RegionEvent>
             let pred = NSPredicate(format: "regionIdentifier == %@", location.identifier)
             request.predicate = pred
             regionEvents = try! context.fetch(request)
 
-
         } catch {
             print("Error: \(error)")
-
         }
-        
-        print("RegionEvents: ", regionEvents)
-        
-        print(regionEvents.count)
-       
-        print(regionEvents.first?.enterRegionTime)
     }
    
    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return regionEvents.count
-        
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 100
+        return 90
     }
 
      func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-         let regionEvent = regionEvents[indexPath.row]
+          let regionEvent = regionEvents[indexPath.row]
        
          let cell = tableView.dequeueReusableCell(withIdentifier: DetailTableViewCell.identifier, for: indexPath) as? DetailTableViewCell 
-             
-         cell?.configure(regionEvent: regionEvent)
-         
-
+      
+         cell?.configure(regionEvent: regionEvent)   // This should be regionEvent
          return cell!
+    }
+    
+    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] (action, view, completionHandler) in
+            self?.editRegionEventAction(indexPath: indexPath)
+            completionHandler(true)
+        }
+        
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, completionHandler) in
+           // self?.deleteRegionEventActionAction(indexPath: indexPath)
+            completionHandler(true)
+        }
+        
+        return UISwipeActionsConfiguration(actions: [editAction, deleteAction])
+    }
+    
+    private func editRegionEventAction(indexPath: IndexPath) {
+        let regionEvent = regionEvents[indexPath.row]
+       // let singer = singers[indexPath.row]
+        var enterTimeTextField = UITextField()
+        var exitTimeTextField = UITextField()
+
+        let alert = UIAlertController(title: "Edit Region Event Times", message: "", preferredStyle: .alert)
+        let editAction = UIAlertAction(title: "Edit", style: .default) { (action) in
+            regionEvent.setValue(enterTimeTextField.text ?? "", forKey: "enterRegionTime")
+            regionEvent.setValue(exitTimeTextField.text ?? "", forKey: "exitRegionTime")
+            
+            try! self.context.save()   // Doesnt this throw?
+            self.tableView.reloadData()
+        }
+        
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Ex: Beyonce"
+            alertTextField.text =  "\(regionEvent.enterRegionTime)"
+            enterTimeTextField = alertTextField
+        }
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive) { (action) in
+            self.dismiss(animated: true, completion: nil)
+        }
+        
+        alert.addAction(editAction)
+        alert.addAction(cancelAction)
+        present(alert, animated: true, completion: nil)
     }
     
 }

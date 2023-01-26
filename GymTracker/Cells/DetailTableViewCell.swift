@@ -34,7 +34,6 @@ class DetailTableViewCell: UITableViewCell {
         contentView.addSubview(enterTimelabel)
         contentView.addSubview(exitTimelabel)
         contentView.addSubview(totalTimelabel)
-        
     }
     
     required init?(coder: NSCoder) {
@@ -42,21 +41,17 @@ class DetailTableViewCell: UITableViewCell {
     }
     
     public func configure(regionEvent: RegionEvent) {
-        
-        guard let enterTime = regionEvent.enterRegionTime else { return }
+       
+        guard let enterTime = regionEvent.enterRegionTime else { return  }
         guard let exitTime = regionEvent.exitRegionTime else { return }
         guard let totalTime = regionEvent.totalRegionTime else { return }
         let enterT = format(date: enterTime)
         let exitT = format(date: exitTime)
         
-        
         enterTimelabel.text = "Enter: \(enterT)"
-        exitTimelabel.text = "Exit:   \(exitT))"
+        exitTimelabel.text = "Exit:   \(exitT)"
         totalTimelabel.text = "Total:  \(totalTime)"
-        
-        
     }
-    
     
     func format(date: Date) -> String {
         return dateFormatter.string(from: date)
@@ -64,28 +59,16 @@ class DetailTableViewCell: UITableViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        
         enterTimelabel.frame = CGRect(x: 5, y: 5, width: 300, height: contentView.frame.size.height-10)
-        
         exitTimelabel.frame = CGRect(x: 5, y: 20, width: 300, height: contentView.frame.size.height-10)
-        
         totalTimelabel.frame = CGRect(x: 5, y: 35, width: 300, height: contentView.frame.size.height-10)
     }
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
-
-    
-  //  func configure(for location: Location) {
-        
-        
-  //  }
 }

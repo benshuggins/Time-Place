@@ -216,7 +216,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         })
        
         let date = Date()
-        let radius: Double = 400
+        let radius: Double = 40
         let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
         

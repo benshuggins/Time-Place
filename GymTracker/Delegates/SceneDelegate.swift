@@ -13,12 +13,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
 
     var window: UIWindow?
     let locationManager = CLLocationManager()
-   // var location: [Location]?
     var enterT: Date!
     var regionEvents: [RegionEvent]?
-    
-   // var regionEvent: RegionEvent?
-
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var seconds: Int = 0
+    var timerIsRunning: Bool = false
+  
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
                 let window = UIWindow(windowScene: windowScene)
@@ -26,7 +26,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
                 let navVC = UINavigationController(rootViewController: MainMapVC())
                 window.rootViewController = navVC
                 self.window = window
-        
         listenForFatalCoreDataNotifications()
         locationManager.delegate = self
         locationManager.requestAlwaysAuthorization()
@@ -60,39 +59,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
         // to restore the scene back to its current state.
         // Save changes in the application's managed object context when the application transitions to the background.
     }
-    
-    // MARK: - Core Data stack
-    lazy var managedObjectContext: NSManagedObjectContext = self.persistentContainer.viewContext
-   
-    lazy var persistentContainer: NSPersistentContainer = {
-     
-      let container = NSPersistentContainer(name: "DataModel")
-      container.loadPersistentStores(completionHandler: { (storeDescription, error) in
-        if let error = error as NSError? {
-          fatalError("Unresolved error \(error), \(error.userInfo)")
-        }
-      })
-      return container
-    }()
-    
-    // MARK: - Core Data Saving support
-    func saveContext () {
-    let context = persistentContainer.viewContext
-      if context.hasChanges {
-        do {
-          try context.save()
-        } catch {
-          // Replace this implementation with code to handle the error appropriately.
-          // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-          let nserror = error as NSError
-          fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-        }
-      }
-    }
+
     
     // MARK: - Helper methods
-    func listenForFatalCoreDataNotifications() { NotificationCenter.default.addObserver(forName: CoreDataSaveFailedNotification, object: nil, queue: OperationQueue.main
-      ) { _ in
+    func listenForFatalCoreDataNotifications() { NotificationCenter.default.addObserver(forName: CoreDataSaveFailedNotification, object: nil, queue: OperationQueue.main) { _ in
         let message = """
         There was a fatal error in the app and it cannot continue.
         Press OK to terminate the app. Sorry for the inconvenience.
@@ -114,129 +84,95 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
     func format(date: Date) -> String {
         return dateFormatter.string(from: date)
     }
-    
-    // A regionEvent is only added when the app is closed right now
-    
-    // Solve the problem as if the app was open
-    
-    
-    // should I hold the time in an instance variable and then save all at once once I get an exit time or should I
-
-    
-    // I have to go get the location object off of the phones harddrive
-    
-    func handleEvent(for region: CLRegion, travel: String) {
-        if UIApplication.shared.applicationState == .active {
-            
-            guard let location = DataManager.shared.matchLocation(from: region.identifier) else {return}
-            
-            // add the location.identifier to the region
-            
-            let regionEvent = RegionEvent(context: managedObjectContext)
-            if travel == "Entering" {
-             
-             enterT = Date()
-              let enterTimeFormat = format(date: enterT)
-             
-                // Instantiate the object
-                
-                //1 can this function not save exitREGIONTIME AT ALL?
-                
-                // save the regions identifier to this model and then fetch it below
-                
-//                var regionEvent = DataManager.shared.regionEvent(enterRegionTime: enterT, exitRegionTime: nil, totalRegionTime: "", regionIdentifer: location.identifier, location: location)
-                
-               // regionEvents.append(regionEvent)
-                DataManager.shared.save()
-                window?.rootViewController?.showAlert(withTitle: location.title, message: "Entering at: \(enterTimeFormat)")
-                
-            } else if travel == "Exiting" {
-                
-               // get the location.regionEvent from the identifer
-                
-                let exitT = Date()
-                let exitTimeFormat = format(date: exitT)
-                let deltaT = exitT.timeIntervalSince(enterT ?? Date())
-                
-               // let updateRegionModel = DataManager.sh
-                
-                // updating all exitRegionTimes
-                location.regionEvent?.setValue(exitT, forKey: "exitRegionTime")      // This is updating an existing model
-                
-                location.regionEvent?.setValue("\(deltaT.stringTime)", forKey: "totalRegionTime")
-                
-                DataManager.shared.save()
-                window?.rootViewController?.showAlert(withTitle: location.title, message: "E: \(exitTimeFormat), T: \(deltaT.stringTime)")
-                
-            }
-        } else {
-            // get currect location object that matches
-           // guard let thisLocation = matchLocation(from: region.identifier) else { return }
-            guard let thisLocation = DataManager.shared.matchLocation(from: region.identifier) else {return}
-            
-            let notificationContent = UNMutableNotificationContent()
-            let regionEvent = RegionEvent(context: managedObjectContext)
-            if travel == "Entering" {
-                enterT = Date()
-                regionEvent.enterRegionTime = enterT
-                notificationContent.title = "Entering: \(thisLocation.title ?? "")"
-                let enterTimeFormatted = format(date: enterT)
-                notificationContent.body = enterTimeFormatted
-                // Add the enterTime
-                thisLocation.addToRegionEvent(regionEvent)
-                try! managedObjectContext.save()
-            } else if travel == "Exiting" {
-                // I am not fetching the entrance time aI am just saving it locally 
-                
-                // need to fetch the current time from the correct region that is triggered
-                let regionExitTime = Date()
-                regionEvent.exitRegionTime = regionExitTime
-                let regionExitTimeFormatted = format(date: regionExitTime)
-                let delta = regionExitTime.timeIntervalSince(enterT)
-                notificationContent.title = "Leaving: \(thisLocation.title ?? "")"
-                notificationContent.body = "Left: \(regionExitTimeFormatted) Total: \(delta.stringTime)"
-                regionEvent.totalRegionTime = delta.stringTime
-                try! managedObjectContext.save()
-            }
-            notificationContent.sound = .default
-            notificationContent.badge = UIApplication.shared.applicationIconBadgeNumber + 1 as NSNumber
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)             // trigger after 1 second
-            let request = UNNotificationRequest(
-              identifier: "location_change",
-              content: notificationContent,
-              trigger: trigger)
-            UNUserNotificationCenter.current().add(request) { error in
-              if let error = error {
-                print("Error: \(error)")
-              }
-            }
-          }
-        }
       }
 
 // MARK: - Location Manager Delegate
 
-
-// HOW DO I GET THE CORRECT NOTE AND THEN ADD AN ENTRY TIME TO IT?
 extension SceneDelegate {
     
-  func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-    if region is CLCircularRegion {
-        // If handle func is called from here just give use the time we arrived, send time from here
-        handleEvent(for: region, travel: "Entering")
-        // deal with time
-    }
-  }
+    func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
 
-  func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-    if region is CLCircularRegion {
-        // If handle event is called from here then subtract this time from the last time
-        handleEvent(for: region, travel: "Exiting")
-        
-        // deal with time
+         guard let currentLocation = DataManager.shared.matchLocation(from: region.identifier) else {return}
+     
+        if state == CLRegionState.inside {
+            print("👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻Inside the region")
+            enterT = Date()
+            let enterTimeFormat = format(date: enterT)
+            
+            if UIApplication.shared.applicationState == .active {
+                //            let nc = NotificationCenter.default
+                //            nc.post(name: Notification.Name("UserLoggedIn"), object: nil)
+                window?.rootViewController?.showAlert(withTitle: currentLocation.title, message: "Entering at: \(enterTimeFormat)")
+            
+            } else {
+                let notificationContent = UNMutableNotificationContent()
+                notificationContent.title = "Entering: \(currentLocation.title ?? "")"
+                notificationContent.body = "At: \(enterTimeFormat)"
+                notificationContent.sound = .default
+                notificationContent.badge = UIApplication.shared.applicationIconBadgeNumber + 1 as NSNumber
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)             // trigger after 1 second
+                let request = UNNotificationRequest(
+                  identifier: "location_change",
+                  content: notificationContent,
+                  trigger: trigger)
+                UNUserNotificationCenter.current().add(request) { error in
+                  if let error = error {
+                    print("Error: \(error)")
+                  }
+                }
+            }
+        } else if state == CLRegionState.outside {
+            
+            print("👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻outside the region")
+            let exitTime = Date()
+            let exitTimeFormat = format(date: exitTime)
+            var totalTimeString = ""
+          
+            if enterT != nil {
+                let deltaT = exitTime.timeIntervalSince(enterT)
+                totalTimeString = deltaT.stringTime
+            } else {
+                totalTimeString = "No Entrance Time"
+            }
+            
+            let regionEvent = RegionEvent(context: context) // CD init
+            regionEvent.enterRegionTime = enterT  //Core Data Enter
+            regionEvent.exitRegionTime = exitTime // Core Data Exit
+            regionEvent.totalRegionTime = totalTimeString //Core Data Total
+            regionEvent.regionIdentifier = currentLocation.identifier
+            currentLocation.addToRegionEvent(regionEvent) // Core Data add entire regionEvent object to CD
+            try! context.save()
+            
+            if UIApplication.shared.applicationState == .active {
+                //            let nc = NotificationCenter.default
+                //            nc.post(name: Notification.Name("UserLoggedOut"), object: nil)
+                window?.rootViewController?.showAlert(withTitle: currentLocation.title, message: "E: \(exitTimeFormat), T: \(totalTimeString)")
+            } else {
+                let notificationContent = UNMutableNotificationContent()
+                notificationContent.title = "Leaving: \(currentLocation.title ?? "")"
+                notificationContent.body = "Left: \(exitTimeFormat) Total: \(totalTimeString)"
+                notificationContent.sound = .default
+                notificationContent.badge = UIApplication.shared.applicationIconBadgeNumber + 1 as NSNumber
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)             // trigger after 1 second
+                let request = UNNotificationRequest(
+                  identifier: "location_change",
+                  content: notificationContent,
+                  trigger: trigger)
+                UNUserNotificationCenter.current().add(request) { error in
+                  if let error = error {
+                    print("Error: \(error)")
+                  }
+                }
+            }
+        } else if state == CLRegionState.unknown {
+            window?.rootViewController?.showAlert(withTitle: "There was an error entering region", message: "Region State is .unknown")
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
+        print("This region has an error: \(String(describing: region?.identifier))")
     }
   }
-}
 
 extension TimeInterval {
     private var milliseconds: Int {
@@ -263,3 +199,160 @@ extension TimeInterval {
         }
     }
 }
+
+
+//
+//    // MARK: - Core Data stack
+//    lazy var managedObjectContext: NSManagedObjectContext = self.persistentContainer.viewContext
+//
+//    lazy var persistentContainer: NSPersistentContainer = {
+//
+//      let container = NSPersistentContainer(name: "DataModel")
+//      container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+//        if let error = error as NSError? {
+//          fatalError("Unresolved error \(error), \(error.userInfo)")
+//        }
+//      })
+//      return container
+//    }()
+    
+    // MARK: - Core Data Saving support
+//    func saveContext () {
+//    let context = persistentContainer.viewContext
+//      if context.hasChanges {
+//        do {
+//          try context.save()
+//        } catch {
+//          // Replace this implementation with code to handle the error appropriately.
+//          // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+//          let nserror = error as NSError
+//          fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+//        }
+//      }
+//    }
+
+
+
+// entering and exiting don't talk to eachother
+
+//  func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
+//        // Give it a unique identifier
+//
+//      // a counter variable and ass
+//
+//      let identifier = region.identifier // unique identifier for did enter
+//
+//
+//      if region is CLCircularRegion {
+//        // If handle func is called from here just give use the time we arrived, send time from here
+//        handleEvent(for: region, travel: "Entering")
+//        // deal with time
+//
+//          //
+//    }
+//  }
+//
+//  func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
+//
+//      let identifier = region.identifier // unique identifier for d
+//
+//    if region is CLCircularRegion {
+//        // If handle event is called from here then subtract this time from the last time
+//        handleEvent(for: region, travel: "Exiting")
+//
+//        // deal with time
+//    }
+
+
+
+//    func handleEvent(for region: CLRegion, travel: String) {
+//        guard let currentLocation = DataManager.shared.matchLocation(from: region.identifier) else {return}
+//        let regionEvent = RegionEvent(context: context)
+//
+//
+//        if UIApplication.shared.applicationState == .active {
+//           if travel == "Entering" {
+//               enterT = Date()
+//               let enterTimeFormat = format(date: enterT)
+//               regionEvent.enterRegionTime = enterT
+//               regionEvent.regionIdentifier = currentLocation.identifier
+////
+////                var regionEvent = DataManager.shared.regionEvent(enterRegionTime: enterT, exitRegionTime: nil, totalRegionTime: "", regionIdentifer: location.identifier, location: location)
+//
+//                currentLocation.addToRegionEvent(regionEvent)
+//                try! context.save()
+//               // DataManager.shared.save()
+//                window?.rootViewController?.showAlert(withTitle: currentLocation.title, message: "Entering at: \(enterTimeFormat)")
+//
+//            } else if travel == "Exiting" {
+//
+//                // fetch the last entry, that has the same UUID(), and check that the exitRegionTime and total region time are nil if they are then upate them and save
+//                // fetch the last saved entry
+//                // fetch the last saved entry and
+//               // get the location.regionEvent from the identifer
+//
+//                let exitT = Date()
+//                let exitTimeFormat = format(date: exitT)
+//                let deltaT = exitT.timeIntervalSince(enterT ?? Date())
+//
+////                regionEvent.exitRegionTime = exitT
+////
+////                regionEvent.totalRegionTime = String(deltaT)
+//
+//
+//                // updating all exitRegionTimes
+//                regionEvent.setValue(exitT, forKey: "exitRegionTime")      // This is updating an existing model
+//
+//                regionEvent.setValue("\(deltaT.stringTime)", forKey: "totalRegionTime")
+//              //  context.save()
+//               // DataManager.shared.save()
+//                currentLocation.addToRegionEvent(regionEvent)
+//                try! context.save()
+//                window?.rootViewController?.showAlert(withTitle: currentLocation.title, message: "E: \(exitTimeFormat), T: \(deltaT.stringTime)")
+//
+//            }
+//        } else {
+//            // get currect location object that matches
+//           // guard let thisLocation = matchLocation(from: region.identifier) else { return }
+//            guard let thisLocation = DataManager.shared.matchLocation(from: region.identifier) else {return}
+//
+//            let notificationContent = UNMutableNotificationContent()
+//            let regionEvent = RegionEvent(context: context)
+//            if travel == "Entering" {
+//                enterT = Date()
+//                regionEvent.enterRegionTime = enterT
+//                notificationContent.title = "Entering: \(thisLocation.title ?? "")"
+//                let enterTimeFormatted = format(date: enterT)
+//                notificationContent.body = enterTimeFormatted
+//                // Add the enterTime
+//                thisLocation.addToRegionEvent(regionEvent)
+//                try! context.save()
+//            } else if travel == "Exiting" {
+//                // I am not fetching the entrance time aI am just saving it locally
+//
+//                // need to fetch the current time from the correct region that is triggered
+//                let regionExitTime = Date()
+//                regionEvent.exitRegionTime = regionExitTime
+//                let regionExitTimeFormatted = format(date: regionExitTime)
+//                let delta = regionExitTime.timeIntervalSince(enterT)
+//                notificationContent.title = "Leaving: \(thisLocation.title ?? "")"
+//                notificationContent.body = "Left: \(regionExitTimeFormatted) Total: \(delta.stringTime)"
+//                regionEvent.totalRegionTime = delta.stringTime
+//                thisLocation.addToRegionEvent(regionEvent)
+//                try! context.save()
+//            }
+//            notificationContent.sound = .default
+//            notificationContent.badge = UIApplication.shared.applicationIconBadgeNumber + 1 as NSNumber
+//            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)             // trigger after 1 second
+//            let request = UNNotificationRequest(
+//              identifier: "location_change",
+//              content: notificationContent,
+//              trigger: trigger)
+//            UNUserNotificationCenter.current().add(request) { error in
+//              if let error = error {
+//                print("Error: \(error)")
+//              }
+//            }
+//          }
+//        }
+

@@ -4,6 +4,9 @@
 //
 //  Created by Ben Huggins on 11/19/22.
 //
+
+// Build everything with appdelegate managedObjectContext
+
 import UIKit
 import MapKit
 import CoreLocation
@@ -11,8 +14,8 @@ import CoreData
 
 class MainMapVC: UIViewController {
     
-    let defaults = UserDefaults.standard
     var locations = [Location]()
+    let defaults = UserDefaults.standard
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     let locationManager = CLLocationManager()
     var lastLocationError: Error?
@@ -20,7 +23,7 @@ class MainMapVC: UIViewController {
     var placeMark: CLPlacemark?
     var performingReverseGeocoding = false
     var lastGeocodingError: Error?
-    private let regionMeters: Double = 10000
+    private let regionMeters: Double = 100
     private var slideInTransitionDelegate: SlideInPresentationManager!
     var userIdentifierLabel = ""
     var givenNameLabel = ""
@@ -33,10 +36,11 @@ class MainMapVC: UIViewController {
         map.overrideUserInterfaceStyle = .dark
         return map}()
 
-    let tableView: UITableView = {
-        let table = UITableView()
-        table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-       return table}()
+    var timerLabel = UILabel(frame: CGRect(x: 10, y: 100, width: 200, height: 50))
+    var textTimer: String = ""
+    var seconds: Int = 0
+    
+    let nc = NotificationCenter.default
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,8 +54,10 @@ class MainMapVC: UIViewController {
             defaults.set(true, forKey: "First Launch")
         }
         
+     
         mapView.delegate = self
         title = "Map"
+//        view.addSubview(timerLabel)
         view.addSubview(mapView)
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
         let goToLocationImage = UIImage(systemName: "mappin.and.ellipse")
@@ -68,11 +74,57 @@ class MainMapVC: UIViewController {
         checkLocationServices()
         fetchLocations()
         
+        
+        
         if !locations.isEmpty {
             showLocations()
         }
+        
+//        if let navigationBar = self.navigationController?.navigationBar {
+        
+        nc.addObserver(self, selector: #selector(userLoggedIn), name: Notification.Name("UserLoggedIn"), object: nil)
+        
+        nc.addObserver(self, selector: #selector(userLoggedOut), name: Notification.Name("UserLoggedOut"), object: nil)
+         
+          
+           
+            
+            mapView.addSubview(timerLabel)
+         
+        
+        
+     
+  //  }
     }
     
+    @objc func userLoggedIn() {
+       
+                    Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] timer in
+                        self.seconds += 1
+                       textTimer = "\(seconds)"
+                        timerLabel.text = textTimer
+                        print(self.seconds)
+        
+        
+                    }
+        
+        
+        
+    }
+    
+    @objc func userLoggedOut() {
+       
+                  //  Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] timer in
+                     //   self.seconds += 1
+                   //    textTimer = "\(seconds)"
+                        timerLabel.text = ""
+                        print(self.seconds)
+        
+      
+        
+        
+                    }
+   
     // Centers the screen over All the Map annotations Perfectly
     func region(for annotations: [MKAnnotation]) -> MKCoordinateRegion {
       let region: MKCoordinateRegion
@@ -206,8 +258,20 @@ class MainMapVC: UIViewController {
     
     // MARK: LAYOUT CONFIGURATION
     private func configureUI() {
+
+//        NSLayoutConstraint.activate([
+//            label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+//            label.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+//            label.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+//           label.bottomAnchor.constraint(equalTo: mapView.topAnchor),
+//          label.heightAnchor.constraint(equalToConstant: 60)
+//
+//
+//        ])
+//
+        
         NSLayoutConstraint.activate([
-            mapView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            mapView.topAnchor.constraint(equalTo: view.topAnchor),
             mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)

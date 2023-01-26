@@ -13,6 +13,8 @@ class DataManager {
     
     static let shared = DataManager()
     
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
     lazy var persistentContainer: NSPersistentContainer = {
       let container = NSPersistentContainer(name: "DataModel")
       container.loadPersistentStores(completionHandler: { (storeDescription, error) in
@@ -24,7 +26,7 @@ class DataManager {
     
     // MARK: - Core Data Saving support
     func save () {
-      let context = persistentContainer.viewContext
+      let context = context
       if context.hasChanges {
         do {
           try context.save()
@@ -39,7 +41,7 @@ class DataManager {
     
     // Save a single Location
     func location(title: String, date: Date, identifier: String, latitude: Double, longitude: Double, radius: Double, placeMark: String) -> Location {
-        let location = Location(context: persistentContainer.viewContext)
+        let location = Location(context: context)
         location.title = title
         location.date = date
         location.identifier = identifier
@@ -64,13 +66,15 @@ class DataManager {
     
     // Not returning anything
     // Save a regionEvent attached to it's Location
-    func regionEvent(enterRegionTime: Date, exitRegionTime: Date!, totalRegionTime: String, regionIdentifer: String, location: Location) {
-        let regionEvent = RegionEvent(context: persistentContainer.viewContext)
+    func regionEvent(enterRegionTime: Date, exitRegionTime: Date!, totalRegionTime: String, regionIdentifer: String, location: Location) -> RegionEvent {
+        let regionEvent = RegionEvent(context: context)
         regionEvent.enterRegionTime = enterRegionTime
         regionEvent.exitRegionTime = exitRegionTime
         regionEvent.totalRegionTime = totalRegionTime   // there is no total time saved yet
         regionEvent.regionIdentifier = regionIdentifer
         location.addToRegionEvent(regionEvent)
+        
+        return regionEvent
     }
     
     
@@ -96,7 +100,7 @@ class DataManager {
     // Send in a location and get back the associated regionEvents
     
     func getRegionEvents(location: Location) -> [RegionEvent] {
-        let context = persistentContainer.viewContext
+        let context = context
         let request: NSFetchRequest<RegionEvent> = RegionEvent.fetchRequest()
         request.predicate = NSPredicate(format: "location = %@", location)
         //request.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
@@ -115,7 +119,7 @@ class DataManager {
     //MARK: - DELETE A LOCATION CORE DATA
 // Delete a Location, counld add a sole do catch to print errors specific to failure of deletion
     func deleteLocation(location: Location) {
-        let context = persistentContainer.viewContext
+        let context = context
         context.delete(location)
         save()
     }
@@ -125,7 +129,7 @@ class DataManager {
    //  I send you identifier from region and you give me back the title name
     // identifiers dont match 
     func matchLocation(from identifier: String) -> Location? {
-        let context = persistentContainer.viewContext
+        let context = context
         var location: [Location] = []
             let request = Location.fetchRequest() as NSFetchRequest<Location>
             let pred = NSPredicate(format: "identifier == %@", identifier)
