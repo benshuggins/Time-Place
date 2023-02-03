@@ -66,9 +66,9 @@ class DetailTableViewCell: UITableViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        totalTimelabel.frame = CGRect(x: 5, y: 35, width: 300, height: contentView.frame.size.height-10)
-        enterTimelabel.frame = CGRect(x: 5, y: 5, width: 300, height: contentView.frame.size.height-10)
-        exitTimelabel.frame = CGRect(x: 5, y: 20, width: 300, height: contentView.frame.size.height-10)
+        totalTimelabel.frame = CGRect(x: 5, y: 5, width: 300, height: contentView.frame.size.height-10)
+        enterTimelabel.frame = CGRect(x: 5, y: 20, width: 300, height: contentView.frame.size.height-10)
+        exitTimelabel.frame = CGRect(x: 5, y: 35, width: 300, height: contentView.frame.size.height-10)
        
     }
     

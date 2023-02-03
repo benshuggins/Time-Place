@@ -280,7 +280,7 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     private func deleteRegionEventAction(indexPath: IndexPath) {
        // let singer = singers[indexPath.row] // this is the old way
         let regionEvent = fetchedResultsController.object(at: indexPath)
-        
+       // tableView.deleteRows(at: [indexPath], with: .automatic)
         let areYouSureAlert = UIAlertController(title: "Are you sure you want to delete this Region Event?", message: "", preferredStyle: .alert)
         let yesDeleteAction = UIAlertAction(title: "Yes", style: .destructive) { [self] (action) in
 
@@ -321,6 +321,7 @@ extension DetailLocationVC {
         print("*** NSFetchedResultsChangeDelete (section)")
         tableView.deleteSections(
           IndexSet(integer: sectionIndex), with: .fade)
+         // tableView.deleteRows(at: [indexPath!], with: .fade)
       case .update:
         print("*** NSFetchedResultsChangeUpdate (section)")
       case .move:
@@ -329,6 +330,36 @@ extension DetailLocationVC {
         print("*** NSFetchedResults unknown type")
       }
     }
+    
+    
+        func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+          switch type {
+          case .insert:
+            print("*** NSFetchedResultsChangeInsert (object)")
+            tableView.insertRows(at: [newIndexPath!], with: .fade)
+
+          case .delete:
+            print("*** NSFetchedResultsChangeDelete (object)")
+            tableView.deleteRows(at: [indexPath!], with: .fade)
+
+          case .update:
+            print("*** NSFetchedResultsChangeUpdate (object)")
+            if let cell = tableView.cellForRow(at: indexPath!) as? DetailTableViewCell {
+              let regionEvent = controller.object(
+                at: indexPath!) as! RegionEvent
+                cell.configure(regionEvent: regionEvent)
+                //cell.textLabel?.text = "\(regionEvent.enterRegionTime)"
+            }
+
+          case .move:
+            print("*** NSFetchedResultsChangeMove (object)")
+            tableView.deleteRows(at: [indexPath!], with: .fade)
+            tableView.insertRows(at: [newIndexPath!], with: .fade)
+
+          @unknown default:
+            print("*** NSFetchedResults unknown type")
+          }
+        }
 
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
       print("*** controllerDidChangeContent")
