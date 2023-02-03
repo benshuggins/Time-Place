@@ -52,52 +52,39 @@ class DataManager {
         return location
     }
     
-   
-    
-//    func song(title: String, releaseDate: String, singer: Singer) -> Song {
-//        let song = Song(context: persistentContainer.viewContext)
-//        song.title = title
-//        song.releaseDate = releaseDate
-//
-//
-//        singer.addToSongs(song)    // use built in method for adding song to a singer
-//        return song
-//    }
-    
-    // Not returning anything
-    // Save a regionEvent attached to it's Location
-    func regionEvent(enterRegionTime: Date, exitRegionTime: Date!, totalRegionTime: String, regionIdentifer: String, location: Location) -> RegionEvent {
-        let regionEvent = RegionEvent(context: context)
-        regionEvent.enterRegionTime = enterRegionTime
-        regionEvent.exitRegionTime = exitRegionTime
-        regionEvent.totalRegionTime = totalRegionTime   // there is no total time saved yet
-        regionEvent.regionIdentifier = regionIdentifer
-        location.addToRegionEvent(regionEvent)
+    // Fetches RegionEvents from a location identifier 
+    func fetchRegions(locationIdentifier: String) -> [RegionEvent] {
         
-        return regionEvent
+        var fetchedRegionEvents = [RegionEvent]()
+        
+                do {
+                   // let request = RegionEvent.fetchRequest() as NSFetchRequest<RegionEvent>   // this is basic NSFEtch
+                    let request: NSFetchRequest<RegionEvent> = NSFetchRequest<RegionEvent>(entityName: "RegionEvent")
+                    let pred = NSPredicate(format: "ANY regionIdentifier == %@", locationIdentifier)
+                    request.predicate = pred
+                     fetchedRegionEvents = try! context.fetch(request)
+        
+                } catch {
+                    print("Error: \(error)")
+                }
+        return fetchedRegionEvents
     }
     
     
-    // Fetch functions
-    
-//
-//    // Main fetch for singers
-//    func songs(singer: Singer) -> [Song] {
-//        let request: NSFetchRequest<Song> = Song.fetchRequest()
-//        request.predicate = NSPredicate(format: "singer = %@", singer)
-//        request.sortDescriptors = [NSSortDescriptor(key: "releaseDate", ascending: false)]
-//        var fetchedSongs: [Song] = []
-//
-//        do {
-//            fetchedSongs = try persistentContainer.viewContext.fetch(request)
-//        } catch let error {
-//            print("Error fetching songs \(error)")
-//        }
-//        return fetchedSongs
+
+    // Save a regionEvent attached to it's Location
+//    func regionEvent(enterRegionTime: Date, exitRegionTime: Date!, totalRegionTime: String, regionIdentifer: String, location: Location) -> RegionEvent {
+//        let regionEvent = RegionEvent(context: context)
+//        regionEvent.enterRegionTime = enterRegionTime
+//        regionEvent.exitRegionTime = exitRegionTime
+//        regionEvent.totalRegionTime = totalRegionTime   // there is no total time saved yet
+//        regionEvent.regionIdentifier = regionIdentifer
+//        location.addToRegionEvent(regionEvent)
+//        
+//        return regionEvent
 //    }
-//
     
-    // Send in a location and get back the associated regionEvents
+
     
     func getRegionEvents(location: Location) -> [RegionEvent] {
         let context = context

@@ -23,7 +23,7 @@ class MainMapVC: UIViewController {
     var placeMark: CLPlacemark?
     var performingReverseGeocoding = false
     var lastGeocodingError: Error?
-    private let regionMeters: Double = 100
+    private let regionMeters: Double = 40
     private var slideInTransitionDelegate: SlideInPresentationManager!
     var userIdentifierLabel = ""
     var givenNameLabel = ""
@@ -167,9 +167,7 @@ class MainMapVC: UIViewController {
     // Keep Battery Level drainage manageable
     func setUpLocationManager() {
         locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest // 
-        
-        
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest   
     }
     
     func checkLocationServices() {
@@ -240,6 +238,7 @@ class MainMapVC: UIViewController {
     // MARK: MAP OVERLAY
     func addRadiusOverlay(forLocation location: Location) {
       mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
+
     }
     
     func removeRadiusOverlay(forLocation location: Location) {
@@ -408,9 +407,12 @@ extension MainMapVC: MKMapViewDelegate {
     return nil
   }
     
+    // How would I change this when the user enters the region
   func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
       if let circleOverlay = overlay as? MKCircle {
       let circleRenderer = MKCircleRenderer(overlay: circleOverlay)
+          
+          
       circleRenderer.lineWidth = 1.0
       circleRenderer.strokeColor = .green
       circleRenderer.fillColor = UIColor.red.withAlphaComponent(0.4)

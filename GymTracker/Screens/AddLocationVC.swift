@@ -11,7 +11,6 @@ import CoreLocation
 import CoreData
 import AudioToolbox
 
-
 protocol AddLocationVCDelegate: class {
   func addLocationVC(_ controller: AddLocationVC, didAddLocation: Location)
 }
@@ -24,7 +23,7 @@ let dateFormatter: DateFormatter = {
     }()
 
 class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
-
+    
     var locations: [Location] = []
     weak var delegate: AddLocationVCDelegate?
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -55,8 +54,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         textField.textColor = .black
         textField.backgroundColor = .darkGray
         textField.textAlignment = .left
-        textField.attributedPlaceholder = NSAttributedString(
-            string: "Enter Location Name",
+        textField.attributedPlaceholder = NSAttributedString(string: "Enter Location Name",
             attributes: [NSAttributedString.Key.foregroundColor: UIColor.black])
         textField.addTarget(self, action: #selector(didEnterNoteTextField), for: .editingChanged)
         return textField
@@ -83,7 +81,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         let imageView = UIImageView(image: image)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.tintColor = .red
-        
         return imageView
     }()
     
@@ -101,7 +98,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         mapView.addSubview(mappinImageView)
         configureUI()
         
-        //MARK: - BUTTON BAR ITEMS
+        //MARK: - NAV BAR BUTTON ITEMS
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
         let goToLocationImage = UIImage(systemName: "location.square.fill")
         let zoomButton = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(didTapGoToYourLocationBarButton))
@@ -214,9 +211,9 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
             }
             self.performingReverseGeocoding = false
         })
-       
+       //MARK: RADIUS
         let date = Date()
-        let radius: Double = 40
+        let radius: Double = 100
         let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
         

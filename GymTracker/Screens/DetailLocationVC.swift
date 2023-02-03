@@ -4,21 +4,46 @@
 //
 //  Created by Ben Huggins on 11/27/22.
 //
+// Things to do
+// reverse the tableView with predicates
+// sum values within each section for the total predicates ?\
+// add a searcb bar
+// add the radius increaser
+//
+
+
+
 
 import UIKit
 import CoreLocation
 import CoreData
 import MapKit
 
-class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UITableViewDelegate, UITableViewDataSource {
- 
-    var titleString: String = ""
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-//    var locations = [Locations]()
-    var location = Location()
-   // var regionEvent = [RegionEvent]()
-    var regionEvents: [RegionEvent] = []
+class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSource, NSFetchedResultsControllerDelegate {
     
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
+    lazy var fetchedResultsController: NSFetchedResultsController<RegionEvent> = {
+      let fetchRequest = NSFetchRequest<RegionEvent>()
+
+      let entity = RegionEvent.entity()
+      fetchRequest.entity = entity
+
+      let sort1 = NSSortDescriptor(key: "sectionDate", ascending: true)   // just a date
+      let sort2 = NSSortDescriptor(key: "enterRegionTime", ascending: true)
+      fetchRequest.sortDescriptors = [sort1, sort2]
+
+     //fetchRequest.fetchBatchSize = 20
+
+      let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: "sectionDate", cacheName: "RegionEventsCache")
+
+      fetchedResultsController.delegate = self
+      return fetchedResultsController
+    }()
+    
+    var titleString: String = ""
+    var location = Location()
+    var regionEvents: [RegionEvent] = []
     var locationsPredicate: NSPredicate?
     
     private let label: UILabel = {
@@ -28,11 +53,11 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
     }()
     
     let tableView: UITableView = {
-        let table = UITableView()
+        let table = UITableView(frame: .zero, style: .insetGrouped)
         table.register(DetailTableViewCell.self, forCellReuseIdentifier: DetailTableViewCell.identifier)
        return table
     }()
-    
+
         override func viewDidLoad() {
             super.viewDidLoad()
           //  view.addSubview(label)
@@ -43,83 +68,146 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
             view.backgroundColor = .white
             tableView.frame = view.bounds
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(changeFilter))
-         loadSavedData()
-           // loadRegion(location2)
+                // loadSavedData()
+            performFetch()
+     
+          //  loadSavedDataResults()
+            let thisLocation = fetchLocation(title: titleString)
+           // send this to get back the regionEvents thisLocation.identifier NSFETCHRESULTSCONTROLLER
+            regionEvents = DataManager.shared.fetchRegions(locationIdentifier: thisLocation.identifier) // this holds our regionEvents
         }
     
-        @objc func changeFilter() {
-            let ac = UIAlertController(title: "Filter Region Events…", message: nil, preferredStyle: .actionSheet)
-
-            // 1
-            ac.addAction(UIAlertAction(title: "Show Most Recent", style: .default) { [unowned self] _ in
-                self.locationsPredicate = NSPredicate(format: "message CONTAINS[c] 'h'")
-                self.loadSavedData()
-            })
-          
-            // 3 request only commits that took place 43,200 seconds ago
-            ac.addAction(UIAlertAction(title: "Show Oldest", style: .default) { [unowned self] _ in
-                let twelveHoursAgo = Date().addingTimeInterval(-43200)
-                self.locationsPredicate = NSPredicate(format: "date > %@", twelveHoursAgo as NSDate)
-                self.loadSavedData()
-            })
-            
-            ac.addAction(UIAlertAction(title: "Show Longest Time", style: .default) { [unowned self] _ in
-                self.locationsPredicate = nil
-                self.loadSavedData()
-            })
-            ac.addAction(UIAlertAction(title: "Show Shortest Time", style: .default) { [unowned self] _ in
-                self.locationsPredicate = nil
-                self.loadSavedData()
-            })
-            ac.addAction(UIAlertAction(title: "Show Errors", style: .default) { [unowned self] _ in
-                self.locationsPredicate = nil
-                self.loadSavedData()
-            })
-            
-            ac.addAction(UIAlertAction(title: "Show Total Time for Location", style: .default) { [unowned self] _ in
-                self.locationsPredicate = nil
-                self.loadSavedData()
-            })
-            // 4 show everything again
-            ac.addAction(UIAlertAction(title: "Show All", style: .default) { [unowned self] _ in
-                self.locationsPredicate = nil
-                self.loadSavedData()
-            })
-
-            ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-            present(ac, animated: true)
-        }
-   
-    
-
-    func loadSavedData()  {
-        // Just get the Locations Associated with the title
-       
+    private func performFetch() {
+        
         do {
-        let request = Location.fetchRequest() as NSFetchRequest<Location>
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("Error with fetchedResultsController \(error)")
+        }
+    }
+    
+    deinit {
+        fetchedResultsController.delegate = nil
+    }
+
+    func fetchLocation(title: String) -> Location {
+        
+        do {
+        let request = Location.fetchRequest() as NSFetchRequest<Location>  
             let pred = NSPredicate(format: "title == %@", titleString)
         request.predicate = pred
             location = try! context.fetch(request).first!
         print("😇😇😇😇😇😇😇Location: \(location)")
-            
         } catch {
             print("Error: \(error)")
         }
-       
-        do {
-            let request = RegionEvent.fetchRequest() as NSFetchRequest<RegionEvent>
-            let pred = NSPredicate(format: "regionIdentifier == %@", location.identifier)
-            request.predicate = pred
-            regionEvents = try! context.fetch(request)
-
-        } catch {
-            print("Error: \(error)")
-        }
+        return location
     }
-   
-   
+    
+    
+//
+//
+//    func loadSavedData()   {
+//        // Just get the Locations Associated with the title
+//
+//        do {
+//        let request = Location.fetchRequest() as NSFetchRequest<Location>
+//            let pred = NSPredicate(format: "title == %@", titleString)
+//        request.predicate = pred
+//            location = try! context.fetch(request).first!
+//        print("😇😇😇😇😇😇😇Location: \(location)")
+//
+//        } catch {
+//            print("Error: \(error)")
+//        }
+//
+//        do {
+//            let request = RegionEvent.fetchRequest() as NSFetchRequest<RegionEvent>
+//            let pred = NSPredicate(format: "regionIdentifier == %@", location.identifier)
+//            request.predicate = pred
+//            regionEvents = try! context.fetch(request)
+//
+//        } catch {
+//            print("Error: \(error)")
+//        }
+//    }
+//
+        @objc func changeFilter() {
+            let ac = UIAlertController(title: "Filter Region Events…", message: nil, preferredStyle: .actionSheet)
+
+//            // 1
+//            ac.addAction(UIAlertAction(title: "Show Most Recent", style: .default) { [unowned self] _ in
+//                self.locationsPredicate = NSPredicate(format: "message CONTAINS[c] 'h'")
+//                self.loadSavedData()
+//            })
+//
+//            // 3 request only commits that took place 43,200 seconds ago
+//            ac.addAction(UIAlertAction(title: "Show Oldest", style: .default) { [unowned self] _ in
+//                let twelveHoursAgo = Date().addingTimeInterval(-43200)
+//                self.locationsPredicate = NSPredicate(format: "date > %@", twelveHoursAgo as NSDate)
+//                self.loadSavedData()
+//            })
+//
+//            ac.addAction(UIAlertAction(title: "Show Longest Time", style: .default) { [unowned self] _ in
+//                self.locationsPredicate = nil
+//                self.loadSavedData()
+//            })
+//            ac.addAction(UIAlertAction(title: "Show Shortest Time", style: .default) { [unowned self] _ in
+//                self.locationsPredicate = nil
+//                self.loadSavedData()
+//            })
+//            ac.addAction(UIAlertAction(title: "Show Errors", style: .default) { [unowned self] _ in
+//                self.locationsPredicate = nil
+//                self.loadSavedData()
+//            })
+//
+//            ac.addAction(UIAlertAction(title: "Show Total Time for Location", style: .default) { [unowned self] _ in
+//                self.locationsPredicate = nil
+//                self.loadSavedData()
+//            })
+//            // 4 show everything again
+//            ac.addAction(UIAlertAction(title: "Show All", style: .default) { [unowned self] _ in
+//                self.locationsPredicate = nil
+//                self.loadSavedData()
+//            })
+//
+//            ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+//            present(ac, animated: true)
+        }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return fetchedResultsController.sections!.count
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let sectionInfo = fetchedResultsController.sections![section]
+        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 28))
+        headerView.backgroundColor = .secondarySystemBackground
+        
+        let sectionDateLabel = UILabel(frame: CGRect(x: 5, y: 5, width: 100, height: headerView.frame.size.height-10))
+        sectionDateLabel.text = sectionInfo.name
+       
+        let totalLabel = UILabel(frame: CGRect(x: 100 + sectionDateLabel.frame.size.width,
+                                               y: 5,
+                                               width: 100,
+                                               height: headerView.frame.size.height - 10))
+       
+        totalLabel.backgroundColor = .secondarySystemBackground
+        totalLabel.text = "Total:   "
+        totalLabel.textColor = .black
+        headerView.addSubview(totalLabel)
+        headerView.addSubview(sectionDateLabel)
+        return headerView
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 40
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return regionEvents.count
+        let sectionInfo = fetchedResultsController.sections![section]
+        return sectionInfo.numberOfObjects
+
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -127,11 +215,15 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
     }
 
      func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-          let regionEvent = regionEvents[indexPath.row]
+         // let regionEvent = regionEvents[indexPath.row]
        
-         let cell = tableView.dequeueReusableCell(withIdentifier: DetailTableViewCell.identifier, for: indexPath) as? DetailTableViewCell 
-      
-         cell?.configure(regionEvent: regionEvent)   // This should be regionEvent
+         let cell = tableView.dequeueReusableCell(withIdentifier: DetailTableViewCell.identifier, for: indexPath) as? DetailTableViewCell//UITableViewCell//
+         
+         let regionEvent = fetchedResultsController.object(at: indexPath)
+        
+//         cell?.textLabel?.text = regionEvent.totalRegionTime
+//         cell?.detailTextLabel?.text = "\(String(describing: regionEvent.exitRegionTime))"
+         cell?.configure(regionEvent: regionEvent)
          return cell!
     }
     
@@ -142,7 +234,7 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
         }
         
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, completionHandler) in
-           // self?.deleteRegionEventActionAction(indexPath: indexPath)
+            self?.deleteRegionEventAction(indexPath: indexPath)
             completionHandler(true)
         }
         
@@ -165,9 +257,15 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
         }
         
         alert.addTextField { (alertTextField) in
-            alertTextField.placeholder = "Ex: Beyonce"
-            alertTextField.text =  "\(regionEvent.enterRegionTime)"
+            alertTextField.placeholder = "Edit Enter Time"
+            alertTextField.text = "\(regionEvent.enterRegionTime)"
             enterTimeTextField = alertTextField
+        }
+        
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Edit Exit Time"
+            alertTextField.text = "\(regionEvent.exitRegionTime)"
+            exitTimeTextField = alertTextField
         }
 
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive) { (action) in
@@ -179,7 +277,117 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
         present(alert, animated: true, completion: nil)
     }
     
+    private func deleteRegionEventAction(indexPath: IndexPath) {
+       // let singer = singers[indexPath.row] // this is the old way
+        let regionEvent = fetchedResultsController.object(at: indexPath)
+        
+        let areYouSureAlert = UIAlertController(title: "Are you sure you want to delete this Region Event?", message: "", preferredStyle: .alert)
+        let yesDeleteAction = UIAlertAction(title: "Yes", style: .destructive) { [self] (action) in
+
+            context.delete(regionEvent)
+            do {
+                try context.save()
+               
+            } catch {
+                print("Error deleting object NSFetch: ", error)
+            }
+            //tableView.reloadData()
+        }
+        let noDeleteAction = UIAlertAction(title: "No", style: .default) { (action) in
+            //do nothing
+        }
+        areYouSureAlert.addAction(noDeleteAction)
+        areYouSureAlert.addAction(yesDeleteAction)
+        self.present(areYouSureAlert, animated: true, completion: nil)
+    }
+    
 }
+
+//MARK: - NSFETCHRESULTSCONTROLLERDLEGATE
+extension DetailLocationVC {
+    
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+      print("*** controllerWillChangeContent")
+      tableView.beginUpdates()
+    }
+
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,didChange sectionInfo: NSFetchedResultsSectionInfo,atSectionIndex sectionIndex: Int,for type: NSFetchedResultsChangeType) {
+      switch type {
+      case .insert:
+        print("*** NSFetchedResultsChangeInsert (section)")
+        tableView.insertSections(
+          IndexSet(integer: sectionIndex), with: .fade)
+      case .delete:
+        print("*** NSFetchedResultsChangeDelete (section)")
+        tableView.deleteSections(
+          IndexSet(integer: sectionIndex), with: .fade)
+      case .update:
+        print("*** NSFetchedResultsChangeUpdate (section)")
+      case .move:
+        print("*** NSFetchedResultsChangeMove (section)")
+      @unknown default:
+        print("*** NSFetchedResults unknown type")
+      }
+    }
+
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+      print("*** controllerDidChangeContent")
+      tableView.endUpdates()
+    }
+}
+
+//    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+//      switch type {
+//      case .insert:
+//        print("*** NSFetchedResultsChangeInsert (object)")
+//        tableView.insertRows(at: [newIndexPath!], with: .fade)
+//
+//      case .delete:
+//        print("*** NSFetchedResultsChangeDelete (object)")
+//        tableView.deleteRows(at: [indexPath!], with: .fade)
+//
+//      case .update:
+//        print("*** NSFetchedResultsChangeUpdate (object)")
+//        if let cell = tableView.cellForRow(at: indexPath!) as? DetailTableViewCell {
+//          let regionEvent = controller.object(
+//            at: indexPath!) as! RegionEvent
+//            cell.configure(regionEvent: regionEvent)
+//            //cell.textLabel?.text = "\(regionEvent.enterRegionTime)"
+//        }
+//
+//      case .move:
+//        print("*** NSFetchedResultsChangeMove (object)")
+//        tableView.deleteRows(at: [indexPath!], with: .fade)
+//        tableView.insertRows(at: [newIndexPath!], with: .fade)
+//
+//      @unknown default:
+//        print("*** NSFetchedResults unknown type")
+//      }
+//    }
+
+//extension DetailLocationVC {
+//
+//    @objc public var messageDateSectionIdentifier: String? {
+//        var dateString = ""
+//        self.willAccessValue(forKey: "messageDateSectionIdentifier")
+//        if let date = self.messageDateCreated {
+//            let calendar = Formatters.calendar
+//            let today = Date()
+//            let yesterday = today.addingTimeInterval(-86400.0)
+//            if calendar.isDate(date, inSameDayAs: today) {
+//                dateString = LocalizedStrings.DateStrings.Today
+//            } else if calendar.isDate(date, inSameDayAs: yesterday) {
+//                dateString = LocalizedStrings.DateStrings.Yesterday
+//            } else {
+//                dateString = Formatters.messageDateFormatter.string(from: date)
+//            }
+//        }
+//        self.didAccessValue(forKey: "messageDateSectionIdentifier")
+//
+//        return dateString
+//    }
+//
+//}
     
 //    lazy var fetchedResultsController: NSFetchedResultsController<Locations> = {
 //      let fetchRequest = NSFetchRequest<Locations>()
@@ -253,3 +461,29 @@ class DetailLocationVC: UIViewController, NSFetchedResultsControllerDelegate, UI
 //
 //}
 
+//
+//
+//func loadSavedData()  {
+//    // Just get the Locations Associated with the title
+//
+//    do {
+//    let request = Location.fetchRequest() as NSFetchRequest<Location>
+//        let pred = NSPredicate(format: "title == %@", titleString)
+//    request.predicate = pred
+//        location = try! context.fetch(request).first!
+//    print("😇😇😇😇😇😇😇Location: \(location)")
+//
+//    } catch {
+//        print("Error: \(error)")
+//    }
+//
+//    do {
+//        let request = RegionEvent.fetchRequest() as NSFetchRequest<RegionEvent>
+//        let pred = NSPredicate(format: "regionIdentifier == %@", location.identifier)
+//        request.predicate = pred
+//        regionEvents = try! context.fetch(request)
+//
+//    } catch {
+//        print("Error: \(error)")
+//    }
+//}

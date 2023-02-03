@@ -9,6 +9,13 @@ import UIKit
 import CoreData
 import CoreLocation
 
+let dateFormatterSections: DateFormatter = {
+   let formatter = DateFormatter()
+    formatter.dateStyle = .medium
+    formatter.timeStyle = .none
+    return formatter
+    }()
+
 class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelegate {
 
     var window: UIWindow?
@@ -95,6 +102,9 @@ extension SceneDelegate {
          guard let currentLocation = DataManager.shared.matchLocation(from: region.identifier) else {return}
      
         if state == CLRegionState.inside {
+            
+            // the mkoverlayr renderer for method and chaange the color inside the circle
+            
             print("👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻Inside the region")
             enterT = Date()
             let enterTimeFormat = format(date: enterT)
@@ -126,7 +136,12 @@ extension SceneDelegate {
             print("👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻outside the region")
             let exitTime = Date()
             let exitTimeFormat = format(date: exitTime)
+            let sectionDateS = Date()
+            let sectionDate = dateFormatterSections.string(from: sectionDateS)
+            
+            
             var totalTimeString = ""
+            
           
             if enterT != nil {
                 let deltaT = exitTime.timeIntervalSince(enterT)
@@ -135,10 +150,12 @@ extension SceneDelegate {
                 totalTimeString = "No Entrance Time"
             }
             
+            /// Create Core data regionEvent object  and save
             let regionEvent = RegionEvent(context: context) // CD init
             regionEvent.enterRegionTime = enterT  //Core Data Enter
             regionEvent.exitRegionTime = exitTime // Core Data Exit
             regionEvent.totalRegionTime = totalTimeString //Core Data Total
+            regionEvent.sectionDate = sectionDate // String for section Date
             regionEvent.regionIdentifier = currentLocation.identifier
             currentLocation.addToRegionEvent(regionEvent) // Core Data add entire regionEvent object to CD
             try! context.save()

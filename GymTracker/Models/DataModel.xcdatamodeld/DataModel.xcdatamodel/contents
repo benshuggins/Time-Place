@@ -14,11 +14,12 @@
         <attribute name="enterRegionTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="exitRegionTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="regionIdentifier" optional="YES" attributeType="String"/>
+        <attribute name="sectionDate" optional="YES" attributeType="String"/>
         <attribute name="totalRegionTime" optional="YES" attributeType="String"/>
         <relationship name="location" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Location" inverseName="regionEvent" inverseEntity="Location"/>
     </entity>
     <elements>
         <element name="Location" positionX="-158.22265625" positionY="-18" width="223.22265625" height="163"/>
-        <element name="RegionEvent" positionX="174.0390625" positionY="-21.625" width="128" height="104"/>
+        <element name="RegionEvent" positionX="174.0390625" positionY="-21.625" width="128" height="119"/>
     </elements>
 </model>
