@@ -54,7 +54,6 @@ class MainMapVC: UIViewController {
             defaults.set(true, forKey: "First Launch")
         }
         
-     
         mapView.delegate = self
         title = "Map"
 //        view.addSubview(timerLabel)
@@ -75,7 +74,7 @@ class MainMapVC: UIViewController {
         fetchLocations()
         
         
-        
+        // If locations arent empty
         if !locations.isEmpty {
             showLocations()
         }
@@ -90,11 +89,7 @@ class MainMapVC: UIViewController {
            
             
             mapView.addSubview(timerLabel)
-         
-        
-        
-     
-  //  }
+
     }
     
     @objc func userLoggedIn() {
@@ -104,12 +99,7 @@ class MainMapVC: UIViewController {
                        textTimer = "\(seconds)"
                         timerLabel.text = textTimer
                         print(self.seconds)
-        
-        
-                    }
-        
-        
-        
+        }
     }
     
     @objc func userLoggedOut() {
@@ -211,7 +201,7 @@ class MainMapVC: UIViewController {
     
     // MARK: - Helper Methods - Alerts
     func showLocationServicesDeniedAlert() {
-      let alert = UIAlertController(title: "Location Services Disabled", message: "Please enable location services for GymTracker in your iphone. Please go to Settings -> Privacy -> Location Services -> Enable Thankyou!",
+      let alert = UIAlertController(title: "Location Services Disabled", message: "Please enable location services for GymTracker in your iphone. Please go to Settings > Privacy > Location Services > Enable Thankyou!",
         preferredStyle: .alert)
       let okAction = UIAlertAction(title: "OK",style: .default,handler: nil)
         alert.addAction(okAction)
@@ -318,6 +308,11 @@ extension MainMapVC: CLLocationManagerDelegate {
     // This fires everytime the users location updates
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         // we will be back
+  
+    
+        
+        
+    
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
@@ -411,8 +406,6 @@ extension MainMapVC: MKMapViewDelegate {
   func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
       if let circleOverlay = overlay as? MKCircle {
       let circleRenderer = MKCircleRenderer(overlay: circleOverlay)
-          
-          
       circleRenderer.lineWidth = 1.0
       circleRenderer.strokeColor = .green
       circleRenderer.fillColor = UIColor.red.withAlphaComponent(0.4)

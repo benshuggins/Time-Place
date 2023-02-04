@@ -164,9 +164,9 @@
 			children = (
 				F5DD12ED29626B0B003B5BD7 /* LoginVC.swift */,
 				F59B420C2929604A001F0269 /* MainMapVC.swift */,
-				F5DD12F829627D0A003B5BD7 /* LeftMenuVC.swift */,
 				F5D2D8C72929A40B00A065AD /* AddLocationVC.swift */,
 				F59FD2B52933CD2100EEAC30 /* DetailLocationVC.swift */,
+				F5DD12F829627D0A003B5BD7 /* LeftMenuVC.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";

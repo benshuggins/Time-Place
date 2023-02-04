@@ -90,23 +90,12 @@ extension LoginVC: ASAuthorizationControllerDelegate {
             let fullName = appleIDCredential.fullName
             let email = appleIDCredential.email
             self.saveUserInKeychain(userIdentifier)
-            let tabBar = UITabBarController()
-            tabBar.tabBar.barTintColor = .gray
+           
             let vc1 = UINavigationController(rootViewController: MainMapVC())
             vc1.title = "Map"
-            
-            let vc2 = UINavigationController(rootViewController: AddLocationVC())
-            vc2.navigationController?.navigationBar.backgroundColor = .gray
-            vc2.title = "Add Location Tracker"
-           // vc2.modalPresentationStyle = .fullScreen
-            
-            tabBar.setViewControllers([vc1, vc2], animated: false)
-            tabBar.modalPresentationStyle = .fullScreen
-            tabBar.tabBar.backgroundColor = .darkGray
-            tabBar.tabBar.barTintColor = .white
-            tabBar.tabBar.tintColor = .systemBlue
-            present(tabBar, animated: true)
-        
+            vc1.modalPresentationStyle = .fullScreen
+            present(vc1, animated: true)
+ 
         case let passwordCredential as ASPasswordCredential:
         
             // Sign in using an existing iCloud Keychain credential.

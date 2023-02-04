@@ -98,14 +98,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
 extension SceneDelegate {
     
     func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
-
+        ///Get the name of the location by passing it the regions identifier that will match the location identiffer 
          guard let currentLocation = DataManager.shared.matchLocation(from: region.identifier) else {return}
      
         if state == CLRegionState.inside {
-            
-            // the mkoverlayr renderer for method and chaange the color inside the circle
-            
-            print("👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻👎🏻Inside the region")
             enterT = Date()
             let enterTimeFormat = format(date: enterT)
             
@@ -132,16 +128,11 @@ extension SceneDelegate {
                 }
             }
         } else if state == CLRegionState.outside {
-            
-            print("👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻👍🏻outside the region")
             let exitTime = Date()
             let exitTimeFormat = format(date: exitTime)
             let sectionDateS = Date()
             let sectionDate = dateFormatterSections.string(from: sectionDateS)
-            
-            
             var totalTimeString = ""
-            
           
             if enterT != nil {
                 let deltaT = exitTime.timeIntervalSince(enterT)

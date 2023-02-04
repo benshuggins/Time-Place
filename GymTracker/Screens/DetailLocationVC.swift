@@ -73,10 +73,11 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
      
           //  loadSavedDataResults()
             let thisLocation = fetchLocation(title: titleString)
-           // send this to get back the regionEvents thisLocation.identifier NSFETCHRESULTSCONTROLLER
-            regionEvents = DataManager.shared.fetchRegions(locationIdentifier: thisLocation.identifier) // this holds our regionEvents
+           // fetch the RegionEvents that match this Location 
+            regionEvents = fetchRegions(locationIdentifier: thisLocation.identifier) // this holds our regionEvents
         }
     
+  
     private func performFetch() {
         
         do {
@@ -89,7 +90,7 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     deinit {
         fetchedResultsController.delegate = nil
     }
-
+    /// Get the location that matches the title location that was passed to this VC
     func fetchLocation(title: String) -> Location {
         
         do {
@@ -103,6 +104,25 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         }
         return location
     }
+    
+    // Fetches RegionEvents from a location identifier
+    func fetchRegions(locationIdentifier: String) -> [RegionEvent] {
+        
+        var fetchedRegionEvents = [RegionEvent]()
+        
+                do {
+                   // let request = RegionEvent.fetchRequest() as NSFetchRequest<RegionEvent>   // this is basic NSFEtch
+                    let request: NSFetchRequest<RegionEvent> = NSFetchRequest<RegionEvent>(entityName: "RegionEvent")
+                    let pred = NSPredicate(format: "ANY regionIdentifier == %@", locationIdentifier)
+                    request.predicate = pred
+                     fetchedRegionEvents = try! context.fetch(request)
+        
+                } catch {
+                    print("Error: \(error)")
+                }
+        return fetchedRegionEvents
+    }
+    
     
     
 //
@@ -135,44 +155,44 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         @objc func changeFilter() {
             let ac = UIAlertController(title: "Filter Region Events…", message: nil, preferredStyle: .actionSheet)
 
-//            // 1
-//            ac.addAction(UIAlertAction(title: "Show Most Recent", style: .default) { [unowned self] _ in
-//                self.locationsPredicate = NSPredicate(format: "message CONTAINS[c] 'h'")
-//                self.loadSavedData()
-//            })
-//
-//            // 3 request only commits that took place 43,200 seconds ago
-//            ac.addAction(UIAlertAction(title: "Show Oldest", style: .default) { [unowned self] _ in
-//                let twelveHoursAgo = Date().addingTimeInterval(-43200)
-//                self.locationsPredicate = NSPredicate(format: "date > %@", twelveHoursAgo as NSDate)
-//                self.loadSavedData()
-//            })
-//
-//            ac.addAction(UIAlertAction(title: "Show Longest Time", style: .default) { [unowned self] _ in
-//                self.locationsPredicate = nil
-//                self.loadSavedData()
-//            })
-//            ac.addAction(UIAlertAction(title: "Show Shortest Time", style: .default) { [unowned self] _ in
-//                self.locationsPredicate = nil
-//                self.loadSavedData()
-//            })
-//            ac.addAction(UIAlertAction(title: "Show Errors", style: .default) { [unowned self] _ in
-//                self.locationsPredicate = nil
-//                self.loadSavedData()
-//            })
-//
-//            ac.addAction(UIAlertAction(title: "Show Total Time for Location", style: .default) { [unowned self] _ in
-//                self.locationsPredicate = nil
-//                self.loadSavedData()
-//            })
-//            // 4 show everything again
-//            ac.addAction(UIAlertAction(title: "Show All", style: .default) { [unowned self] _ in
-//                self.locationsPredicate = nil
-//                self.loadSavedData()
-//            })
-//
-//            ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-//            present(ac, animated: true)
+            // 1
+            ac.addAction(UIAlertAction(title: "Show Most Recent", style: .default) { [unowned self] _ in
+                self.locationsPredicate = NSPredicate(format: "message CONTAINS[c] 'h'")
+              //  self.fetchRegions(locationIdentifier: )
+            })
+
+            // 3 request only commits that took place 43,200 seconds ago
+            ac.addAction(UIAlertAction(title: "Show Oldest", style: .default) { [unowned self] _ in
+               // let twelveHoursAgo = Date().addingTimeInterval(-43200)
+            //    self.locationsPredicate = NSPredicate(format: "date > %@", twelveHoursAgo as NSDate)
+            //    self.loadSavedData()
+            })
+
+            ac.addAction(UIAlertAction(title: "Show Longest Time", style: .default) { [unowned self] _ in
+                self.locationsPredicate = nil
+              //  self.loadSavedData()
+            })
+            ac.addAction(UIAlertAction(title: "Show Shortest Time", style: .default) { [unowned self] _ in
+                self.locationsPredicate = nil
+             //   self.loadSavedData()
+            })
+            ac.addAction(UIAlertAction(title: "Show Errors", style: .default) { [unowned self] _ in
+                self.locationsPredicate = nil
+              //  self.loadSavedData()
+            })
+
+            ac.addAction(UIAlertAction(title: "Show Total Time for Location", style: .default) { [unowned self] _ in
+                self.locationsPredicate = nil
+                //self.loadSavedData()
+            })
+            // 4 show everything again
+            ac.addAction(UIAlertAction(title: "Show All", style: .default) { [unowned self] _ in
+                self.locationsPredicate = nil
+              //  self.loadSavedData()
+            })
+
+            ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+            present(ac, animated: true)
         }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -197,6 +217,8 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         totalLabel.textColor = .black
         headerView.addSubview(totalLabel)
         headerView.addSubview(sectionDateLabel)
+        
+        
         return headerView
     }
     

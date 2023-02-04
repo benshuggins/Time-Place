@@ -98,6 +98,8 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         mapView.addSubview(mappinImageView)
         configureUI()
         
+        /// Center  over the user's location upon entry and call it in the background 
+        performSelector(inBackground: #selector(didTapGoToYourLocationBarButton), with: .none )
         //MARK: - NAV BAR BUTTON ITEMS
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
         let goToLocationImage = UIImage(systemName: "location.square.fill")
@@ -109,6 +111,11 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         addRightButtonBar.isEnabled = false
         self.hideKeyboardWhenTappedAround()
         setupKeyBoard()
+    }
+    
+    @objc func didTapGoToYourLocationBarButton() {
+        print("DidTapZoomBarButton")
+        mapView.zoomToLocation(mapView.userLocation.location)
     }
     
     private func setupKeyBoard() {
@@ -254,10 +261,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
       AudioServicesPlaySystemSound(soundID)
     }
 
-    @objc func didTapGoToYourLocationBarButton() {
-        print("DidTapZoomBarButton")
-        mapView.zoomToLocation(mapView.userLocation.location)
-    }
+ 
     
     //MARK: - LAYOUT CONSTRAINTS
     func configureUI() {
