@@ -73,6 +73,9 @@ class MainMapVC: UIViewController {
         checkLocationServices()
         fetchLocations()
         
+        if locations.isEmpty {
+            self.showEmptyAlert()
+        }
         
         // If locations arent empty
         if !locations.isEmpty {
@@ -90,6 +93,10 @@ class MainMapVC: UIViewController {
             
             mapView.addSubview(timerLabel)
 
+    }
+    func showEmptyAlert() {
+        self.showAlert(withTitle: "No Locations!", message: "Please add a Location so the app can record your time inside location")
+        
     }
     
     @objc func userLoggedIn() {
