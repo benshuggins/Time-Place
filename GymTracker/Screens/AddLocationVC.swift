@@ -9,7 +9,6 @@ import UIKit
 import MapKit
 import CoreLocation
 import CoreData
-import AudioToolbox
 
 protocol AddLocationVCDelegate: class {
   func addLocationVC(_ controller: AddLocationVC, didAddLocation: Location)
@@ -22,7 +21,16 @@ let dateFormatter: DateFormatter = {
     return formatter
     }()
 
-class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
+class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate, MKAnnotation {
+  
+    var latitude: CLLocationDegrees!
+    var longitude: CLLocationDegrees!
+    
+    var coordinate: CLLocationCoordinate2D {
+        return CLLocationCoordinate2DMake(latitude, longitude)
+    }
+    
+    let searchController = UISearchController(searchResultsController: nil) // display in same view your searching
     
     var locations: [Location] = []
     weak var delegate: AddLocationVCDelegate?
@@ -32,7 +40,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     var performingReverseGeocoding = false
     var lastGeocodingError: Error?
     var address: String = ""
-    var soundID: SystemSoundID = 0
     
     //MARK: - LAYOUT DECLARATIONS
     var addRightButtonBar: UIBarButtonItem = {
@@ -86,8 +93,22 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+    
+        // 1
+        searchController.searchResultsUpdater = self
+        // 2
+        searchController.obscuresBackgroundDuringPresentation = false
+        // 3
+        searchController.searchBar.placeholder = "Search Candies"
+        // 4
+        navigationItem.searchController = searchController
+        // 5
+        definesPresentationContext = true
+     
+        
+        
         title = "Add Location Tracker"
-        let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.black]
+        let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.red]
         navigationController?.navigationBar.titleTextAttributes = textAttributes
         view.backgroundColor = .white
         view.addSubview(searchBar)
@@ -98,6 +119,8 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         mapView.addSubview(mappinImageView)
         configureUI()
         
+        searchBar.delegate = self
+        
         /// Center  over the user's location upon entry and call it in the background 
         performSelector(inBackground: #selector(didTapGoToYourLocationBarButton), with: .none )
         //MARK: - NAV BAR BUTTON ITEMS
@@ -105,6 +128,8 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         let goToLocationImage = UIImage(systemName: "location.square.fill")
         let zoomButton = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(didTapGoToYourLocationBarButton))
         addRightButtonBar = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapSaveLocationBarButton))
+        zoomButton.tintColor = UIColor.red
+        addRightButtonBar.tintColor = UIColor.red
         navigationItem.rightBarButtonItems = [addRightButtonBar, zoomButton]
         navigationItem.rightBarButtonItem?.isEnabled = (locations.count < 20)
         navigationController?.navigationBar.backgroundColor = .darkGray
@@ -124,7 +149,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 
     private func setupKeyboardHiding() {
 //        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-//
 //        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
 //
         NotificationCenter.default.addObserver(self,
@@ -156,7 +180,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
                // mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
                 mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -60)
             ])
-    
         }
     }
     
@@ -201,7 +224,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     
     //MARK: - DELEGATE PASS BACK MODEL
     @objc func didTapSaveLocationBarButton() {
-        self.playSoundEffect()
     
         let coordinate = mapView.centerCoordinate
         let latitude = coordinate.latitude
@@ -240,29 +262,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     func format(date: Date) -> String {
         return dateFormatter.string(from: date)
     }
-    
-    // MARK: - Sound effects
-    func loadSoundEffect(_ name: String) {
-      if let path = Bundle.main.path(forResource: name, ofType: nil) {
-        let fileURL = URL(fileURLWithPath: path, isDirectory: false)
-        let error = AudioServicesCreateSystemSoundID(fileURL as CFURL, &soundID)
-        if error != kAudioServicesNoError {
-          print("Error code \(error) loading sound: \(path)")
-        }
-      }
-    }
 
-    func unloadSoundEffect() {
-      AudioServicesDisposeSystemSoundID(soundID)
-      soundID = 0
-    }
-
-    func playSoundEffect() {
-      AudioServicesPlaySystemSound(soundID)
-    }
-
- 
-    
     //MARK: - LAYOUT CONSTRAINTS
     func configureUI() {
         NSLayoutConstraint.activate([
@@ -293,8 +293,51 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 }
 
 extension AddLocationVC: UISearchBarDelegate {
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        print(searchText)
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        self.view.isUserInteractionEnabled = false
+        let activityIndicator = UIActivityIndicatorView()
+        activityIndicator.style = UIActivityIndicatorView.Style.medium
+        activityIndicator.center = view.center
+        activityIndicator.hidesWhenStopped = true
+        
+        view.addSubview(activityIndicator)
+        searchBar.resignFirstResponder()
+      //  dismiss(animated: true, completion: nil)
+        
+        let searchRequest = MKLocalSearch.Request()
+        searchRequest.naturalLanguageQuery = searchBar.text
+        let search = MKLocalSearch(request: searchRequest)
+        
+        search.start { (localSearchResponse, error) in
+            
+            activityIndicator.stopAnimating()
+       
+            if localSearchResponse == nil {
+              
+                let alertController = UIAlertController(title: nil, message: "Place Not Found", preferredStyle: UIAlertController.Style.alert)
+                alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertAction.Style.default, handler: nil))
+                self.present(alertController, animated: true, completion: nil)
+           
+            } else {
+                let latitude = localSearchResponse?.boundingRegion.center.latitude
+                let longitude = localSearchResponse?.boundingRegion.center.longitude
+                
+//                let annotation = MKPointAnnotation()
+//                annotation.title = searchBar.text
+               let coordinateCenter = CLLocationCoordinate2DMake(latitude!, longitude!)
+              //  self.mapView.addAnnotation(annotation)
+                
+               // let region = MKCoordinateRegion(center: coordinateCenter, latitudinalMeters: 10000, longitudinalMeters: 10000)
+               // self.mapView.setCenter(coordinateCenter, animated: true)
+             //   self.mapView.setCameraBoundary(coordinateCenter, animated: true)
+              //  self.mapView.setRegion(region, animated: true)
+            //    mapView.setCameraZoomRange(<#T##cameraZoomRange: MKMapView.CameraZoomRange?##MKMapView.CameraZoomRange?#>, animated: <#T##Bool#>)/
+                
+                
+                 
+        }
+         }
     }
 }
 
@@ -314,4 +357,10 @@ extension AddLocationVC {
         ])
         view.endEditing(true)
     }
+}
+
+extension AddLocationVC: UISearchResultsUpdating {
+  func updateSearchResults(for searchController: UISearchController) {
+         
+  }
 }

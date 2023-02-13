@@ -101,14 +101,15 @@ extension SceneDelegate {
         ///Get the name of the location by passing it the regions identifier that will match the location identiffer 
          guard let currentLocation = DataManager.shared.matchLocation(from: region.identifier) else {return}
      
+        /// Here we have entered the region
         if state == CLRegionState.inside {
             enterT = Date()
             let enterTimeFormat = format(date: enterT)
-            
+            ///If the app is open (Looking at the map inside iPhone) then show an alert the view
             if UIApplication.shared.applicationState == .active {
                 //            let nc = NotificationCenter.default
                 //            nc.post(name: Notification.Name("UserLoggedIn"), object: nil)
-                window?.rootViewController?.showAlert(withTitle: currentLocation.title, message: "Entering at: \(enterTimeFormat)")
+              //  window?.rootViewController?.showAlert(withTitle: currentLocation.title, message: "Entering at: \(enterTimeFormat)")
             
             } else {
                 let notificationContent = UNMutableNotificationContent()
@@ -127,6 +128,7 @@ extension SceneDelegate {
                   }
                 }
             }
+            ///Exit the region
         } else if state == CLRegionState.outside {
             let exitTime = Date()
             let exitTimeFormat = format(date: exitTime)
@@ -154,7 +156,7 @@ extension SceneDelegate {
             if UIApplication.shared.applicationState == .active {
                 //            let nc = NotificationCenter.default
                 //            nc.post(name: Notification.Name("UserLoggedOut"), object: nil)
-                window?.rootViewController?.showAlert(withTitle: currentLocation.title, message: "E: \(exitTimeFormat), T: \(totalTimeString)")
+              //  window?.rootViewController?.showAlert(withTitle: currentLocation.title, message: "E: \(exitTimeFormat), T: \(totalTimeString)")
             } else {
                 let notificationContent = UNMutableNotificationContent()
                 notificationContent.title = "Leaving: \(currentLocation.title ?? "")"

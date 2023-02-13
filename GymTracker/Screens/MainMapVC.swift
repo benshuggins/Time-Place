@@ -56,6 +56,9 @@ class MainMapVC: UIViewController {
         
         mapView.delegate = self
         title = "Map"
+        let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.red]
+        navigationController?.navigationBar.titleTextAttributes = textAttributes
+      
 //        view.addSubview(timerLabel)
         view.addSubview(mapView)
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
@@ -67,6 +70,10 @@ class MainMapVC: UIViewController {
         navigationItem.rightBarButtonItems = [addLocation, zoom]
         let leftMenu = UIBarButtonItem(image: leftMenuButton, style: .plain, target: self, action: #selector(openLeftMenuButtonTapped))
         let centerOverLocations = UIBarButtonItem(image: centerLocation, style: .plain, target: self, action: #selector(showLocations))
+        addLocation.tintColor = UIColor.red
+        zoom.tintColor = UIColor.red
+        leftMenu.tintColor = UIColor.red
+        centerOverLocations.tintColor = UIColor.red
         navigationItem.leftBarButtonItems = [leftMenu, centerOverLocations]
         locationManager.allowsBackgroundLocationUpdates = true
         configureUI()
@@ -77,50 +84,37 @@ class MainMapVC: UIViewController {
             self.showEmptyAlert()
         }
         
-        // If locations arent empty
         if !locations.isEmpty {
             showLocations()
         }
         
 //        if let navigationBar = self.navigationController?.navigationBar {
-        
         nc.addObserver(self, selector: #selector(userLoggedIn), name: Notification.Name("UserLoggedIn"), object: nil)
-        
         nc.addObserver(self, selector: #selector(userLoggedOut), name: Notification.Name("UserLoggedOut"), object: nil)
-         
-          
-           
-            
-            mapView.addSubview(timerLabel)
-
+        mapView.addSubview(timerLabel)
     }
+    
     func showEmptyAlert() {
-        self.showAlert(withTitle: "No Locations!", message: "Please add a Location so the app can record your time inside location")
+        self.showAlert(withTitle: "No Locations!", message: "To add a Location, Tap the upper right + button!")
         
     }
     
     @objc func userLoggedIn() {
-       
-                    Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] timer in
-                        self.seconds += 1
-                       textTimer = "\(seconds)"
-                        timerLabel.text = textTimer
-                        print(self.seconds)
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] timer in
+            self.seconds += 1
+           textTimer = "\(seconds)"
+            timerLabel.text = textTimer
+            print(self.seconds)
         }
     }
     
     @objc func userLoggedOut() {
-       
-                  //  Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] timer in
-                     //   self.seconds += 1
-                   //    textTimer = "\(seconds)"
-                        timerLabel.text = ""
-                        print(self.seconds)
-        
-      
-        
-        
-                    }
+      //  Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] timer in
+         //   self.seconds += 1
+       //    textTimer = "\(seconds)"
+            timerLabel.text = ""
+            print(self.seconds)
+        }
    
     // Centers the screen over All the Map annotations Perfectly
     func region(for annotations: [MKAnnotation]) -> MKCoordinateRegion {
@@ -235,7 +229,6 @@ class MainMapVC: UIViewController {
     // MARK: MAP OVERLAY
     func addRadiusOverlay(forLocation location: Location) {
       mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
-
     }
     
     func removeRadiusOverlay(forLocation location: Location) {
@@ -315,11 +308,6 @@ extension MainMapVC: CLLocationManagerDelegate {
     // This fires everytime the users location updates
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         // we will be back
-  
-    
-        
-        
-    
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {

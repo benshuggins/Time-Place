@@ -201,6 +201,20 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let sectionInfo = fetchedResultsController.sections![section]
+      
+        var total = 0
+        let subCategory = sectionInfo.objects as? [RegionEvent]
+        /// This method sums the totalTime for each individual section
+        for i in subCategory ?? [] {
+            let name = i.sectionDate
+            if name == i.sectionDate {
+                if let unwrapped = i.totalRegionTime{
+                    total += Int(unwrapped) ?? 0
+                } else {
+                }
+            }
+        }
+        
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 28))
         headerView.backgroundColor = .secondarySystemBackground
         
@@ -213,7 +227,7 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
                                                height: headerView.frame.size.height - 10))
        
         totalLabel.backgroundColor = .secondarySystemBackground
-        totalLabel.text = "Total:   "
+        totalLabel.text = "Total: \(total)  "
         totalLabel.textColor = .black
         headerView.addSubview(totalLabel)
         headerView.addSubview(sectionDateLabel)
@@ -242,9 +256,6 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
          let cell = tableView.dequeueReusableCell(withIdentifier: DetailTableViewCell.identifier, for: indexPath) as? DetailTableViewCell//UITableViewCell//
          
          let regionEvent = fetchedResultsController.object(at: indexPath)
-        
-//         cell?.textLabel?.text = regionEvent.totalRegionTime
-//         cell?.detailTextLabel?.text = "\(String(describing: regionEvent.exitRegionTime))"
          cell?.configure(regionEvent: regionEvent)
          return cell!
     }
