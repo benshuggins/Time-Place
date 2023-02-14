@@ -8,8 +8,10 @@
 import UIKit
 import MapKit
 
+
+//1
 protocol sendSearchDataBackDelegate: class {
-    func sendBackData(_ controller: SearchResultsVC, placeMark: MKPlacemark)
+    func sendBackSearchData(_ controller: SearchResultsVC, placeMark: MKPlacemark)
 }
 
 class SearchResultsVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchResultsUpdating {
@@ -28,7 +30,7 @@ class SearchResultsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
         return table
     }()
     
-    weak var delegate: sendSearchDataBackDelegate?
+    weak var delegate: sendSearchDataBackDelegate?  //2
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,7 +58,9 @@ class SearchResultsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
      
      func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
          let placeMark = matchingItems[indexPath.row].placemark
-         self.delegate?.sendBackData(self, placeMark: placeMark)  //3
+         
+         // Do a Core data save here and then pass it on back to the mainmapView and it will work
+         self.delegate?.sendBackSearchData(self, placeMark: placeMark)  //3
          dismiss(animated: true, completion: nil)
      }
 

@@ -10,6 +10,8 @@ import MapKit
 import CoreLocation
 import CoreData
 
+
+
 protocol AddLocationVCDelegate: class {
   func addLocationVC(_ controller: AddLocationVC, didAddLocation: Location)
 }
@@ -64,10 +66,10 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         }()
     
     let mapView : MKMapView = {
-            let map = MKMapView()
-            map.translatesAutoresizingMaskIntoConstraints = false
-            map.overrideUserInterfaceStyle = .dark
-            return map
+        let map = MKMapView()
+        map.translatesAutoresizingMaskIntoConstraints = false
+        map.overrideUserInterfaceStyle = .dark
+        return map
         }()
     
     private let mappinImageView: UIImageView = {
@@ -93,7 +95,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.red]
         navigationController?.navigationBar.titleTextAttributes = textAttributes
         view.backgroundColor = .white
-      //  view.addSubview(searchBar)
 
         /// Center  over the user's location upon entry and call it in the background 
         performSelector(inBackground: #selector(didTapGoToYourLocationBarButton), with: .none )
@@ -111,9 +112,14 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         self.hideKeyboardWhenTappedAround()
         setupKeyBoard()
         
+        
+        
+        
         // MARK: - SEARCH CONTROLLER
          let searchResultsVC = SearchResultsVC()
-        searchResultsVC.delegate = self        // this is the passback
+        // searchResultsVC.delegate = self        // this is the passback      // 5 Delegate for search
+        
+    
         searchController = UISearchController(searchResultsController: searchResultsVC)
         searchController.searchResultsUpdater = searchResultsVC as UISearchResultsUpdating
         searchController.hidesNavigationBarDuringPresentation = true
@@ -122,7 +128,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         searchBar.sizeToFit()
         searchBar.placeholder = "Search for places"
         navigationItem.searchController = searchController     // This has to be the last thing before the mapview and last in viewDidLoad
-       
         searchResultsVC.mapView = mapView
     }
     
@@ -140,7 +145,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 //        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
 //
         NotificationCenter.default.addObserver(self,
-                                               selector: #selector(handle(keyboardShowNotification:)),
+                            selector: #selector(handle(keyboardShowNotification:)),
                                                name: UIResponder.keyboardDidShowNotification,
                                                object: nil)
         
@@ -234,6 +239,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
         
+        // Save and Build a location object and then send it back with delegation to the MainMapVC
         let location = DataManager.shared.location(title: note, date: date, identifier: identifier, latitude: latitude, longitude: longitude, radius: radius, placeMark: "No Address")
         DataManager.shared.save()
         
@@ -247,19 +253,12 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
           }
     }
     
-    func format(date: Date) -> String {
+     func format(date: Date) -> String {
         return dateFormatter.string(from: date)
     }
 
     //MARK: - LAYOUT CONSTRAINTS
     func configureUI() {
-//        NSLayoutConstraint.activate([
-//            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-//            searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-//            searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-//            searchBar.bottomAnchor.constraint(equalTo: textFieldNote.topAnchor),
-//            searchBar.heightAnchor.constraint(equalToConstant: 60)
-//        ])
         NSLayoutConstraint.activate([
             textFieldNote.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             textFieldNote.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -297,13 +296,20 @@ extension AddLocationVC {
         view.endEditing(true)
     }
 }
-extension AddLocationVC: sendSearchDataBackDelegate {
-   
-    func sendBackData(_ controller: SearchResultsVC, placeMark placemark: MKPlacemark) {
-        // cache the pin
-        selectedPin = placemark
-        print("Name: ", selectedPin?.name)
-//        // clear the existing annotation
+
+ //How does this integrate into addLocationVC we are adding a pin
+//extension AddLocationVC: sendSearchDataBackDelegate {
+//
+//    func sendBackSearchData(_ controller: SearchResultsVC, placeMark placemark: MKPlacemark) {
+//        // cache the pin
+//        selectedPin = placemark
+//        print("Name: ", selectedPin?.name ?? "")
+
+//}
+//}
+
+
+        // clear the existing annotation
 //        mapView.removeAnnotations(mapView.annotations)
 //        let annotation = MKPointAnnotation()
 //        annotation.coordinate = placemark.coordinate
@@ -317,8 +323,14 @@ extension AddLocationVC: sendSearchDataBackDelegate {
 //        let span = MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
 //        let region = MKCoordinateRegion(center: placemark.coordinate, span: span)
 //        mapView.setRegion(region, animated: true)
-    }
-}
+
+
+
+
+
+
+
+
 //
 //extension AddLocationVC: UISearchResultsUpdating {
 //  func updateSearchResults(for searchController: UISearchController) {
@@ -367,7 +379,7 @@ extension AddLocationVC: sendSearchDataBackDelegate {
 //               // self.mapView.setCenter(coordinateCenter, animated: true)
 //             //   self.mapView.setCameraBoundary(coordinateCenter, animated: true)
 //              //  self.mapView.setRegion(region, animated: true)
-//            //    mapView.setCameraZoomRange(<#T##cameraZoomRange: MKMapView.CameraZoomRange?##MKMapView.CameraZoomRange?#>, animated: <#T##Bool#>)/
+//            //    mapView.setCameraZoomRange(, animated: )/
 //
 //
 //

@@ -77,7 +77,6 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             regionEvents = fetchRegions(locationIdentifier: thisLocation.identifier) // this holds our regionEvents
         }
     
-  
     private func performFetch() {
         
         do {
@@ -217,22 +216,14 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 28))
         headerView.backgroundColor = .secondarySystemBackground
-        
         let sectionDateLabel = UILabel(frame: CGRect(x: 5, y: 5, width: 100, height: headerView.frame.size.height-10))
         sectionDateLabel.text = sectionInfo.name
-       
-        let totalLabel = UILabel(frame: CGRect(x: 100 + sectionDateLabel.frame.size.width,
-                                               y: 5,
-                                               width: 100,
-                                               height: headerView.frame.size.height - 10))
-       
+        let totalLabel = UILabel(frame: CGRect(x: 100 + sectionDateLabel.frame.size.width, y: 5,width: 100, height: headerView.frame.size.height - 10))
         totalLabel.backgroundColor = .secondarySystemBackground
         totalLabel.text = "Total: \(total)  "
         totalLabel.textColor = .black
         headerView.addSubview(totalLabel)
         headerView.addSubview(sectionDateLabel)
-        
-        
         return headerView
     }
     
@@ -243,7 +234,6 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let sectionInfo = fetchedResultsController.sections![section]
         return sectionInfo.numberOfObjects
-
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

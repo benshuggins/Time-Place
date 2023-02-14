@@ -44,6 +44,10 @@ class MainMapVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+      
+        
+        
         //MARK: - Only show login screen once
         if defaults.bool(forKey: "First Launch") == true {
             print("Second or more app launch")
@@ -80,13 +84,8 @@ class MainMapVC: UIViewController {
         checkLocationServices()
         fetchLocations()
         
-        if locations.isEmpty {
-            self.showEmptyAlert()
-        }
-        
-        if !locations.isEmpty {
-            showLocations()
-        }
+        if locations.isEmpty { self.showEmptyAlert() }
+        if !locations.isEmpty { showLocations() }
         
 //        if let navigationBar = self.navigationController?.navigationBar {
         nc.addObserver(self, selector: #selector(userLoggedIn), name: Notification.Name("UserLoggedIn"), object: nil)
@@ -96,7 +95,6 @@ class MainMapVC: UIViewController {
     
     func showEmptyAlert() {
         self.showAlert(withTitle: "No Locations!", message: "To add a Location, Tap the upper right + button!")
-        
     }
     
     @objc func userLoggedIn() {
@@ -116,7 +114,7 @@ class MainMapVC: UIViewController {
             print(self.seconds)
         }
    
-    // Centers the screen over All the Map annotations Perfectly
+    /// Centers the screen over All the Map annotations Perfectly
     func region(for annotations: [MKAnnotation]) -> MKCoordinateRegion {
       let region: MKCoordinateRegion
       switch annotations.count {
@@ -152,13 +150,9 @@ class MainMapVC: UIViewController {
             }
         }
         catch {
+            showAlert(withTitle: "Error", message: "There has been an error: \(error.localizedDescription)")
             print("Error: ", error.localizedDescription)
         }
-    }
-    // Keep Battery Level drainage manageable
-    func setUpLocationManager() {
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest   
     }
     
     func checkLocationServices() {
@@ -166,8 +160,12 @@ class MainMapVC: UIViewController {
             setUpLocationManager()
             checkLocationAuthorization()
         } else {
-            // show alert saying location services are turned off
+            showAlert(withTitle: "!!!", message: "Your Location Services are turned off!")
         }
+    }
+    func setUpLocationManager() {
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest   
     }
     
     func checkLocationAuthorization() {
@@ -299,6 +297,7 @@ class MainMapVC: UIViewController {
         let navVC = UINavigationController(rootViewController: addLocationVC)
         addLocationVC.delegate = self
        // navVC.modalPresentationStyle = .overFullScreen
+        
         present(navVC, animated: true)
     }
 }
@@ -362,7 +361,14 @@ func string(from placemark: CLPlacemark) -> String {
 }
 }
 
+
+// I could come all the way back here and save !!!
+/// Make a new protocol and delegate 
+
+
+
 //MARK: - CALL BACK FROM ADDLOCATIONVC
+/// send back the data from
 extension MainMapVC: AddLocationVCDelegate {
     func addLocationVC(_ controller: AddLocationVC, didAddLocation location: Location) {
         controller.dismiss(animated: true, completion: nil)
@@ -371,6 +377,28 @@ extension MainMapVC: AddLocationVCDelegate {
         add(location)
     }
 }
+
+
+/// Send the data back from SearchResultsVC    // Step 6 in delegation 
+//extension MainMapVC: sendSearchDataBackDelegate {
+//    func sendBackSearchData(_ controller: SearchResultsVC, placeMark: MKPlacemark) {
+//        /// Core data save from here
+//        print("Name: ", placeMark.name)
+//    }
+//
+//}
+
+extension MainMapVC: sendSearchDataBackDelegate {
+    
+    
+    func sendBackSearchData(_ controller: SearchResultsVC, placeMark: MKPlacemark) {
+        print("Placemark: ", placeMark)
+    }
+}
+
+
+
+
 // MARK: - Map Annotation
 extension MainMapVC: MKMapViewDelegate {
   func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
@@ -397,7 +425,6 @@ extension MainMapVC: MKMapViewDelegate {
     return nil
   }
     
-    // How would I change this when the user enters the region
   func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
       if let circleOverlay = overlay as? MKCircle {
       let circleRenderer = MKCircleRenderer(overlay: circleOverlay)
@@ -430,7 +457,7 @@ extension MainMapVC {
         return
       }
       let fenceRegion = location.region
-      locationManager.startMonitoring(for: fenceRegion) // Here is where we initiate region monitoring
+      locationManager.startMonitoring(for: fenceRegion) /// Initiate Geofencing
     }
     
     func stopMonitoring(location: Location) {
@@ -442,13 +469,10 @@ extension MainMapVC {
     
     func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
       guard let region = region else {
-        print("Monitoring failed for unknown region")
-          
-          // NEED TO ADD ALERT ACTIONS TO INFORM THE USER OF FAILURE
+          showAlert(withTitle: "Error!", message: "Location Monitoring failed for unknown region")
         return
       }
-      print("Monitoring failed for region with identifier: \(region.identifier)")
-        // NEED TO ADD ALERT ACTIONS TO INFORM THE USER OF FAILURE
+        showAlert(withTitle: "Error!", message: "Monitoring failed for region with identifier: \(region.identifier)")
     }
 }
 
