@@ -13,6 +13,8 @@
 		F55CE2B0296CA45A00E862F4 /* RegionEvent+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55CE2AC296CA45A00E862F4 /* RegionEvent+CoreDataProperties.swift */; };
 		F55CE2B1296CA45A00E862F4 /* Location+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55CE2AD296CA45A00E862F4 /* Location+CoreDataClass.swift */; };
 		F55CE2B2296CA45A00E862F4 /* Location+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55CE2AE296CA45A00E862F4 /* Location+CoreDataProperties.swift */; };
+		F57AABFE299ADDB5005C5890 /* SearchResultsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F57AABFD299ADDB5005C5890 /* SearchResultsVC.swift */; };
+		F57AAC00299AE010005C5890 /* SearchResultsTC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F57AABFF299AE010005C5890 /* SearchResultsTC.swift */; };
 		F5908E7F29491419006AC559 /* SimulatedLocations.gpx in Resources */ = {isa = PBXBuildFile; fileRef = F5908E7E29491419006AC559 /* SimulatedLocations.gpx */; };
 		F5908E8129491426006AC559 /* Google.gpx in Resources */ = {isa = PBXBuildFile; fileRef = F5908E8029491426006AC559 /* Google.gpx */; };
 		F5908E832949142F006AC559 /* Apple.gpx in Resources */ = {isa = PBXBuildFile; fileRef = F5908E822949142F006AC559 /* Apple.gpx */; };
@@ -46,6 +48,8 @@
 		F55CE2AC296CA45A00E862F4 /* RegionEvent+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RegionEvent+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		F55CE2AD296CA45A00E862F4 /* Location+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Location+CoreDataClass.swift"; sourceTree = "<group>"; };
 		F55CE2AE296CA45A00E862F4 /* Location+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Location+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		F57AABFD299ADDB5005C5890 /* SearchResultsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsVC.swift; sourceTree = "<group>"; };
+		F57AABFF299AE010005C5890 /* SearchResultsTC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsTC.swift; sourceTree = "<group>"; };
 		F5908E7E29491419006AC559 /* SimulatedLocations.gpx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = SimulatedLocations.gpx; sourceTree = "<group>"; };
 		F5908E8029491426006AC559 /* Google.gpx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Google.gpx; sourceTree = "<group>"; };
 		F5908E822949142F006AC559 /* Apple.gpx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Apple.gpx; sourceTree = "<group>"; };
@@ -165,6 +169,7 @@
 				F5DD12ED29626B0B003B5BD7 /* LoginVC.swift */,
 				F59B420C2929604A001F0269 /* MainMapVC.swift */,
 				F5D2D8C72929A40B00A065AD /* AddLocationVC.swift */,
+				F57AABFD299ADDB5005C5890 /* SearchResultsVC.swift */,
 				F59FD2B52933CD2100EEAC30 /* DetailLocationVC.swift */,
 				F5DD12F829627D0A003B5BD7 /* LeftMenuVC.swift */,
 			);
@@ -183,6 +188,7 @@
 		F5DD12FC29627EDC003B5BD7 /* Cells */ = {
 			isa = PBXGroup;
 			children = (
+				F57AABFF299AE010005C5890 /* SearchResultsTC.swift */,
 				F5CF1B9B296652E1003DEF02 /* DetailTableViewCell.swift */,
 				F5DD12FD29627F79003B5BD7 /* LeftMenuTVCell.swift */,
 			);
@@ -271,8 +277,10 @@
 				F55CE2B2296CA45A00E862F4 /* Location+CoreDataProperties.swift in Sources */,
 				F59B42092929604A001F0269 /* AppDelegate.swift in Sources */,
 				F5F3ED09295B8C4A0038B64F /* DataManager.swift in Sources */,
+				F57AAC00299AE010005C5890 /* SearchResultsTC.swift in Sources */,
 				F5D493382932A82200776B07 /* LocationManager.swift in Sources */,
 				F5C99DB92966AA76003A333C /* HudView.swift in Sources */,
+				F57AABFE299ADDB5005C5890 /* SearchResultsVC.swift in Sources */,
 				F5D2D8C82929A40B00A065AD /* AddLocationVC.swift in Sources */,
 				F59FD2B62933CD2100EEAC30 /* DetailLocationVC.swift in Sources */,
 				F55CE2B0296CA45A00E862F4 /* RegionEvent+CoreDataProperties.swift in Sources */,
