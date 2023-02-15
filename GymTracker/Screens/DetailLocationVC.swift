@@ -77,8 +77,17 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             regionEvents = fetchRegions(locationIdentifier: thisLocation.identifier) // this holds our regionEvents
         }
     
+    override func viewWillAppear(_ animated: Bool) {
+       super.viewWillAppear(animated)
+       AppUtility.lockOrientation(.portrait)
+   }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        AppUtility.lockOrientation(.all)
+    }
+    
     private func performFetch() {
-        
         do {
             try fetchedResultsController.performFetch()
         } catch {
@@ -97,7 +106,6 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             let pred = NSPredicate(format: "title == %@", titleString)
         request.predicate = pred
             location = try! context.fetch(request).first!
-        print("😇😇😇😇😇😇😇Location: \(location)")
         } catch {
             print("Error: \(error)")
         }

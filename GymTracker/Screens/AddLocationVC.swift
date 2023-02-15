@@ -167,8 +167,8 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
                 mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
                 mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
                 mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-               // mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-                mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -60)
+                mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+               // mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -60)
             ])
         }
     }
@@ -213,15 +213,15 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
    func configureUI() {
        NSLayoutConstraint.activate([
            textFieldNote.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-           textFieldNote.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-           textFieldNote.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+           textFieldNote.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+           textFieldNote.trailingAnchor.constraint(equalTo: view.trailingAnchor),
            textFieldNote.heightAnchor.constraint(equalToConstant: 40),
            textFieldNote.bottomAnchor.constraint(equalTo: mapView.topAnchor)
        ])
        NSLayoutConstraint.activate([
            mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
-           mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-           mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+           mapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+           mapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
            mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
        ])
        NSLayoutConstraint.activate([
@@ -230,8 +230,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
        ])
    }
 
-
-    
     @objc func didEnterNoteTextField(_ textField: UITextField) {
         print(textField.text ?? "")
         let radiusSet = 40                                          // wrong ???
@@ -239,7 +237,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         addRightButtonBar.isEnabled = (radiusSet != 0) && noteSet
     }
     
-    //MARK: - DELEGATE PASS BACK MODEL
+    //MARK: - Save location from pan and zoom option
     @objc func didTapSaveLocationBarButton() {
     
         let coordinate = mapView.centerCoordinate
@@ -263,12 +261,9 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         let identifier = NSUUID().uuidString
         let note = textFieldNote.text ?? ""
         
-        // Save and Build a location object and then send it back with delegation to the MainMapVC
         let location = DataManager.shared.location(title: note, date: date, identifier: identifier, latitude: latitude, longitude: longitude, radius: radius, placeMark: "No Address")
         DataManager.shared.save()
         
-        //MARK: - HudView
-       // let hudView = HudView.hud(inView: navigationController!.view, aninated: true)
         let hudView = HudView.hud(inView: view, aninated: true)
           hudView.text = "Tagged"
           afterDelay(0.7) {
@@ -278,12 +273,9 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     }
 }
 
-//How does this integrate into addLocationVC we are adding a pin
+//MARK: Save from search bar
 extension AddLocationVC: sendSearchDataBackDelegate {
-
    func sendBackSearchData(_ controller: SearchResultsVC, placeMark placemark: MKPlacemark) {
-       print("Name: ", selectedPin?.name ?? "")
-       
        let note = placemark.name
        let date = Date()
        let identifier = NSUUID().uuidString
@@ -294,9 +286,13 @@ extension AddLocationVC: sendSearchDataBackDelegate {
        let location = DataManager.shared.location(title: note ?? "No Title", date: date, identifier: identifier, latitude: latitude, longitude: longitude, radius: radius, placeMark: "No Address")
        DataManager.shared.save()
        
-       self.delegate?.addLocationVC(self, didAddLocation: location)
-
-}
+       let hudView = HudView.hud(inView: view, aninated: true)
+         hudView.text = "Tagged"
+         afterDelay(0.7) {
+             hudView.hide()
+             self.delegate?.addLocationVC(self, didAddLocation: location)              //3
+       }
+    }
 }
 
 extension AddLocationVC {
@@ -316,84 +312,3 @@ extension AddLocationVC {
         view.endEditing(true)
     }
 }
-
-
-
-        // clear the existing annotation
-//        mapView.removeAnnotations(mapView.annotations)
-//        let annotation = MKPointAnnotation()
-//        annotation.coordinate = placemark.coordinate
-//        annotation.title = placemark.name
-//        if let city = placemark.locality,
-//
-//            let state = placemark.administrativeArea {
-//            annotation.subtitle = "(city) (state)"
-//        }
-//        mapView.addAnnotation(annotation)
-//        let span = MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-//        let region = MKCoordinateRegion(center: placemark.coordinate, span: span)
-//        mapView.setRegion(region, animated: true)
-
-
-
-
-
-
-
-
-//
-//extension AddLocationVC: UISearchResultsUpdating {
-//  func updateSearchResults(for searchController: UISearchController) {
-//
-//  }
-//}
-
-
-//extension AddLocationVC: UISearchBarDelegate {
-//
-//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//        self.view.isUserInteractionEnabled = false
-//        let activityIndicator = UIActivityIndicatorView()
-//        activityIndicator.style = UIActivityIndicatorView.Style.medium
-//        activityIndicator.center = view.center
-//        activityIndicator.hidesWhenStopped = true
-//
-//        view.addSubview(activityIndicator)
-//        searchBar.resignFirstResponder()
-//      //  dismiss(animated: true, completion: nil)
-//
-//        let searchRequest = MKLocalSearch.Request()
-//        searchRequest.naturalLanguageQuery = searchBar.text
-//        let search = MKLocalSearch(request: searchRequest)
-//
-//        search.start { (localSearchResponse, error) in
-//
-//            activityIndicator.stopAnimating()
-//
-//            if localSearchResponse == nil {
-//
-//                let alertController = UIAlertController(title: nil, message: "Place Not Found", preferredStyle: UIAlertController.Style.alert)
-//                alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertAction.Style.default, handler: nil))
-//                self.present(alertController, animated: true, completion: nil)
-//
-//            } else {
-//                let latitude = localSearchResponse?.boundingRegion.center.latitude
-//                let longitude = localSearchResponse?.boundingRegion.center.longitude
-//
-////                let annotation = MKPointAnnotation()
-////                annotation.title = searchBar.text
-//               let coordinateCenter = CLLocationCoordinate2DMake(latitude!, longitude!)
-//              //  self.mapView.addAnnotation(annotation)
-//
-//               // let region = MKCoordinateRegion(center: coordinateCenter, latitudinalMeters: 10000, longitudinalMeters: 10000)
-//               // self.mapView.setCenter(coordinateCenter, animated: true)
-//             //   self.mapView.setCameraBoundary(coordinateCenter, animated: true)
-//              //  self.mapView.setRegion(region, animated: true)
-//            //    mapView.setCameraZoomRange(, animated: )/
-//
-//
-//
-//        }
-//         }
-//    }
-//}

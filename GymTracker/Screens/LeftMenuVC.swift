@@ -10,19 +10,14 @@ import AuthenticationServices
 
 class LeftMenuVC: UIViewController {
     
-    var sectionTitles = ["About Demo App", "Developer", "Ben Huggins URL", "Get Code", "LOGOUT"]
+    var sectionTitles = ["About Demo App", "Developer", "Ben Huggins URL", "Youtube", "LOGOUT"]
         var sectionContent = [["How App Works"],["Linkedin","Github"],["My Website"],["Youtube"], ["LOGOUT"]]
        
     let tableView: UITableView = {
        let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
-       // table.register(RightTableHeaderCell.self, forHeaderFooterViewReuseIdentifier: "header")
         return table
     }()
-    
-//    override func viewWillAppear(_ animated: Bool) {
-//        AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.all, andRotateTo: UIInterfaceOrientation.portrait)
-//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -182,7 +177,7 @@ class LeftMenuVC: UIViewController {
         }
         
         func showSimpleAlert() {
-            let alert = UIAlertController(title: "The Point", message: "This Demo app compares how Covid19 has affected Countries of the World on 3 metrics: Total Cases, Total Recovered Cases, Total Deaths per day all Graphically", preferredStyle: .alert)
+            let alert = UIAlertController(title: "The Point", message: "This Demo app allows the user to add pins to a map. The app adds a circular geofenced region around the pins. When the user enters these predefined regions the length of time inside the regions is recorded.", preferredStyle: .alert)
   
             alert.addAction(UIAlertAction(title: "Dismiss", style: UIAlertAction.Style.default, handler: { _ in
                    //Cancel Action
