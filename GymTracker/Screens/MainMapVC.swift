@@ -35,19 +35,10 @@ class MainMapVC: UIViewController {
         map.translatesAutoresizingMaskIntoConstraints = false
         map.overrideUserInterfaceStyle = .dark
         return map}()
-
-    var timerLabel = UILabel(frame: CGRect(x: 10, y: 100, width: 200, height: 50))
-    var textTimer: String = ""
-    var seconds: Int = 0
-    
-    let nc = NotificationCenter.default
-    
+  
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-      
-        
-        
+ 
         //MARK: - Only show login screen once
         if defaults.bool(forKey: "First Launch") == true {
             print("Second or more app launch")
@@ -62,8 +53,6 @@ class MainMapVC: UIViewController {
         title = "Map"
         let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.red]
         navigationController?.navigationBar.titleTextAttributes = textAttributes
-      
-//        view.addSubview(timerLabel)
         view.addSubview(mapView)
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
         let goToLocationImage = UIImage(systemName: "mappin.and.ellipse")
@@ -83,37 +72,15 @@ class MainMapVC: UIViewController {
         configureUI()
         checkLocationServices()
         fetchLocations()
-        
         if locations.isEmpty { self.showEmptyAlert() }
         if !locations.isEmpty { showLocations() }
         
-//        if let navigationBar = self.navigationController?.navigationBar {
-        nc.addObserver(self, selector: #selector(userLoggedIn), name: Notification.Name("UserLoggedIn"), object: nil)
-        nc.addObserver(self, selector: #selector(userLoggedOut), name: Notification.Name("UserLoggedOut"), object: nil)
-        mapView.addSubview(timerLabel)
     }
     
     func showEmptyAlert() {
         self.showAlert(withTitle: "No Locations!", message: "To add a Location, Tap the upper right + button!")
     }
-    
-    @objc func userLoggedIn() {
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] timer in
-            self.seconds += 1
-           textTimer = "\(seconds)"
-            timerLabel.text = textTimer
-            print(self.seconds)
-        }
-    }
-    
-    @objc func userLoggedOut() {
-      //  Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] timer in
-         //   self.seconds += 1
-       //    textTimer = "\(seconds)"
-            timerLabel.text = ""
-            print(self.seconds)
-        }
-   
+
     /// Centers the screen over All the Map annotations Perfectly
     func region(for annotations: [MKAnnotation]) -> MKCoordinateRegion {
       let region: MKCoordinateRegion
@@ -246,17 +213,6 @@ class MainMapVC: UIViewController {
     // MARK: LAYOUT CONFIGURATION
     private func configureUI() {
 
-//        NSLayoutConstraint.activate([
-//            label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-//            label.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-//            label.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-//           label.bottomAnchor.constraint(equalTo: mapView.topAnchor),
-//          label.heightAnchor.constraint(equalToConstant: 60)
-//
-//
-//        ])
-//
-        
         NSLayoutConstraint.activate([
             mapView.topAnchor.constraint(equalTo: view.topAnchor),
             mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -295,20 +251,13 @@ class MainMapVC: UIViewController {
     @objc func didTapAddLocationBarButton() {
         let addLocationVC = AddLocationVC()
         let navVC = UINavigationController(rootViewController: addLocationVC)
-        addLocationVC.delegate = self
-       // navVC.modalPresentationStyle = .overFullScreen
-        
+        addLocationVC.delegate = self                                               //5
         present(navVC, animated: true)
     }
 }
 
 extension MainMapVC: CLLocationManagerDelegate {
-    
-    // This fires everytime the users location updates
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        // we will be back
-    }
-    
+ 
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         // we will be back
         let status = manager.authorizationStatus
@@ -327,12 +276,11 @@ extension MainMapVC: CLLocationManagerDelegate {
     // MARK: - HANDLE LOCATION MANAGER ERROR HANDLING
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("Location Manager Did fail with error: \(error)")
-        
         if (error as NSError).code == CLError.locationUnknown.rawValue {
             return
         }
         if (error as NSError).code == CLError.regionMonitoringFailure.rawValue {
-            // SHOULD AN ALERT BE PRESENTED WHEN/ if there is a regional error
+           showAlert(withTitle: "Error!", message: "Region Monitoring Failed!")
             return
         }
         lastLocationError = error
@@ -361,15 +309,9 @@ func string(from placemark: CLPlacemark) -> String {
 }
 }
 
-
-// I could come all the way back here and save !!!
-/// Make a new protocol and delegate 
-
-
-
 //MARK: - CALL BACK FROM ADDLOCATIONVC
 /// send back the data from
-extension MainMapVC: AddLocationVCDelegate {
+extension MainMapVC: AddLocationVCDelegate {                                                    //6
     func addLocationVC(_ controller: AddLocationVC, didAddLocation location: Location) {
         controller.dismiss(animated: true, completion: nil)
         location.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
@@ -377,27 +319,6 @@ extension MainMapVC: AddLocationVCDelegate {
         add(location)
     }
 }
-
-
-/// Send the data back from SearchResultsVC    // Step 6 in delegation 
-//extension MainMapVC: sendSearchDataBackDelegate {
-//    func sendBackSearchData(_ controller: SearchResultsVC, placeMark: MKPlacemark) {
-//        /// Core data save from here
-//        print("Name: ", placeMark.name)
-//    }
-//
-//}
-
-extension MainMapVC: sendSearchDataBackDelegate {
-    
-    
-    func sendBackSearchData(_ controller: SearchResultsVC, placeMark: MKPlacemark) {
-        print("Placemark: ", placeMark)
-    }
-}
-
-
-
 
 // MARK: - Map Annotation
 extension MainMapVC: MKMapViewDelegate {
@@ -412,11 +333,7 @@ extension MainMapVC: MKMapViewDelegate {
         removeButton.frame = CGRect(x: 0, y: 0, width: 23, height: 23)
         removeButton.setImage(UIImage(systemName: "trash.fill"), for: .normal)
         annotationView?.leftCalloutAccessoryView = removeButton
-          //      view.canShowCallout = true
-          //      view.calloutOffset = CGPoint(x: -5, y: 5)
-         // let button = UIButton(type: .detailDisclosure)
           annotationView?.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
-          //annotationView?.rightCalloutAccessoryView = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapGraphView))
       } else {
         annotationView?.annotation = annotation
       }
@@ -446,9 +363,9 @@ extension MainMapVC: MKMapViewDelegate {
                   let detailVC = DetailLocationVC()
                   detailVC.titleString = location.title!
                   navigationController?.pushViewController(detailVC, animated: true)
-              }
+            }
         }
-}
+    }
 //MARK: - REGION MONITORING
 extension MainMapVC {
     func startMonitoring(location: Location) {

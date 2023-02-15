@@ -251,54 +251,54 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     
     func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] (action, view, completionHandler) in
-            self?.editRegionEventAction(indexPath: indexPath)
-            completionHandler(true)
-        }
-        
+//        let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] (action, view, completionHandler) in
+//            self?.editRegionEventAction(indexPath: indexPath)
+//            completionHandler(true)
+//        }
+//
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, completionHandler) in
             self?.deleteRegionEventAction(indexPath: indexPath)
             completionHandler(true)
         }
         
-        return UISwipeActionsConfiguration(actions: [editAction, deleteAction])
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
     
-    private func editRegionEventAction(indexPath: IndexPath) {
-        let regionEvent = regionEvents[indexPath.row]
-       // let singer = singers[indexPath.row]
-        var enterTimeTextField = UITextField()
-        var exitTimeTextField = UITextField()
-
-        let alert = UIAlertController(title: "Edit Region Event Times", message: "", preferredStyle: .alert)
-        let editAction = UIAlertAction(title: "Edit", style: .default) { (action) in
-            regionEvent.setValue(enterTimeTextField.text ?? "", forKey: "enterRegionTime")
-            regionEvent.setValue(exitTimeTextField.text ?? "", forKey: "exitRegionTime")
-            
-            try! self.context.save()   // Doesnt this throw?
-            self.tableView.reloadData()
-        }
-        
-        alert.addTextField { (alertTextField) in
-            alertTextField.placeholder = "Edit Enter Time"
-            alertTextField.text = "\(regionEvent.enterRegionTime)"
-            enterTimeTextField = alertTextField
-        }
-        
-        alert.addTextField { (alertTextField) in
-            alertTextField.placeholder = "Edit Exit Time"
-            alertTextField.text = "\(regionEvent.exitRegionTime)"
-            exitTimeTextField = alertTextField
-        }
-
-        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive) { (action) in
-            self.dismiss(animated: true, completion: nil)
-        }
-        
-        alert.addAction(editAction)
-        alert.addAction(cancelAction)
-        present(alert, animated: true, completion: nil)
-    }
+//    private func editRegionEventAction(indexPath: IndexPath) {
+//        let regionEvent = regionEvents[indexPath.row]
+//       // let singer = singers[indexPath.row]
+//        var enterTimeTextField = UITextField()
+//        var exitTimeTextField = UITextField()
+//
+//        let alert = UIAlertController(title: "Edit Region Event Times", message: "", preferredStyle: .alert)
+//        let editAction = UIAlertAction(title: "Edit", style: .default) { (action) in
+//            regionEvent.setValue(enterTimeTextField.text ?? "", forKey: "enterRegionTime")
+//            regionEvent.setValue(exitTimeTextField.text ?? "", forKey: "exitRegionTime")
+//
+//            try! self.context.save()   // Doesnt this throw?
+//            self.tableView.reloadData()
+//        }
+//
+//        alert.addTextField { (alertTextField) in
+//            alertTextField.placeholder = "Edit Enter Time"
+//            alertTextField.text = "\(regionEvent.enterRegionTime)"
+//            enterTimeTextField = alertTextField
+//        }
+//
+//        alert.addTextField { (alertTextField) in
+//            alertTextField.placeholder = "Edit Exit Time"
+//            alertTextField.text = "\(regionEvent.exitRegionTime)"
+//            exitTimeTextField = alertTextField
+//        }
+//
+//        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive) { (action) in
+//            self.dismiss(animated: true, completion: nil)
+//        }
+//
+//        alert.addAction(editAction)
+//        alert.addAction(cancelAction)
+//        present(alert, animated: true, completion: nil)
+//    }
     
     private func deleteRegionEventAction(indexPath: IndexPath) {
        // let singer = singers[indexPath.row] // this is the old way
@@ -353,7 +353,6 @@ extension DetailLocationVC {
         print("*** NSFetchedResults unknown type")
       }
     }
-    
     
         func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
           switch type {

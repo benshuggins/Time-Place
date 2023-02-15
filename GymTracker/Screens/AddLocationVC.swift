@@ -13,7 +13,7 @@ import CoreData
 
 
 protocol AddLocationVCDelegate: class {
-  func addLocationVC(_ controller: AddLocationVC, didAddLocation: Location)
+  func addLocationVC(_ controller: AddLocationVC, didAddLocation: Location)   //1
 }
 
 let dateFormatter: DateFormatter = {
@@ -30,7 +30,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     var selectedPin: MKPlacemark? = nil
     
     var locations: [Location] = []
-    weak var delegate: AddLocationVCDelegate?
+    weak var delegate: AddLocationVCDelegate?                                                       //2
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     let geoCoder = CLGeocoder()
     var placeMark: CLPlacemark?
@@ -112,12 +112,9 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         self.hideKeyboardWhenTappedAround()
         setupKeyBoard()
         
-        
-        
-        
         // MARK: - SEARCH CONTROLLER
          let searchResultsVC = SearchResultsVC()
-        // searchResultsVC.delegate = self        // this is the passback      // 5 Delegate for search
+         searchResultsVC.delegate = self        // this is the passback search results   // 5 Delegate for search
         
     
         searchController = UISearchController(searchResultsController: searchResultsVC)
@@ -208,6 +205,33 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 //        mappinImageView.frame.origin.y = mapView.frame.height/2
 //    }
     
+    func format(date: Date) -> String {
+       return dateFormatter.string(from: date)
+   }
+
+   //MARK: - LAYOUT CONSTRAINTS
+   func configureUI() {
+       NSLayoutConstraint.activate([
+           textFieldNote.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+           textFieldNote.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+           textFieldNote.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+           textFieldNote.heightAnchor.constraint(equalToConstant: 40),
+           textFieldNote.bottomAnchor.constraint(equalTo: mapView.topAnchor)
+       ])
+       NSLayoutConstraint.activate([
+           mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
+           mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+           mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+           mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+       ])
+       NSLayoutConstraint.activate([
+           mappinImageView.centerXAnchor.constraint(equalTo: mapView.centerXAnchor),
+           mappinImageView.centerYAnchor.constraint(equalTo: mapView.centerYAnchor),
+       ])
+   }
+
+
+    
     @objc func didEnterNoteTextField(_ textField: UITextField) {
         print(textField.text ?? "")
         let radiusSet = 40                                          // wrong ???
@@ -249,34 +273,30 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
           hudView.text = "Tagged"
           afterDelay(0.7) {
               hudView.hide()
-              self.delegate?.addLocationVC(self, didAddLocation: location)
-          }
+              self.delegate?.addLocationVC(self, didAddLocation: location)              //3
+        }
     }
-    
-     func format(date: Date) -> String {
-        return dateFormatter.string(from: date)
-    }
+}
 
-    //MARK: - LAYOUT CONSTRAINTS
-    func configureUI() {
-        NSLayoutConstraint.activate([
-            textFieldNote.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            textFieldNote.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            textFieldNote.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            textFieldNote.heightAnchor.constraint(equalToConstant: 40),
-            textFieldNote.bottomAnchor.constraint(equalTo: mapView.topAnchor)
-        ])
-        NSLayoutConstraint.activate([
-            mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
-            mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-        NSLayoutConstraint.activate([
-            mappinImageView.centerXAnchor.constraint(equalTo: mapView.centerXAnchor),
-            mappinImageView.centerYAnchor.constraint(equalTo: mapView.centerYAnchor),
-        ])
-    }
+//How does this integrate into addLocationVC we are adding a pin
+extension AddLocationVC: sendSearchDataBackDelegate {
+
+   func sendBackSearchData(_ controller: SearchResultsVC, placeMark placemark: MKPlacemark) {
+       print("Name: ", selectedPin?.name ?? "")
+       
+       let note = placemark.name
+       let date = Date()
+       let identifier = NSUUID().uuidString
+       let radius: Double = 100
+       let latitude = placemark.coordinate.latitude
+       let longitude = placemark.coordinate.longitude
+       
+       let location = DataManager.shared.location(title: note ?? "No Title", date: date, identifier: identifier, latitude: latitude, longitude: longitude, radius: radius, placeMark: "No Address")
+       DataManager.shared.save()
+       
+       self.delegate?.addLocationVC(self, didAddLocation: location)
+
+}
 }
 
 extension AddLocationVC {
@@ -297,16 +317,6 @@ extension AddLocationVC {
     }
 }
 
- //How does this integrate into addLocationVC we are adding a pin
-//extension AddLocationVC: sendSearchDataBackDelegate {
-//
-//    func sendBackSearchData(_ controller: SearchResultsVC, placeMark placemark: MKPlacemark) {
-//        // cache the pin
-//        selectedPin = placemark
-//        print("Name: ", selectedPin?.name ?? "")
-
-//}
-//}
 
 
         // clear the existing annotation
