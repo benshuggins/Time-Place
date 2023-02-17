@@ -10,8 +10,8 @@ import MapKit
 import CoreLocation
 import CoreData
 
-protocol AddLocationVCDelegate: class {
-  func addLocationVC(_ controller: AddLocationVC, didAddLocation: Location)   //1
+protocol AddLocationVCDelegate: AnyObject {
+  func addLocationVC(_ controller: AddLocationVC, didAddLocation: Location)
 }
 
 let dateFormatter: DateFormatter = {
@@ -23,10 +23,10 @@ let dateFormatter: DateFormatter = {
 
 class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
   
-    var searchController = UISearchController(searchResultsController: SearchResultsVC()) // 1
+    var searchController = UISearchController(searchResultsController: SearchResultsVC())
     var selectedPin: MKPlacemark? = nil
     var locations: [Location] = []
-    weak var delegate: AddLocationVCDelegate?                                                       //2
+    weak var delegate: AddLocationVCDelegate?
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     let geoCoder = CLGeocoder()
     var placeMark: CLPlacemark?
@@ -109,16 +109,15 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         setupKeyBoard()
         
         // MARK: - SEARCH CONTROLLER
-         let searchResultsVC = SearchResultsVC()
-         searchResultsVC.delegate = self
-    
+	    let searchResultsVC = SearchResultsVC()
+	    searchResultsVC.delegate = self
         searchController = UISearchController(searchResultsController: searchResultsVC)
         searchController.searchResultsUpdater = searchResultsVC as UISearchResultsUpdating
         searchController.hidesNavigationBarDuringPresentation = true
         let searchBar = searchController.searchBar
         searchBar.sizeToFit()
         searchBar.placeholder = "Search for a place to add"
-        navigationItem.searchController = searchController     // This has to be the last thing before the mapview and last in viewDidLoad
+        navigationItem.searchController = searchController
         searchResultsVC.mapView = mapView
     }
     
@@ -135,15 +134,11 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 //        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
 //        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
 //
-        NotificationCenter.default.addObserver(self,
-                            selector: #selector(handle(keyboardShowNotification:)),
-                                               name: UIResponder.keyboardDidShowNotification,
-                                               object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handle(keyboardShowNotification:)),
+		name: UIResponder.keyboardDidShowNotification, object: nil)
         
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(handle2(keyboardWillHideNotification:)),
-                                               name: UIResponder.keyboardDidShowNotification,
-                                               object: nil)
+        NotificationCenter.default.addObserver(self,selector: #selector(handle2(keyboardWillHideNotification:)),
+		name: UIResponder.keyboardDidShowNotification, object: nil)
     }
     
 
@@ -184,7 +179,6 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
                 mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
                // mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 60)
             ])
-           
         }
     }
     
@@ -225,15 +219,13 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
    }
 
     @objc func didEnterNoteTextField(_ textField: UITextField) {
-        print(textField.text ?? "")
-        let radiusSet = 40                                          // wrong ???
+        let radiusSet = 40                                          
         let noteSet = !(textField.text?.isEmpty ?? true)
         addRightButtonBar.isEnabled = (radiusSet != 0) && noteSet
     }
     
     //MARK: - Save location from manual pan and zoom option
     @objc func didTapSaveLocationBarButton() {
-    
         let coordinate = mapView.centerCoordinate
         let latitude = coordinate.latitude
         let longitude = coordinate.longitude
@@ -262,7 +254,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
           hudView.text = "Tagged"
           afterDelay(0.7) {
               hudView.hide()
-              self.delegate?.addLocationVC(self, didAddLocation: location)              //3
+              self.delegate?.addLocationVC(self, didAddLocation: location)
         }
     }
 }
@@ -284,7 +276,7 @@ extension AddLocationVC: sendSearchDataBackDelegate {
          hudView.text = "Tagged"
          afterDelay(0.7) {
              hudView.hide()
-             self.delegate?.addLocationVC(self, didAddLocation: location)              //3
+             self.delegate?.addLocationVC(self, didAddLocation: location)
 			 self.navigationController?.popViewController(animated: true)
        }
     }

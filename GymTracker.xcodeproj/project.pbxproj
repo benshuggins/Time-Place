@@ -37,7 +37,6 @@
 		F5DD12F929627D0A003B5BD7 /* LeftMenuVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DD12F829627D0A003B5BD7 /* LeftMenuVC.swift */; };
 		F5DD12FE29627F79003B5BD7 /* LeftMenuTVCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DD12FD29627F79003B5BD7 /* LeftMenuTVCell.swift */; };
 		F5F3ED09295B8C4A0038B64F /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5F3ED08295B8C4A0038B64F /* DataManager.swift */; };
-		F5F3ED2B295BF2510038B64F /* Sound in Resources */ = {isa = PBXBuildFile; fileRef = F5F3ED2A295BF2510038B64F /* Sound */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -74,7 +73,6 @@
 		F5DD12F829627D0A003B5BD7 /* LeftMenuVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeftMenuVC.swift; sourceTree = "<group>"; };
 		F5DD12FD29627F79003B5BD7 /* LeftMenuTVCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeftMenuTVCell.swift; sourceTree = "<group>"; };
 		F5F3ED08295B8C4A0038B64F /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
-		F5F3ED2A295BF2510038B64F /* Sound */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sound; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,7 +137,6 @@
 				F5C99DBA2966B28A003A333C /* MenuHelpers */,
 				F518B3FB294404FC00AB34FB /* Functions.swift */,
 				F5D2D8CA2929A96E00A065AD /* Utilities.swift */,
-				F5F3ED2A295BF2510038B64F /* Sound */,
 				F5C99DB82966AA76003A333C /* HudView.swift */,
 				F5DD12EF29626D80003B5BD7 /* KeychainItem.swift */,
 				F5908E822949142F006AC559 /* Apple.gpx */,
@@ -251,7 +248,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5908E832949142F006AC559 /* Apple.gpx in Resources */,
-				F5F3ED2B295BF2510038B64F /* Sound in Resources */,
 				F59B42182929604D001F0269 /* LaunchScreen.storyboard in Resources */,
 				F59B42152929604D001F0269 /* Assets.xcassets in Resources */,
 				F5908E8129491426006AC559 /* Google.gpx in Resources */,
@@ -441,6 +437,7 @@
 				DEVELOPMENT_TEAM = 3DMFD3YYQW;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GymTracker/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Time@Place";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Can I use your location bro";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Can I use your location";
@@ -476,6 +473,7 @@
 				DEVELOPMENT_TEAM = 3DMFD3YYQW;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GymTracker/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Time@Place";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Can I use your location bro";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Can I use your location";

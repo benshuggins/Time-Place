@@ -54,7 +54,6 @@ class DataManager {
     
     // Fetches RegionEvents from a location identifier 
     func fetchRegions(locationIdentifier: String) -> [RegionEvent] {
-        
         var fetchedRegionEvents = [RegionEvent]()
         
                 do {
@@ -85,7 +84,6 @@ class DataManager {
 //    }
     
 
-    
     func getRegionEvents(location: Location) -> [RegionEvent] {
         let context = context
         let request: NSFetchRequest<RegionEvent> = RegionEvent.fetchRequest()
@@ -102,19 +100,15 @@ class DataManager {
         return fetchedRegionEvents
     }
     
-    
     //MARK: - DELETE A LOCATION CORE DATA
-// Delete a Location, counld add a sole do catch to print errors specific to failure of deletion
     func deleteLocation(location: Location) {
         let context = context
         context.delete(location)
         save()
     }
  
-    
     //MARK: - MATCH REGION TO LOCATION USING IDENTIFIER
    //  I send you identifier from region and you give me back the title name
-    // identifiers dont match 
     func matchLocation(from identifier: String) -> Location? {
         let context = context
         var location: [Location] = []
@@ -128,12 +122,7 @@ class DataManager {
             print("Error: \(error)")
         }
         return location.first
-    }
-
-    
-    
-
-        
+         }
     }
     
     

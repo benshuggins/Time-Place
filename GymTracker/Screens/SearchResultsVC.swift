@@ -8,9 +8,7 @@
 import UIKit
 import MapKit
 
-
-//1
-protocol sendSearchDataBackDelegate: class {
+protocol sendSearchDataBackDelegate: AnyObject {
     func sendBackSearchData(_ controller: SearchResultsVC, placeMark: MKPlacemark)
 }
 
@@ -30,7 +28,7 @@ class SearchResultsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
         return table
     }()
     
-    weak var delegate: sendSearchDataBackDelegate?  //2
+    weak var delegate: sendSearchDataBackDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,23 +57,21 @@ class SearchResultsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
      func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
          let placeMark = matchingItems[indexPath.row].placemark
          
-         self.delegate?.sendBackSearchData(self, placeMark: placeMark)  //3
+         self.delegate?.sendBackSearchData(self, placeMark: placeMark)
          dismiss(animated: true, completion: nil)
      }
 
     func updateSearchResults(for searchController: UISearchController) {
-      //  searchController.searchResultsController?.view.isHidden = false
         guard let mapView = mapView, let searchBarText = searchController.searchBar.text else { return }
         let request = MKLocalSearch.Request()
            request.naturalLanguageQuery = searchBarText
            request.region = mapView.region
-           let search = MKLocalSearch(request: request)     /// This is the search request that gets
+           let search = MKLocalSearch(request: request)
         search.start { [self] response, _ in
                guard let response = response else { return }
-               self.matchingItems = response.mapItems          // these are the items that get returned
+               self.matchingItems = response.mapItems
             print("Matching Items: ", self.matchingItems)
                self.tableView.reloadData()
        }
     }
-
 }

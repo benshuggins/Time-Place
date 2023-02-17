@@ -73,7 +73,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // MARK: - Core Data stack
     lazy var managedObjectContext: NSManagedObjectContext = self.persistentContainer.viewContext
-
     lazy var persistentContainer: NSPersistentContainer = {
      
       let container = NSPersistentContainer(name: "DataModel")
@@ -99,6 +98,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
       }
     }
-
-}
+  }
 

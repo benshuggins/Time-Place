@@ -45,13 +45,7 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     var location = Location()
     var regionEvents: [RegionEvent] = []
     var locationsPredicate: NSPredicate?
-//    
-//    private let label: UILabel = {
-//       let label = UILabel()
-//        label.textColor = .black
-//        return label
-//    }()
-//    
+
     let tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .insetGrouped)
         table.register(DetailTableViewCell.self, forCellReuseIdentifier: DetailTableViewCell.identifier)
@@ -60,18 +54,13 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
 
         override func viewDidLoad() {
             super.viewDidLoad()
-          //  view.addSubview(label)
             title = titleString
             view.addSubview(tableView)
             tableView.delegate = self
             tableView.dataSource = self
-           // view.backgroundColor = .system
             tableView.frame = view.bounds
-            //navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(changeFilter))
-                // loadSavedData()
             performFetch()
      
-          //  loadSavedDataResults()
             let thisLocation = fetchLocation(title: titleString)
            // fetch the RegionEvents that match this Location 
             regionEvents = fetchRegions(locationIdentifier: thisLocation.identifier)
@@ -166,7 +155,7 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             // 4 show everything again
             ac.addAction(UIAlertAction(title: "Show All", style: .default) { [unowned self] _ in
                 self.locationsPredicate = nil
-              //  self.loadSavedData()
+             
             })
 
             ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
@@ -183,7 +172,6 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         var total: Double = 0
        
         let subCategory = sectionInfo.objects as? [RegionEvent]
-        /// This method sums the totalTime for each individual section
         for i in subCategory ?? [] {
             let name = i.sectionDate
             if name == i.sectionDate {
