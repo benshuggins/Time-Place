@@ -29,7 +29,6 @@
 		F5CF1B9C296652E1003DEF02 /* DetailTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5CF1B9B296652E1003DEF02 /* DetailTableViewCell.swift */; };
 		F5D2D8C82929A40B00A065AD /* AddLocationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D2D8C72929A40B00A065AD /* AddLocationVC.swift */; };
 		F5D2D8CB2929A96E00A065AD /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D2D8CA2929A96E00A065AD /* Utilities.swift */; };
-		F5D493382932A82200776B07 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D493372932A82200776B07 /* LocationManager.swift */; };
 		F5DD12EE29626B0B003B5BD7 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DD12ED29626B0B003B5BD7 /* LoginVC.swift */; };
 		F5DD12F029626D80003B5BD7 /* KeychainItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DD12EF29626D80003B5BD7 /* KeychainItem.swift */; };
 		F5DD12F329627A9B003B5BD7 /* SlideInPresentationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5DD12F229627A9B003B5BD7 /* SlideInPresentationManager.swift */; };
@@ -66,7 +65,6 @@
 		F5CF1B9B296652E1003DEF02 /* DetailTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTableViewCell.swift; sourceTree = "<group>"; };
 		F5D2D8C72929A40B00A065AD /* AddLocationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLocationVC.swift; sourceTree = "<group>"; };
 		F5D2D8CA2929A96E00A065AD /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
-		F5D493372932A82200776B07 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		F5DD12ED29626B0B003B5BD7 /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		F5DD12EF29626D80003B5BD7 /* KeychainItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainItem.swift; sourceTree = "<group>"; };
 		F5DD12F1296270EC003B5BD7 /* GymTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GymTracker.entitlements; sourceTree = "<group>"; };
@@ -180,7 +178,6 @@
 			isa = PBXGroup;
 			children = (
 				F5F3ED08295B8C4A0038B64F /* DataManager.swift */,
-				F5D493372932A82200776B07 /* LocationManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -278,7 +275,6 @@
 				F59B42092929604A001F0269 /* AppDelegate.swift in Sources */,
 				F5F3ED09295B8C4A0038B64F /* DataManager.swift in Sources */,
 				F57AAC00299AE010005C5890 /* SearchResultsTC.swift in Sources */,
-				F5D493382932A82200776B07 /* LocationManager.swift in Sources */,
 				F5C99DB92966AA76003A333C /* HudView.swift in Sources */,
 				F57AABFE299ADDB5005C5890 /* SearchResultsVC.swift in Sources */,
 				F5D2D8C82929A40B00A065AD /* AddLocationVC.swift in Sources */,

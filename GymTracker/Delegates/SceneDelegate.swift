@@ -39,35 +39,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
-        // Called as the scene is being released by the system.
-        // This occurs shortly after the scene enters the background, or when its session is discarded.
-        // Release any resources associated with this scene that can be re-created the next time the scene connects.
-        // The scene may re-connect later, as its session was not necessarily discarded (see `application:didDiscardSceneSessions` instead).
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
-        // Called when the scene has moved from an inactive state to an active state.
-        // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
-        // Called when the scene will move from an active state to an inactive state.
-        // This may occur due to temporary interruptions (ex. an incoming phone call).
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
-        // Called as the scene transitions from the background to the foreground.
-        // Use this method to undo the changes made on entering the background.
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
-        // Called as the scene transitions from the foreground to the background.
-        // Use this method to save data, release shared resources, and store enough scene-specific state information
-        // to restore the scene back to its current state.
-        // Save changes in the application's managed object context when the application transitions to the background.
     }
 
-    
     // MARK: - Helper methods
     func listenForFatalCoreDataNotifications() { NotificationCenter.default.addObserver(forName: CoreDataSaveFailedNotification, object: nil, queue: OperationQueue.main) { _ in
         let message = """
@@ -94,7 +79,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
       }
 
 // MARK: - Location Manager Delegate
-
 extension SceneDelegate {
     
     func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
@@ -105,7 +89,7 @@ extension SceneDelegate {
         if state == CLRegionState.inside {
             enterT = Date()
             let enterTimeFormat = format(date: enterT)
-            ///If the app is open (Looking at the map inside iPhone) then show an alert the view
+            ///If the app is open (Looking at the map inside iPhone) then show an alert view informing users of entrance, exit, and total time inside region
             if UIApplication.shared.applicationState == .active {
                 //            let nc = NotificationCenter.default
                 //            nc.post(name: Notification.Name("UserLoggedIn"), object: nil)
@@ -135,9 +119,12 @@ extension SceneDelegate {
             let sectionDateS = Date()
             let sectionDate = dateFormatterSections.string(from: sectionDateS)
             var totalTimeString = ""
+            var totalRegionSeconds: Double = 0
           
             if enterT != nil {
                 let deltaT = exitTime.timeIntervalSince(enterT)
+                totalRegionSeconds = Double(deltaT)
+                // saving a different total time of type time interval may help
                 totalTimeString = deltaT.stringTime
             } else {
                 totalTimeString = "No Entrance Time"
@@ -149,6 +136,7 @@ extension SceneDelegate {
             regionEvent.exitRegionTime = exitTime // Core Data Exit
             regionEvent.totalRegionTime = totalTimeString //Core Data Total
             regionEvent.sectionDate = sectionDate // String for section Date
+            regionEvent.totalRegionSeconds = totalRegionSeconds
             regionEvent.regionIdentifier = currentLocation.identifier
             currentLocation.addToRegionEvent(regionEvent) // Core Data add entire regionEvent object to CD
             try! context.save()

@@ -10,8 +10,6 @@ import MapKit
 import CoreLocation
 import CoreData
 
-
-
 protocol AddLocationVCDelegate: class {
   func addLocationVC(_ controller: AddLocationVC, didAddLocation: Location)   //1
 }
@@ -25,10 +23,8 @@ let dateFormatter: DateFormatter = {
 
 class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
   
-    // Search Step 1
     var searchController = UISearchController(searchResultsController: SearchResultsVC()) // 1
     var selectedPin: MKPlacemark? = nil
-    
     var locations: [Location] = []
     weak var delegate: AddLocationVCDelegate?                                                       //2
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -51,7 +47,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         textField.textColor = .black
         textField.backgroundColor = .darkGray
         textField.textAlignment = .left
-        textField.attributedPlaceholder = NSAttributedString(string: "Enter Location Name",
+        textField.attributedPlaceholder = NSAttributedString(string: " Enter Location Name",
             attributes: [NSAttributedString.Key.foregroundColor: UIColor.black])
         textField.addTarget(self, action: #selector(didEnterNoteTextField), for: .editingChanged)
         return textField
@@ -114,16 +110,14 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         
         // MARK: - SEARCH CONTROLLER
          let searchResultsVC = SearchResultsVC()
-         searchResultsVC.delegate = self        // this is the passback search results   // 5 Delegate for search
-        
+         searchResultsVC.delegate = self
     
         searchController = UISearchController(searchResultsController: searchResultsVC)
         searchController.searchResultsUpdater = searchResultsVC as UISearchResultsUpdating
         searchController.hidesNavigationBarDuringPresentation = true
-        
         let searchBar = searchController.searchBar
         searchBar.sizeToFit()
-        searchBar.placeholder = "Search for places"
+        searchBar.placeholder = "Search for a place to add"
         navigationItem.searchController = searchController     // This has to be the last thing before the mapview and last in viewDidLoad
         searchResultsVC.mapView = mapView
     }
@@ -237,7 +231,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         addRightButtonBar.isEnabled = (radiusSet != 0) && noteSet
     }
     
-    //MARK: - Save location from pan and zoom option
+    //MARK: - Save location from manual pan and zoom option
     @objc func didTapSaveLocationBarButton() {
     
         let coordinate = mapView.centerCoordinate
@@ -291,6 +285,7 @@ extension AddLocationVC: sendSearchDataBackDelegate {
          afterDelay(0.7) {
              hudView.hide()
              self.delegate?.addLocationVC(self, didAddLocation: location)              //3
+			 self.navigationController?.popViewController(animated: true)
        }
     }
 }

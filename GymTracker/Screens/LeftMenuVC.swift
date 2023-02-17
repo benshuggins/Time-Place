@@ -30,20 +30,18 @@ class LeftMenuVC: UIViewController {
         tableView.tableFooterView = UIView(frame: CGRect.zero)
         
         if #available(iOS 13.0, *) {
-                    navigationController?.navigationBar.prefersLargeTitles = true
-                    navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
-                } else {
-                    // Fallback on earlier versions
-                }
-                // remove bottom blank cells in the table view
-                tableView.tableFooterView = UIView(frame: CGRect.zero)
-        
-                //iPad Layout: adds blank space to the left and right of the table view
-                tableView.cellLayoutMarginsFollowReadableWidth = true
-                
-                // Remove text 'Settings' from back button
-                navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-            }
+            navigationController?.navigationBar.prefersLargeTitles = true
+            navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
+        } else {
+            // Fallback on earlier versions
+        }
+        // remove bottom blank cells in the table view
+        tableView.tableFooterView = UIView(frame: CGRect.zero)
+        //iPad Layout: adds blank space to the left and right of the table view
+        tableView.cellLayoutMarginsFollowReadableWidth = true
+        // Remove text 'Settings' from back button
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+    }
         
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -55,50 +53,50 @@ class LeftMenuVC: UIViewController {
          func numberOfSections(in tableView: UITableView) -> Int {
                 return sectionTitles.count
             }
-            
-        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-                
-                switch section {
-                case 0:
-                    return sectionContent[0].count      // section 0 is ABOUT APP
-                case 1:
-                    return sectionContent[1].count      // section 1 is the 2nd section 'Api Used'
-                case 2:
-                    return sectionContent[2].count      // section 2 is the 3rd section 'Get Code'
-                case 3:
-                    return sectionContent[3].count      // section 2 is the 3rd section 'Get Code'
-                case 4:
-                    return sectionContent[4].count
-                default:
-                    return sectionContent[0].count
-                }
-        }
-    
-            func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-                return sectionTitles[section]  // section 0 is the 1st section
-            }
         
-            func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-                let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-            //cell.accessoryType = .disclosureIndicator
-                // Configure the cell...array of content within array of headers
-                cell.textLabel?.text = sectionContent[(indexPath as NSIndexPath).section][(indexPath as NSIndexPath).row]
-                
-                switch (indexPath as NSIndexPath).section {
-                    
-                case 0:  // Section 0 ABOUT APP
-                    cell.accessoryType = .disclosureIndicator
-                   
-                case 1: // Section 1 Developer
-                    cell.accessoryType = .none
-                    
-                case 2:  // Section 2 API USED
-                    cell.accessoryType = .none
-                    
-                case 3:  // Section 3 LOGOUT
-                    cell.accessoryType = .none
-                case 4:  // Section 3 LOGOUT
-                    cell.accessoryType = .none
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            
+            switch section {
+            case 0:
+                return sectionContent[0].count      // section 0 is ABOUT APP
+            case 1:
+                return sectionContent[1].count      // section 1 is the 2nd section 'Api Used'
+            case 2:
+                return sectionContent[2].count      // section 2 is the 3rd section 'Get Code'
+            case 3:
+                return sectionContent[3].count      // section 2 is the 3rd section 'Get Code'
+            case 4:
+                return sectionContent[4].count
+            default:
+                return sectionContent[0].count
+            }
+    }
+
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return sectionTitles[section]  // section 0 is the 1st section
+    }
+        
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+    //cell.accessoryType = .disclosureIndicator
+        // Configure the cell...array of content within array of headers
+        cell.textLabel?.text = sectionContent[(indexPath as NSIndexPath).section][(indexPath as NSIndexPath).row]
+        
+        switch (indexPath as NSIndexPath).section {
+            
+        case 0:  // Section 0 ABOUT APP
+            cell.accessoryType = .disclosureIndicator
+           
+        case 1: // Section 1 Developer
+            cell.accessoryType = .none
+            
+        case 2:  // Section 2 API USED
+            cell.accessoryType = .none
+            
+        case 3:  // Section 3 LOGOUT
+            cell.accessoryType = .none
+        case 4:  // Section 3 LOGOUT
+            cell.accessoryType = .none
                     
                 
         default: break

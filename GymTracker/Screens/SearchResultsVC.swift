@@ -59,7 +59,6 @@ class SearchResultsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
      func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
          let placeMark = matchingItems[indexPath.row].placemark
          
-         // Do a Core data save here and then pass it on back to the mainmapView and it will work
          self.delegate?.sendBackSearchData(self, placeMark: placeMark)  //3
          dismiss(animated: true, completion: nil)
      }

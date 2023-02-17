@@ -34,7 +34,8 @@ class MainMapVC: UIViewController {
         let map = MKMapView()
         map.translatesAutoresizingMaskIntoConstraints = false
         map.overrideUserInterfaceStyle = .dark
-        return map}()
+        return map
+		}()
   
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,7 +51,7 @@ class MainMapVC: UIViewController {
         }
         
         mapView.delegate = self
-        title = "Map"
+        title = "Time@Place"
         let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.red]
         navigationController?.navigationBar.titleTextAttributes = textAttributes
         view.addSubview(mapView)
@@ -74,7 +75,6 @@ class MainMapVC: UIViewController {
         fetchLocations()
         if locations.isEmpty { self.showEmptyAlert() }
         if !locations.isEmpty { showLocations() }
-        
     }
     
     func showEmptyAlert() {
@@ -173,6 +173,7 @@ class MainMapVC: UIViewController {
         alert.addAction(okAction)
       present(alert, animated: true, completion: nil)
     }
+	
     //MARK: - ADDING A LOCATION
     func add(_ location: Location) {
         locations.append(location)
@@ -180,6 +181,7 @@ class MainMapVC: UIViewController {
       //updateGeotificationsCount()
         mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
     }
+	
     //MARK: - DELETING A LOCATION
     func remove(_ location: Location) {
       guard let index = locations.firstIndex(of: location) else { return }
@@ -366,6 +368,7 @@ extension MainMapVC: MKMapViewDelegate {
             }
         }
     }
+
 //MARK: - REGION MONITORING
 extension MainMapVC {
     func startMonitoring(location: Location) {

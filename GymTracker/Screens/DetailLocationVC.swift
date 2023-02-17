@@ -33,7 +33,7 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
       let sort2 = NSSortDescriptor(key: "enterRegionTime", ascending: true)
       fetchRequest.sortDescriptors = [sort1, sort2]
 
-     //fetchRequest.fetchBatchSize = 20
+     fetchRequest.fetchBatchSize = 20
 
       let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: "sectionDate", cacheName: "RegionEventsCache")
 
@@ -45,13 +45,13 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     var location = Location()
     var regionEvents: [RegionEvent] = []
     var locationsPredicate: NSPredicate?
-    
-    private let label: UILabel = {
-       let label = UILabel()
-        label.textColor = .black
-        return label
-    }()
-    
+//    
+//    private let label: UILabel = {
+//       let label = UILabel()
+//        label.textColor = .black
+//        return label
+//    }()
+//    
     let tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .insetGrouped)
         table.register(DetailTableViewCell.self, forCellReuseIdentifier: DetailTableViewCell.identifier)
@@ -65,16 +65,16 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             view.addSubview(tableView)
             tableView.delegate = self
             tableView.dataSource = self
-            view.backgroundColor = .white
+           // view.backgroundColor = .system
             tableView.frame = view.bounds
-            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(changeFilter))
+            //navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(changeFilter))
                 // loadSavedData()
             performFetch()
      
           //  loadSavedDataResults()
             let thisLocation = fetchLocation(title: titleString)
            // fetch the RegionEvents that match this Location 
-            regionEvents = fetchRegions(locationIdentifier: thisLocation.identifier) // this holds our regionEvents
+            regionEvents = fetchRegions(locationIdentifier: thisLocation.identifier)
         }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -119,7 +119,7 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         
                 do {
                    // let request = RegionEvent.fetchRequest() as NSFetchRequest<RegionEvent>   // this is basic NSFEtch
-                    let request: NSFetchRequest<RegionEvent> = NSFetchRequest<RegionEvent>(entityName: "RegionEvent")
+                   let request: NSFetchRequest<RegionEvent> = NSFetchRequest<RegionEvent>(entityName: "RegionEvent")
                     let pred = NSPredicate(format: "ANY regionIdentifier == %@", locationIdentifier)
                     request.predicate = pred
                      fetchedRegionEvents = try! context.fetch(request)
@@ -129,43 +129,14 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
                 }
         return fetchedRegionEvents
     }
-    
-    
-    
-//
-//
-//    func loadSavedData()   {
-//        // Just get the Locations Associated with the title
-//
-//        do {
-//        let request = Location.fetchRequest() as NSFetchRequest<Location>
-//            let pred = NSPredicate(format: "title == %@", titleString)
-//        request.predicate = pred
-//            location = try! context.fetch(request).first!
-//        print("😇😇😇😇😇😇😇Location: \(location)")
-//
-//        } catch {
-//            print("Error: \(error)")
-//        }
-//
-//        do {
-//            let request = RegionEvent.fetchRequest() as NSFetchRequest<RegionEvent>
-//            let pred = NSPredicate(format: "regionIdentifier == %@", location.identifier)
-//            request.predicate = pred
-//            regionEvents = try! context.fetch(request)
-//
-//        } catch {
-//            print("Error: \(error)")
-//        }
-//    }
-//
+
+    // MARK: THIS WILL BE ADDED IN THE FUTURE FOR EASE OF USE
         @objc func changeFilter() {
             let ac = UIAlertController(title: "Filter Region Events…", message: nil, preferredStyle: .actionSheet)
 
             // 1
             ac.addAction(UIAlertAction(title: "Show Most Recent", style: .default) { [unowned self] _ in
                 self.locationsPredicate = NSPredicate(format: "message CONTAINS[c] 'h'")
-              //  self.fetchRegions(locationIdentifier: )
             })
 
             // 3 request only commits that took place 43,200 seconds ago
@@ -190,7 +161,7 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
 
             ac.addAction(UIAlertAction(title: "Show Total Time for Location", style: .default) { [unowned self] _ in
                 self.locationsPredicate = nil
-                //self.loadSavedData()
+
             })
             // 4 show everything again
             ac.addAction(UIAlertAction(title: "Show All", style: .default) { [unowned self] _ in
@@ -209,27 +180,28 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let sectionInfo = fetchedResultsController.sections![section]
       
-        var total = 0
+        var total: Double = 0
+       
         let subCategory = sectionInfo.objects as? [RegionEvent]
         /// This method sums the totalTime for each individual section
         for i in subCategory ?? [] {
             let name = i.sectionDate
             if name == i.sectionDate {
-                if let unwrapped = i.totalRegionTime{
-                    total += Int(unwrapped) ?? 0
-                } else {
-                }
+                    total += i.totalRegionSeconds
             }
         }
-        
+		
+		let timeTotal = TimeInterval(total)
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 28))
         headerView.backgroundColor = .secondarySystemBackground
+        headerView.layer.cornerRadius = 10
         let sectionDateLabel = UILabel(frame: CGRect(x: 5, y: 5, width: 100, height: headerView.frame.size.height-10))
         sectionDateLabel.text = sectionInfo.name
-        let totalLabel = UILabel(frame: CGRect(x: 100 + sectionDateLabel.frame.size.width, y: 5,width: 100, height: headerView.frame.size.height - 10))
+        sectionDateLabel.textColor = .systemGray
+        let totalLabel = UILabel(frame: CGRect(x: 50 + sectionDateLabel.frame.size.width, y: 5,width: 200, height: headerView.frame.size.height - 10))
         totalLabel.backgroundColor = .secondarySystemBackground
-        totalLabel.text = "Total: \(total)  "
-        totalLabel.textColor = .black
+		totalLabel.text = "Total: \(timeTotal.stringTime)  "
+        totalLabel.textColor = .systemGray
         headerView.addSubview(totalLabel)
         headerView.addSubview(sectionDateLabel)
         return headerView
@@ -249,8 +221,7 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
 
      func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-         // let regionEvent = regionEvents[indexPath.row]
-       
+         
          let cell = tableView.dequeueReusableCell(withIdentifier: DetailTableViewCell.identifier, for: indexPath) as? DetailTableViewCell//UITableViewCell//
          
          let regionEvent = fetchedResultsController.object(at: indexPath)
@@ -259,11 +230,7 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     
     func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-//        let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] (action, view, completionHandler) in
-//            self?.editRegionEventAction(indexPath: indexPath)
-//            completionHandler(true)
-//        }
-//
+
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, completionHandler) in
             self?.deleteRegionEventAction(indexPath: indexPath)
             completionHandler(true)
@@ -271,42 +238,6 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         
         return UISwipeActionsConfiguration(actions: [deleteAction])
     }
-    
-//    private func editRegionEventAction(indexPath: IndexPath) {
-//        let regionEvent = regionEvents[indexPath.row]
-//       // let singer = singers[indexPath.row]
-//        var enterTimeTextField = UITextField()
-//        var exitTimeTextField = UITextField()
-//
-//        let alert = UIAlertController(title: "Edit Region Event Times", message: "", preferredStyle: .alert)
-//        let editAction = UIAlertAction(title: "Edit", style: .default) { (action) in
-//            regionEvent.setValue(enterTimeTextField.text ?? "", forKey: "enterRegionTime")
-//            regionEvent.setValue(exitTimeTextField.text ?? "", forKey: "exitRegionTime")
-//
-//            try! self.context.save()   // Doesnt this throw?
-//            self.tableView.reloadData()
-//        }
-//
-//        alert.addTextField { (alertTextField) in
-//            alertTextField.placeholder = "Edit Enter Time"
-//            alertTextField.text = "\(regionEvent.enterRegionTime)"
-//            enterTimeTextField = alertTextField
-//        }
-//
-//        alert.addTextField { (alertTextField) in
-//            alertTextField.placeholder = "Edit Exit Time"
-//            alertTextField.text = "\(regionEvent.exitRegionTime)"
-//            exitTimeTextField = alertTextField
-//        }
-//
-//        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive) { (action) in
-//            self.dismiss(animated: true, completion: nil)
-//        }
-//
-//        alert.addAction(editAction)
-//        alert.addAction(cancelAction)
-//        present(alert, animated: true, completion: nil)
-//    }
     
     private func deleteRegionEventAction(indexPath: IndexPath) {
        // let singer = singers[indexPath.row] // this is the old way
@@ -322,7 +253,7 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             } catch {
                 print("Error deleting object NSFetch: ", error)
             }
-            //tableView.reloadData()
+
         }
         let noDeleteAction = UIAlertAction(title: "No", style: .default) { (action) in
             //do nothing
@@ -331,7 +262,6 @@ class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         areYouSureAlert.addAction(yesDeleteAction)
         self.present(areYouSureAlert, animated: true, completion: nil)
     }
-    
 }
 
 //MARK: - NSFETCHRESULTSCONTROLLERDLEGATE
@@ -378,7 +308,6 @@ extension DetailLocationVC {
               let regionEvent = controller.object(
                 at: indexPath!) as! RegionEvent
                 cell.configure(regionEvent: regionEvent)
-                //cell.textLabel?.text = "\(regionEvent.enterRegionTime)"
             }
 
           case .move:
@@ -396,155 +325,3 @@ extension DetailLocationVC {
       tableView.endUpdates()
     }
 }
-
-//    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-//      switch type {
-//      case .insert:
-//        print("*** NSFetchedResultsChangeInsert (object)")
-//        tableView.insertRows(at: [newIndexPath!], with: .fade)
-//
-//      case .delete:
-//        print("*** NSFetchedResultsChangeDelete (object)")
-//        tableView.deleteRows(at: [indexPath!], with: .fade)
-//
-//      case .update:
-//        print("*** NSFetchedResultsChangeUpdate (object)")
-//        if let cell = tableView.cellForRow(at: indexPath!) as? DetailTableViewCell {
-//          let regionEvent = controller.object(
-//            at: indexPath!) as! RegionEvent
-//            cell.configure(regionEvent: regionEvent)
-//            //cell.textLabel?.text = "\(regionEvent.enterRegionTime)"
-//        }
-//
-//      case .move:
-//        print("*** NSFetchedResultsChangeMove (object)")
-//        tableView.deleteRows(at: [indexPath!], with: .fade)
-//        tableView.insertRows(at: [newIndexPath!], with: .fade)
-//
-//      @unknown default:
-//        print("*** NSFetchedResults unknown type")
-//      }
-//    }
-
-//extension DetailLocationVC {
-//
-//    @objc public var messageDateSectionIdentifier: String? {
-//        var dateString = ""
-//        self.willAccessValue(forKey: "messageDateSectionIdentifier")
-//        if let date = self.messageDateCreated {
-//            let calendar = Formatters.calendar
-//            let today = Date()
-//            let yesterday = today.addingTimeInterval(-86400.0)
-//            if calendar.isDate(date, inSameDayAs: today) {
-//                dateString = LocalizedStrings.DateStrings.Today
-//            } else if calendar.isDate(date, inSameDayAs: yesterday) {
-//                dateString = LocalizedStrings.DateStrings.Yesterday
-//            } else {
-//                dateString = Formatters.messageDateFormatter.string(from: date)
-//            }
-//        }
-//        self.didAccessValue(forKey: "messageDateSectionIdentifier")
-//
-//        return dateString
-//    }
-//
-//}
-    
-//    lazy var fetchedResultsController: NSFetchedResultsController<Locations> = {
-//      let fetchRequest = NSFetchRequest<Locations>()
-//
-//      let entity = Locations.entity()
-//      fetchRequest.entity = entity
-//
-//      let sort1 = NSSortDescriptor(key: "title", ascending: true)
-//    //  let sort2 = NSSortDescriptor(key: "date", ascending: true)
-//      fetchRequest.sortDescriptors = [sort1]
-//
-//      fetchRequest.fetchBatchSize = 20
-//
-//      let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,managedObjectContext: self.context, sectionNameKeyPath: "title",
-//        cacheName: "Locations")
-//
-//      fetchedResultsController.delegate = self
-//      return fetchedResultsController
-//    }()
-//
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        view.addSubview(label)
-//        view.addSubview(tableView)
-//        tableView.delegate = self
-//        tableView.dataSource = self
-//        title = "Core Data Filtering"
-//        view.backgroundColor = .white
-//
-////        label.text = titleString
-////        // Do any additional setup after loading the view.
-////        label.frame = CGRect(x: 50, y: 100, width: 200, height: 55)
-//
-//        performFetch()
-//    }
-//
-//
-//    deinit {
-//      fetchedResultsController.delegate = nil
-//    }
-//
-//    // MARK: - Helper methods
-//    func performFetch() {
-//      do {
-//        try fetchedResultsController.performFetch()
-//      } catch {
-//        fatalCoreDataError(error)
-//      }
-//    }
-//
-////    // MARK: - Table View Delegates
-////     func numberOfSections(in tableView: UITableView) -> Int {
-////      return fetchedResultsController.sections!.count
-////    }
-//
-//
-//    func tableView(_ tableView: UITableView,numberOfRowsInSection section: Int) -> Int {
-////      let sectionInfo = fetchedResultsController.sections![section]
-////      return sectionInfo.numberOfObjects
-//        return 10
-//    }
-//
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//      let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as UITableViewCell
-//
-//        let location = fetchedResultsController.object(at: indexPath)
-//
-//        cell.textLabel?.text = "hey"
-//
-//        return cell
-//
-//}
-
-//
-//
-//func loadSavedData()  {
-//    // Just get the Locations Associated with the title
-//
-//    do {
-//    let request = Location.fetchRequest() as NSFetchRequest<Location>
-//        let pred = NSPredicate(format: "title == %@", titleString)
-//    request.predicate = pred
-//        location = try! context.fetch(request).first!
-//    print("😇😇😇😇😇😇😇Location: \(location)")
-//
-//    } catch {
-//        print("Error: \(error)")
-//    }
-//
-//    do {
-//        let request = RegionEvent.fetchRequest() as NSFetchRequest<RegionEvent>
-//        let pred = NSPredicate(format: "regionIdentifier == %@", location.identifier)
-//        request.predicate = pred
-//        regionEvents = try! context.fetch(request)
-//
-//    } catch {
-//        print("Error: \(error)")
-//    }
-//}

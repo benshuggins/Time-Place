@@ -2,14 +2,12 @@
 //  Location+CoreDataProperties.swift
 //  GymTracker
 //
-//  Created by Ben Huggins on 2/2/23.
+//  Created by Ben Huggins on 2/15/23.
 //
 //
 
 import Foundation
 import CoreData
-import MapKit
-import CoreLocation
 
 
 extension Location {

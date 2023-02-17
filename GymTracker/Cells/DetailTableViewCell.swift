@@ -39,7 +39,6 @@ class DetailTableViewCell: UITableViewCell {
         contentView.addSubview(totalTimelabel)
         contentView.addSubview(enterTimelabel)
         contentView.addSubview(exitTimelabel)
-       
     }
     
     required init?(coder: NSCoder) {
@@ -50,14 +49,13 @@ class DetailTableViewCell: UITableViewCell {
         guard let totalTime = regionEvent.totalRegionTime else { return }
         guard let enterTime = regionEvent.enterRegionTime else { return  }
         guard let exitTime = regionEvent.exitRegionTime else { return }
-       
+
         let enterT = format(date: enterTime)
         let exitT = format(date: exitTime)
         
         totalTimelabel.text = "Total:  \(totalTime)"
         enterTimelabel.text = "Enter: \(enterT)"
         exitTimelabel.text = "Exit:    \(exitT)"
-        
     }
     
     func format(date: Date) -> String {
@@ -69,7 +67,6 @@ class DetailTableViewCell: UITableViewCell {
         totalTimelabel.frame = CGRect(x: 5, y: 5, width: 300, height: contentView.frame.size.height-10)
         enterTimelabel.frame = CGRect(x: 5, y: 20, width: 300, height: contentView.frame.size.height-10)
         exitTimelabel.frame = CGRect(x: 5, y: 35, width: 300, height: contentView.frame.size.height-10)
-       
     }
     
     override func awakeFromNib() {
