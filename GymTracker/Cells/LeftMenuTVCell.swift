@@ -50,7 +50,6 @@ class LeftMenuTVCell: UITableViewCell {
     }
     
     @objc private func didTapButton() {
-        //guard let string = string else {return}
         delegate?.didTapButton(data: data)
     }
     

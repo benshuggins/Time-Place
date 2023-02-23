@@ -14,7 +14,6 @@ import CoreLocation
 @objc(Location)
 public class Location: NSManagedObject, MKAnnotation {
     
-    
     public var coordinate: CLLocationCoordinate2D {
         return CLLocationCoordinate2DMake(latitude, longitude)
     }
@@ -26,17 +25,13 @@ public class Location: NSManagedObject, MKAnnotation {
     func clampRadius(maxRadius: CLLocationDegrees) {
       radius = min(radius, maxRadius)
     }
-
 }
 
 extension Location {
     var region: CLCircularRegion {
-      let region = CLCircularRegion(
-        center: coordinate,
-        radius: radius,
-        identifier: identifier)
-      region.notifyOnEntry = true
-      region.notifyOnExit = true
-      return region
+	  let region = CLCircularRegion(center: coordinate,radius: radius,identifier: identifier)
+	  region.notifyOnEntry = true
+	  region.notifyOnExit = true
+	  return region
     }
 }

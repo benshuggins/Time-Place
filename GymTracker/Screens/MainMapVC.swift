@@ -83,26 +83,26 @@ class MainMapVC: UIViewController {
 
     /// Centers the screen over All the Map annotations Perfectly
     func region(for annotations: [MKAnnotation]) -> MKCoordinateRegion {
-      let region: MKCoordinateRegion
-      switch annotations.count {
-      case 0:
-        region = MKCoordinateRegion(center: mapView.userLocation.coordinate,latitudinalMeters: 1000,longitudinalMeters: 1000)
-      case 1:
-        let annotation = annotations[annotations.count - 1]
-        region = MKCoordinateRegion(center: annotation.coordinate,latitudinalMeters: 1000,longitudinalMeters: 1000)
-      default:
-        var topLeft = CLLocationCoordinate2D(latitude: -90,longitude: 180)
-        var bottomRight = CLLocationCoordinate2D(latitude: 90,longitude: -180)
-        for annotation in annotations {topLeft.latitude = max(topLeft.latitude,annotation.coordinate.latitude)
-          topLeft.longitude = min(topLeft.longitude,annotation.coordinate.longitude)
-          bottomRight.latitude = min(bottomRight.latitude, annotation.coordinate.latitude)
-          bottomRight.longitude = max(bottomRight.longitude,annotation.coordinate.longitude)}
-        let center = CLLocationCoordinate2D(latitude: topLeft.latitude - (topLeft.latitude - bottomRight.latitude) / 2,
-          longitude: topLeft.longitude - (topLeft.longitude - bottomRight.longitude) / 2)
-        let extraSpace = 1.1
-        let span = MKCoordinateSpan(latitudeDelta: abs(topLeft.latitude - bottomRight.latitude) * extraSpace,
-          longitudeDelta: abs(topLeft.longitude - bottomRight.longitude) * extraSpace)
-        region = MKCoordinateRegion(center: center, span: span)
+		  let region: MKCoordinateRegion
+		  switch annotations.count {
+		  case 0:
+			region = MKCoordinateRegion(center: mapView.userLocation.coordinate,latitudinalMeters: 1000,longitudinalMeters: 1000)
+		  case 1:
+			let annotation = annotations[annotations.count - 1]
+			region = MKCoordinateRegion(center: annotation.coordinate,latitudinalMeters: 1000,longitudinalMeters: 1000)
+		  default:
+			var topLeft = CLLocationCoordinate2D(latitude: -90,longitude: 180)
+			var bottomRight = CLLocationCoordinate2D(latitude: 90,longitude: -180)
+			for annotation in annotations {topLeft.latitude = max(topLeft.latitude,annotation.coordinate.latitude)
+			  topLeft.longitude = min(topLeft.longitude,annotation.coordinate.longitude)
+			  bottomRight.latitude = min(bottomRight.latitude, annotation.coordinate.latitude)
+			  bottomRight.longitude = max(bottomRight.longitude,annotation.coordinate.longitude)}
+			let center = CLLocationCoordinate2D(latitude: topLeft.latitude - (topLeft.latitude - bottomRight.latitude) / 2,
+			  longitude: topLeft.longitude - (topLeft.longitude - bottomRight.longitude) / 2)
+			let extraSpace = 1.1
+			let span = MKCoordinateSpan(latitudeDelta: abs(topLeft.latitude - bottomRight.latitude) * extraSpace,
+			  longitudeDelta: abs(topLeft.longitude - bottomRight.longitude) * extraSpace)
+			region = MKCoordinateRegion(center: center, span: span)
       }
       return mapView.regionThatFits(region)
     }
@@ -141,7 +141,7 @@ class MainMapVC: UIViewController {
             mapView.showsUserLocation = true
            // centerViewOnUsersLocation()
             locationManager.startUpdatingLocation()
-            locationManager.allowsBackgroundLocationUpdates = true   // this is the second declaration one in viewDidLoad
+            locationManager.allowsBackgroundLocationUpdates = true
 
             break
         case .authorizedWhenInUse:
@@ -149,10 +149,9 @@ class MainMapVC: UIViewController {
         case .notDetermined:
             locationManager.requestAlwaysAuthorization()
         case .denied:
-            // show alert telling them they have to enable location services in their settings
+				showAlert(withTitle: "Please Enable Location Services", message: "Please enable in your iPhone's settings page! Thanks")
             break
         case .restricted:
-            // Parental Control: Show Alert
             break
         }
     }
@@ -261,11 +260,10 @@ class MainMapVC: UIViewController {
 extension MainMapVC: CLLocationManagerDelegate {
  
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        // we will be back
         let status = manager.authorizationStatus
-        // This is what shows the blue dot on the screen
+        /// This is what shows the blue dot on the screen
         mapView.showsUserLocation = (status == .authorizedAlways)
-        // 3
+	
         if status != .authorizedAlways {
           let message = """
           Your geotification is saved but will only be activated once you grant
@@ -288,7 +286,7 @@ extension MainMapVC: CLLocationManagerDelegate {
         lastLocationError = error
     }
 
-    // Convert to a readable address.
+    /// Convert to a readable address.
 func string(from placemark: CLPlacemark) -> String {
   var line1 = ""
   if let tmp = placemark.subThoroughfare {
@@ -312,7 +310,7 @@ func string(from placemark: CLPlacemark) -> String {
 }
 
 //MARK: - CALL BACK FROM ADDLOCATIONVC
-/// send back the data from
+/// send back data delegate
 extension MainMapVC: AddLocationVCDelegate {                                                    //6
     func addLocationVC(_ controller: AddLocationVC, didAddLocation location: Location) {
         controller.dismiss(animated: true, completion: nil)

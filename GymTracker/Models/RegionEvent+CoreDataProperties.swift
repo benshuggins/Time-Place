@@ -16,13 +16,13 @@ extension RegionEvent {
         return NSFetchRequest<RegionEvent>(entityName: "RegionEvent")
     }
 
-    @NSManaged public var enterRegionTime: Date?
-    @NSManaged public var exitRegionTime: Date?
-    @NSManaged public var regionIdentifier: String?
-    @NSManaged public var sectionDate: String?
-    @NSManaged public var totalRegionTime: String?
-    @NSManaged public var totalRegionSeconds: Double
-    @NSManaged public var location: Location?
+	@NSManaged public var enterRegionTime: Date?
+	@NSManaged public var exitRegionTime: Date?
+	@NSManaged public var regionIdentifier: String?
+	@NSManaged public var sectionDate: String?
+	@NSManaged public var totalRegionTime: String?
+	@NSManaged public var totalRegionSeconds: Double
+	@NSManaged public var location: Location?
 
 }
 

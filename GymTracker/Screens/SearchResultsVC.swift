@@ -12,7 +12,7 @@ protocol sendSearchDataBackDelegate: AnyObject {
     func sendBackSearchData(_ controller: SearchResultsVC, placeMark: MKPlacemark)
 }
 
-class SearchResultsVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchResultsUpdating {
+final class SearchResultsVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchResultsUpdating {
     
     var mapView: MKMapView? = nil
     var matchingItems:[MKMapItem] = [] {
@@ -21,7 +21,7 @@ class SearchResultsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
         }
     }
     
-    let tableView: UITableView = {
+   private let tableView: UITableView = {
        let table = UITableView()
        table.register(SearchResultsTC.self, forCellReuseIdentifier: SearchResultsTC.identifier)
         table.translatesAutoresizingMaskIntoConstraints = false

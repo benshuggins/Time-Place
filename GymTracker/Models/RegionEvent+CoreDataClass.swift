@@ -13,12 +13,11 @@ import MapKit
 @objc(RegionEvent)
 public class RegionEvent: NSManagedObject {
     
-//    override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?) {
-//        super.init(entity: entity, insertInto: context)
-//        print("Region Event init called!")
-//    }
-    
-    }
+	override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?) {
+		super.init(entity: entity, insertInto: context)
+		print("Region Event init called!")
+		}
+	}
 
 
 

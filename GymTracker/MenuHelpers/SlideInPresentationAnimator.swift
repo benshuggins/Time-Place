@@ -7,12 +7,11 @@
 import UIKit
 
 class SlideInPresentationAnimator: NSObject {
-    // 1
+ 
       // MARK: - Properties
       let direction: PresentationDirection
-      //2
       let isPresentation: Bool
-      //3
+ 
       // MARK: - Initializers
       init(direction: PresentationDirection, isPresentation: Bool) {
         self.direction = direction

@@ -89,6 +89,10 @@
 		F506F00E292BF584002BF373 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				F55CE2AD296CA45A00E862F4 /* Location+CoreDataClass.swift */,
+				F55CE2AE296CA45A00E862F4 /* Location+CoreDataProperties.swift */,
+				F55CE2AB296CA45A00E862F4 /* RegionEvent+CoreDataClass.swift */,
+				F55CE2AC296CA45A00E862F4 /* RegionEvent+CoreDataProperties.swift */,
 				F518B3F42943EF1B00AB34FB /* DataModel.xcdatamodeld */,
 			);
 			path = Models;
@@ -106,10 +110,6 @@
 		F59B41FC2929604A001F0269 = {
 			isa = PBXGroup;
 			children = (
-				F55CE2AD296CA45A00E862F4 /* Location+CoreDataClass.swift */,
-				F55CE2AE296CA45A00E862F4 /* Location+CoreDataProperties.swift */,
-				F55CE2AB296CA45A00E862F4 /* RegionEvent+CoreDataClass.swift */,
-				F55CE2AC296CA45A00E862F4 /* RegionEvent+CoreDataProperties.swift */,
 				F59B42072929604A001F0269 /* GymTracker */,
 				F59B42062929604A001F0269 /* Products */,
 			);
@@ -433,7 +433,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = GymTracker/GymTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 1.0.0;
 				DEVELOPMENT_TEAM = 3DMFD3YYQW;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GymTracker/Info.plist;
@@ -448,13 +448,13 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.benhuggins.GymTracker;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.benhuggins.TimeAtPlace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -469,7 +469,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = GymTracker/GymTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 1.0.0;
 				DEVELOPMENT_TEAM = 3DMFD3YYQW;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GymTracker/Info.plist;
@@ -484,13 +484,13 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.benhuggins.GymTracker;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.benhuggins.TimeAtPlace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

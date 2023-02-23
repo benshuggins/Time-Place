@@ -12,7 +12,6 @@ import MapKit
 class DataManager {
     
     static let shared = DataManager()
-    
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     lazy var persistentContainer: NSPersistentContainer = {
@@ -31,15 +30,16 @@ class DataManager {
         do {
           try context.save()
         } catch {
-          // Replace this implementation with code to handle the error appropriately.
-          // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-          let nserror = error as NSError
-          fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-        }
+			assert(false, "There was a Core Data Save error")
+			let alert = UIAlertController(title: "There was a Core Data Save error", message: "Please contact the developer", preferredStyle: UIAlertController.Style.alert)
+			alert.addAction(UIAlertAction(title: "Ok", style: UIAlertAction.Style.default, handler: nil))
+			UIApplication.topViewController()?.present(alert, animated: true, completion: nil)
+			abort()
+				}
+		   }
       }
-    }
     
-    // Save a single Location
+    /// Save a single Location
     func location(title: String, date: Date, identifier: String, latitude: Double, longitude: Double, radius: Double, placeMark: String) -> Location {
         let location = Location(context: context)
         location.title = title
@@ -52,43 +52,26 @@ class DataManager {
         return location
     }
     
-    // Fetches RegionEvents from a location identifier 
+    /// Fetches RegionEvents from a location identifier
     func fetchRegions(locationIdentifier: String) -> [RegionEvent] {
         var fetchedRegionEvents = [RegionEvent]()
-        
-                do {
-                   // let request = RegionEvent.fetchRequest() as NSFetchRequest<RegionEvent>   // this is basic NSFEtch
-                    let request: NSFetchRequest<RegionEvent> = NSFetchRequest<RegionEvent>(entityName: "RegionEvent")
-                    let pred = NSPredicate(format: "ANY regionIdentifier == %@", locationIdentifier)
-                    request.predicate = pred
-                     fetchedRegionEvents = try! context.fetch(request)
-        
-                } catch {
-                    print("Error: \(error)")
-                }
+
+			do {
+				let request: NSFetchRequest<RegionEvent> = NSFetchRequest<RegionEvent>(entityName: "RegionEvent")
+				let pred = NSPredicate(format: "ANY regionIdentifier == %@", locationIdentifier)
+				request.predicate = pred
+				 fetchedRegionEvents = try context.fetch(request)
+
+			} catch {
+				print("Error: \(error)")
+			}
         return fetchedRegionEvents
     }
-    
-    
-
-    // Save a regionEvent attached to it's Location
-//    func regionEvent(enterRegionTime: Date, exitRegionTime: Date!, totalRegionTime: String, regionIdentifer: String, location: Location) -> RegionEvent {
-//        let regionEvent = RegionEvent(context: context)
-//        regionEvent.enterRegionTime = enterRegionTime
-//        regionEvent.exitRegionTime = exitRegionTime
-//        regionEvent.totalRegionTime = totalRegionTime   // there is no total time saved yet
-//        regionEvent.regionIdentifier = regionIdentifer
-//        location.addToRegionEvent(regionEvent)
-//        
-//        return regionEvent
-//    }
-    
 
     func getRegionEvents(location: Location) -> [RegionEvent] {
         let context = context
         let request: NSFetchRequest<RegionEvent> = RegionEvent.fetchRequest()
         request.predicate = NSPredicate(format: "location = %@", location)
-        //request.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
         var fetchedRegionEvents: [RegionEvent] = []
         
         do {
@@ -108,7 +91,7 @@ class DataManager {
     }
  
     //MARK: - MATCH REGION TO LOCATION USING IDENTIFIER
-   //  I send you identifier from region and you give me back the title name
+   ///  I send you identifier from region and you give me back the title name
     func matchLocation(from identifier: String) -> Location? {
         let context = context
         var location: [Location] = []
@@ -124,14 +107,23 @@ class DataManager {
         return location.first
          }
     }
-    
-    
-    
-    
-    
-    
-    
-    
+
+/// Gets the top viewcontroller being shown for presenting error
+extension UIApplication {
+
+	static func topViewController(base: UIViewController? = UIApplication.shared.delegate?.window??.rootViewController) -> UIViewController? {
+		if let nav = base as? UINavigationController {
+			return topViewController(base: nav.visibleViewController)
+		}
+		if let tab = base as? UITabBarController, let selected = tab.selectedViewController {
+			return topViewController(base: selected)
+		}
+		if let presented = base?.presentedViewController {
+			return topViewController(base: presented)
+		}
+		return base
+	}
+}
     
     
     

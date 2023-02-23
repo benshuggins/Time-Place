@@ -13,13 +13,13 @@ class LoginVC: UIViewController {
     private let appleSignInButton = ASAuthorizationAppleIDButton()
     let countrySelectionVC = MainMapVC()
     
-    let logoImageView: UIImageView = {
-        let logoImage = UIImageView()
-        logoImage.image = UIImage(named: "logo_transparent_background")
-        logoImage.translatesAutoresizingMaskIntoConstraints = false
-        logoImage.contentMode = .scaleAspectFit
-        return logoImage
-    }()
+	let logoImageView: UIImageView = {
+		let logoImage = UIImageView()
+		logoImage.image = UIImage(named: "logo_transparent_background")
+		logoImage.translatesAutoresizingMaskIntoConstraints = false
+		logoImage.contentMode = .scaleAspectFit
+		return logoImage
+	}()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -86,26 +86,25 @@ extension LoginVC: ASAuthorizationControllerDelegate {
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         switch authorization.credential {
         case let appleIDCredential as ASAuthorizationAppleIDCredential:
-            let userIdentifier = appleIDCredential.user
-            let fullName = appleIDCredential.fullName
-            let email = appleIDCredential.email
-            self.saveUserInKeychain(userIdentifier)
-           
-            let vc1 = UINavigationController(rootViewController: MainMapVC())
-            vc1.title = "Map"
-            vc1.modalPresentationStyle = .fullScreen
-            present(vc1, animated: true)
- 
+		let userIdentifier = appleIDCredential.user
+			_ = appleIDCredential.fullName
+			_ = appleIDCredential.email
+		self.saveUserInKeychain(userIdentifier)
+	   
+		let vc1 = UINavigationController(rootViewController: MainMapVC())
+		vc1.title = "Map"
+		vc1.modalPresentationStyle = .fullScreen
+		present(vc1, animated: true)
+
         case let passwordCredential as ASPasswordCredential:
-        
-            // Sign in using an existing iCloud Keychain credential.
-            let username = passwordCredential.user
-            let password = passwordCredential.password
-            
-            DispatchQueue.main.async {
-                self.showPasswordCredentialAlert(username: username, password: password)
-            }
-            
+	
+		// Sign in using an existing iCloud Keychain credential.
+		let username = passwordCredential.user
+		let password = passwordCredential.password
+		
+		DispatchQueue.main.async {
+			self.showPasswordCredentialAlert(username: username, password: password)
+		}
         default:
             break
         }
@@ -148,7 +147,7 @@ extension LoginVC: ASAuthorizationControllerDelegate {
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        // Handle error.
+		showAlert(withTitle: "Auth Error!", message: "Error: \(error)")
     }
 }
 

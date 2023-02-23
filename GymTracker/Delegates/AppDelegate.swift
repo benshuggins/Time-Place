@@ -12,9 +12,6 @@ import UserNotifications
 
  @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-  //  let center = UNUserNotificationCenter.current()
-   // let locationManager = CLLocationManager()
     
     var window: UIWindow?
     var orientationLock = UIInterfaceOrientationMask.all
@@ -60,15 +57,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // MARK: UISceneSession Lifecycle
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
         return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        // Called when the user discards a scene session.
-        // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 
     // MARK: - Core Data stack
@@ -91,12 +83,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         do {
           try context.save()
         } catch {
-          // Replace this implementation with code to handle the error appropriately.
-          // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-          let nserror = error as NSError
-          fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+			assert(false, "There was a Core Data Save error")
+			///precondition(true, "There was a Core Data Save Error")
+			let alertController = UIAlertController(title: "Core Data Save Error!", message: "Please Contact the Developer", preferredStyle: .actionSheet)
+			let okAction = UIAlertAction(title: "OK", style: UIAlertAction.Style.default) { UIAlertAction in
+					NSLog("OK Pressed")
+				}
+			alertController.addAction(okAction)
+			self.window?.rootViewController?.present(alertController, animated: true, completion: nil)
+			abort()
         }
       }
     }
   }
-
