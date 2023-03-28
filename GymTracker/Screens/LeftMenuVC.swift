@@ -98,7 +98,6 @@ class LeftMenuVC: UIViewController {
         case 4:  // Section 3 LOGOUT
             cell.accessoryType = .none
                     
-                
         default: break
                 }
                 return cell

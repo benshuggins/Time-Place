@@ -4,7 +4,6 @@
 //
 //  Created by Ben Huggins on 11/19/22.
 //
-
 // Build everything with appdelegate managedObjectContext
 
 import UIKit
@@ -12,9 +11,11 @@ import MapKit
 import CoreLocation
 import CoreData
 
-class MainMapVC: UIViewController {
-    
-    var locations = [Location]()
+class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
+	
+	var locations = [Location]()
+		
+	
     let defaults = UserDefaults.standard
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     let locationManager = CLLocationManager()
@@ -29,17 +30,58 @@ class MainMapVC: UIViewController {
     var givenNameLabel = ""
     var familyNameLabel = ""
     var emailLabel = ""
+	
+	lazy var stackView: UIStackView = {
+		let stack = UIStackView()
+		stack.axis = .vertical
+		stack.spacing = 20.0
+		stack.alignment = .fill
+		stack.distribution = .fillEqually
+		[self.tableView,
+			self.mapView].forEach { stack.addArrangedSubview($0) }
+		return stack
+	}()
+	
+	let tableView: UITableView = {
+		let table = UITableView()
+		table.layer.cornerRadius = 10
+		table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+		table.translatesAutoresizingMaskIntoConstraints = false
+		return table
+	}()
     
     let mapView : MKMapView = {
         let map = MKMapView()
         map.translatesAutoresizingMaskIntoConstraints = false
         map.overrideUserInterfaceStyle = .dark
         return map
-		}()
-  
+	}()
+	
+	// Here is the NSFetchResultscontroller
+	//let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+	
+	lazy var fetchedResultsController: NSFetchedResultsController<Location> = {
+	  let fetchRequest = NSFetchRequest<Location>()
+
+	  let entity = Location.entity()
+	  fetchRequest.entity = entity
+
+	  let sort1 = NSSortDescriptor(key: "title", ascending: true)
+	//  let sort2 = NSSortDescriptor(key: "enterRegionTime", ascending: true)
+	  fetchRequest.sortDescriptors = [sort1]
+	
+
+	 fetchRequest.fetchBatchSize = 20
+
+	  let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: "title", cacheName: "Locations")
+
+	  fetchedResultsController.delegate = self
+	  return fetchedResultsController
+	}()
+	
     override func viewDidLoad() {
         super.viewDidLoad()
- 
+		
         //MARK: - Only show login screen once
         if defaults.bool(forKey: "First Launch") == true {
             print("Second or more app launch")
@@ -49,12 +91,24 @@ class MainMapVC: UIViewController {
             showLoginViewController()
             defaults.set(true, forKey: "First Launch")
         }
-        
+		navigationController?.navigationBar.backgroundColor = .systemGray
+		navigationController?.navigationBar.isTranslucent = false
+		view.addSubview(tableView)
+		
         mapView.delegate = self
+		mapView.layer.cornerRadius = 10
         title = "Time@Place"
-        let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.red]
+        let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.black]
         navigationController?.navigationBar.titleTextAttributes = textAttributes
-        view.addSubview(mapView)
+		
+		view.backgroundColor = .purple
+		view.addSubview(stackView)
+        stackView.addSubview(tableView)
+		stackView.addSubview(mapView)
+		stackView.frame = view.bounds
+		tableView.dataSource = self
+		tableView.delegate = self
+		
         let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
         let goToLocationImage = UIImage(systemName: "mappin.and.ellipse")
         let leftMenuButton = UIImage(systemName: "text.justify.left")
@@ -64,18 +118,42 @@ class MainMapVC: UIViewController {
         navigationItem.rightBarButtonItems = [addLocation, zoom]
         let leftMenu = UIBarButtonItem(image: leftMenuButton, style: .plain, target: self, action: #selector(openLeftMenuButtonTapped))
         let centerOverLocations = UIBarButtonItem(image: centerLocation, style: .plain, target: self, action: #selector(showLocations))
-        addLocation.tintColor = UIColor.red
-        zoom.tintColor = UIColor.red
-        leftMenu.tintColor = UIColor.red
-        centerOverLocations.tintColor = UIColor.red
+        addLocation.tintColor = UIColor.systemGreen
+        zoom.tintColor = UIColor.blue
+        leftMenu.tintColor = UIColor.black
+        centerOverLocations.tintColor = UIColor.blue
         navigationItem.leftBarButtonItems = [leftMenu, centerOverLocations]
         locationManager.allowsBackgroundLocationUpdates = true
         configureUI()
         checkLocationServices()
         fetchLocations()
+		
         if locations.isEmpty { self.showEmptyAlert() }
         if !locations.isEmpty { showLocations() }
+		
+		performFetch()  // this is for NSFetchresultscontrolller
+		
     }
+	
+	
+	private func performFetch() {
+		do {
+			try fetchedResultsController.performFetch()
+			tableView.reloadData()
+		} catch {
+			print("Error with fetchedResultsController \(error)")
+		}
+	}
+	
+	deinit {
+		fetchedResultsController.delegate = nil
+	}
+	
+	override func viewWillAppear(_ animated: Bool) {
+		super.viewWillAppear(true)
+		//tableView.reloadData()
+		if !locations.isEmpty { showLocations() }
+	}
     
     func showEmptyAlert() {
         self.showAlert(withTitle: "No Locations!", message: "To add a Location, Tap the upper right + button!")
@@ -111,9 +189,9 @@ class MainMapVC: UIViewController {
     func fetchLocations() {
         do {
             self.locations = try context.fetch(Location.fetchRequest())
-            DispatchQueue.main.async {
+			DispatchQueue.main.async {
                 self.mapView.addAnnotations(self.locations)
-                self.locations.forEach { self.add($0) }
+				self.locations.forEach { self.add($0) }
             }
         }
         catch {
@@ -153,7 +231,9 @@ class MainMapVC: UIViewController {
             break
         case .restricted:
             break
-        }
+			@unknown default:
+				fatalError()
+		}
     }
     
     func centerViewOnUsersLocation() {
@@ -176,9 +256,12 @@ class MainMapVC: UIViewController {
     //MARK: - ADDING A LOCATION
     func add(_ location: Location) {
         locations.append(location)
+		
       mapView.addAnnotation(location)
+	
       //updateGeotificationsCount()
         mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
+		if !locations.isEmpty { showLocations() }
     }
 	
     //MARK: - DELETING A LOCATION
@@ -214,12 +297,19 @@ class MainMapVC: UIViewController {
     // MARK: LAYOUT CONFIGURATION
     private func configureUI() {
 
-        NSLayoutConstraint.activate([
-            mapView.topAnchor.constraint(equalTo: view.topAnchor),
-            mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+		NSLayoutConstraint.activate([
+			tableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 10),
+			tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+			tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+			tableView.bottomAnchor.constraint(equalTo: mapView.topAnchor, constant: -10)
+			//tableView.heightAnchor.constraint(equalTo: view.frame.size.height/2)
+		])
+		NSLayoutConstraint.activate([
+			mapView.topAnchor.constraint(equalTo: tableView.bottomAnchor),
+			mapView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+			mapView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+			mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20)
+		])
     }
     
     @objc func showLocations() {
@@ -306,9 +396,8 @@ func string(from placemark: CLPlacemark) -> String {
     line2 += tmp
   }
   return line1 + "\n" + line2
+	}
 }
-}
-
 //MARK: - CALL BACK FROM ADDLOCATIONVC
 /// send back data delegate
 extension MainMapVC: AddLocationVCDelegate {                                                    //6
@@ -316,7 +405,7 @@ extension MainMapVC: AddLocationVCDelegate {                                    
         controller.dismiss(animated: true, completion: nil)
         location.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
         startMonitoring(location: location) ///Call start monitoring function
-        add(location)
+		add(location)
     }
 }
 
@@ -326,9 +415,11 @@ extension MainMapVC: MKMapViewDelegate {
     let identifier = "myGeotification"
     if annotation is Location {
       var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKPinAnnotationView
+								// this might be it
       if annotationView == nil {
         annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: identifier)
         annotationView?.canShowCallout = true
+		   
         let removeButton = UIButton(type: .custom)
         removeButton.frame = CGRect(x: 0, y: 0, width: 23, height: 23)
         removeButton.setImage(UIImage(systemName: "trash.fill"), for: .normal)
@@ -394,3 +485,94 @@ extension MainMapVC {
     }
 }
 
+extension MainMapVC: UITableViewDelegate, UITableViewDataSource {
+	
+	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+		//let title1 = locations[indexPath.row].title
+		let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as UITableViewCell
+	    
+		let location = fetchedResultsController.object(at: indexPath)
+		cell.textLabel?.text = location.title
+		return cell
+	}
+	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+		// return locations.count
+		let sectionInfo = fetchedResultsController.sections?[section]
+		return sectionInfo!.numberOfObjects
+	 }
+	
+	func numberOfSections(in tableView: UITableView) -> Int {
+		return fetchedResultsController.sections?.count ?? 2
+	}
+	
+}
+
+
+
+// Here is Core Data
+extension MainMapVC {
+	
+	func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+		print("*** controllerWillChangeContent")
+		tableView.beginUpdates()
+	  }
+
+	  func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,didChange anObject: Any,at indexPath: IndexPath?,
+		for type: NSFetchedResultsChangeType,
+		newIndexPath: IndexPath?) {
+		switch type {
+		case .insert:
+		  print("*** NSFetchedResultsChangeInsert (object)")
+		  tableView.insertRows(at: [newIndexPath!], with: .fade)
+
+		case .delete:
+		  print("*** NSFetchedResultsChangeDelete (object)")
+		  tableView.deleteRows(at: [indexPath!], with: .fade)
+			
+			//THIS MIGHT BE A GOOD PLACE TO CHECK ?
+
+		case .update:
+		  print("*** NSFetchedResultsChangeUpdate (object)")
+			if let cell = tableView.cellForRow(at: indexPath!) {
+			let location = controller.object(at: indexPath!) as! Location
+				  // cell.configure(for: singer)
+				cell.textLabel?.text = location.title
+		  }
+
+		case .move:
+		  print("*** NSFetchedResultsChangeMove (object)")
+		  tableView.deleteRows(at: [indexPath!], with: .fade)
+		  tableView.insertRows(at: [newIndexPath!], with: .fade)
+
+		@unknown default:
+		  print("*** NSFetchedResults unknown type")
+		}
+	  }
+
+	  func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo,
+		atSectionIndex sectionIndex: Int,
+		for type: NSFetchedResultsChangeType
+	  ) {
+		switch type {
+		case .insert:
+		  print("*** NSFetchedResultsChangeInsert (section)")
+		  tableView.insertSections(
+			IndexSet(integer: sectionIndex), with: .fade)
+		case .delete:
+		  print("*** NSFetchedResultsChangeDelete (section)")
+		  tableView.deleteSections(
+			IndexSet(integer: sectionIndex), with: .fade)
+		case .update:
+		  print("*** NSFetchedResultsChangeUpdate (section)")
+		case .move:
+		  print("*** NSFetchedResultsChangeMove (section)")
+		@unknown default:
+		  print("*** NSFetchedResults unknown type")
+		}
+	  }
+
+	  func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+		print("*** controllerDidChangeContent")
+		tableView.endUpdates()
+	  }
+}

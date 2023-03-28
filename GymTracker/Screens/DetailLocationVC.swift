@@ -51,7 +51,7 @@ final class DetailLocationVC: UIViewController, UITableViewDelegate, UITableView
             tableView.frame = view.bounds
             performFetch()
      
-            let thisLocation = fetchLocation(title: titleString)
+            let thisLocation = fetchLocation(title: titleString)  //
            /// fetch the RegionEvents that match this Location
             regionEvents = fetchRegions(locationIdentifier: thisLocation.identifier)
         }
@@ -93,12 +93,11 @@ final class DetailLocationVC: UIViewController, UITableViewDelegate, UITableView
     
     /// Fetches RegionEvents from a location identifier
     private func fetchRegions(locationIdentifier: String) -> [RegionEvent] {
-        
         var fetchedRegionEvents = [RegionEvent]()
         
                 do {
                    let request: NSFetchRequest<RegionEvent> = NSFetchRequest<RegionEvent>(entityName: "RegionEvent")
-                    let pred = NSPredicate(format: "ANY regionIdentifier == %@", locationIdentifier)
+                    let pred = NSPredicate(format: "regionIdentifier == %@", locationIdentifier)
                     request.predicate = pred
                      fetchedRegionEvents = try context.fetch(request)
         

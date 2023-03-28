@@ -48,7 +48,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
-    ///PERFORMS HOUSEKEEPING CLEARING OLDER NOTIFICATIONS
+    ///PERFORMS HOUSEKEEPING CLEARING OLDER NOTIFICATIONS 
     func applicationDidBecomeActive(_ application: UIApplication) {
       application.applicationIconBadgeNumber = 0
       UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
@@ -91,7 +91,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 				}
 			alertController.addAction(okAction)
 			self.window?.rootViewController?.present(alertController, animated: true, completion: nil)
-			abort()
+			abort() /// full app kill
         }
       }
     }

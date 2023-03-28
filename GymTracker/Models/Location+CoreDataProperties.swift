@@ -24,12 +24,10 @@ extension Location {
     @NSManaged public var radius: Double
     @NSManaged public var title: String?
     @NSManaged public var regionEvent: RegionEvent?
-
 }
 
 // MARK: Generated accessors for regionEvent
 extension Location {
-
     @objc(addRegionEventObject:)
     @NSManaged public func addToRegionEvent(_ value: RegionEvent)
 
@@ -41,7 +39,6 @@ extension Location {
 
     @objc(removeRegionEvent:)
     @NSManaged public func removeFromRegionEvent(_ values: NSSet)
-
 }
 
 extension Location : Identifiable {

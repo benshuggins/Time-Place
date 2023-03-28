@@ -48,7 +48,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         textField.textColor = .black
         textField.backgroundColor = .darkGray
         textField.textAlignment = .left
-        textField.attributedPlaceholder = NSAttributedString(string: " Enter Location Name",
+        textField.attributedPlaceholder = NSAttributedString(string: " Enter Location Name via the map marker",
             attributes: [NSAttributedString.Key.foregroundColor: UIColor.black])
         textField.addTarget(self, action: #selector(didEnterNoteTextField), for: .editingChanged)
         return textField
@@ -87,7 +87,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         mapView.addSubview(mappinImageView)
         navigationItem.searchController = searchController
         title = "Add Location Tracker"
-        let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.red]
+        let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.black]
         navigationController?.navigationBar.titleTextAttributes = textAttributes
         view.backgroundColor = .white
 
@@ -98,8 +98,8 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         let goToLocationImage = UIImage(systemName: "location.square.fill")
         let zoomButton = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(didTapGoToYourLocationBarButton))
         addRightButtonBar = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapSaveLocationBarButton))
-        zoomButton.tintColor = UIColor.red
-        addRightButtonBar.tintColor = UIColor.red
+        zoomButton.tintColor = UIColor.blue
+        addRightButtonBar.tintColor = UIColor.systemGreen
         navigationItem.rightBarButtonItems = [addRightButtonBar, zoomButton]
         navigationItem.rightBarButtonItem?.isEnabled = (locations.count < 20)
         navigationController?.navigationBar.backgroundColor = .darkGray
@@ -118,6 +118,10 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         searchBar.placeholder = "Search for a place to add"
         navigationItem.searchController = searchController
         searchResultsVC.mapView = mapView
+		
+		if isFirstLaunch() {
+			showAlert(withTitle: "Add your location 2 ways!", message: "Please add a location using the searchbar or by placing marker over desired location via the map and giving it a name!")
+		}
     }
 	
 	override func viewWillAppear(_ animated: Bool) {
@@ -128,6 +132,16 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         print("DidTapZoomBarButton")
         mapView.zoomToLocation(mapView.userLocation.location)
     }
+	
+	// first app launch
+	func isFirstLaunch() -> Bool {
+
+		if (!UserDefaults.standard.bool(forKey: "launched_before")) {
+			UserDefaults.standard.set(true, forKey: "launched_before")
+			return true
+		}
+		return false
+	}
     
     func format(date: Date) -> String {
        return dateFormatter.string(from: date)
@@ -157,7 +171,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 
     @objc func didEnterNoteTextField(_ textField: UITextField) {
 		
-		if isKeyBoardShowing == true {						
+		if isKeyBoardShowing == true {
 			configureUI()
 		}
         let radiusSet = 40                                          
@@ -192,7 +206,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         
         let hudView = HudView.hud(inView: view, aninated: true)
           hudView.text = "Tagged"
-          afterDelay(0.7) {
+		afterDelay(1.0) {
               hudView.hide()
               self.delegate?.addLocationVC(self, didAddLocation: location)
         }
