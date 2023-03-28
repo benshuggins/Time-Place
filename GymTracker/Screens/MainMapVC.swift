@@ -13,8 +13,11 @@ import CoreData
 
 class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
 	
-	var locations = [Location]()
-		
+	var locations = [Location]() {
+		didSet {
+			if locations.isEmpty { self.showEmptyAlert() }
+		}
+	}
 	
     let defaults = UserDefaults.standard
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -57,8 +60,9 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
         return map
 	}()
 	
-	// Here is the NSFetchResultscontroller
-	//let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+	let goToLocationButton = UIButton()
+    let centerOverRegionsButton = UIButton()
+	let addNewButton = UIButton()
 	
 	lazy var fetchedResultsController: NSFetchedResultsController<Location> = {
 	  let fetchRequest = NSFetchRequest<Location>()
@@ -69,8 +73,6 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
 	  let sort1 = NSSortDescriptor(key: "title", ascending: true)
 	//  let sort2 = NSSortDescriptor(key: "enterRegionTime", ascending: true)
 	  fetchRequest.sortDescriptors = [sort1]
-	
-
 	 fetchRequest.fetchBatchSize = 20
 
 	  let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: "title", cacheName: "Locations")
@@ -81,7 +83,6 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
 	
     override func viewDidLoad() {
         super.viewDidLoad()
-		
         //MARK: - Only show login screen once
         if defaults.bool(forKey: "First Launch") == true {
             print("Second or more app launch")
@@ -91,14 +92,14 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
             showLoginViewController()
             defaults.set(true, forKey: "First Launch")
         }
-		navigationController?.navigationBar.backgroundColor = .systemGray
-		navigationController?.navigationBar.isTranslucent = false
+		navigationController?.navigationBar.backgroundColor = .purple
+		navigationController?.toolbar.barTintColor = .purple
 		view.addSubview(tableView)
 		
         mapView.delegate = self
 		mapView.layer.cornerRadius = 10
         title = "Time@Place"
-        let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.black]
+        let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.white]
         navigationController?.navigationBar.titleTextAttributes = textAttributes
 		
 		view.backgroundColor = .purple
@@ -109,32 +110,30 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
 		tableView.dataSource = self
 		tableView.delegate = self
 		
-        let addLocationImage = UIImage(systemName: "plus.circle.fill") //location.square.fill
-        let goToLocationImage = UIImage(systemName: "mappin.and.ellipse")
-        let leftMenuButton = UIImage(systemName: "text.justify.left")
-        let centerLocation = UIImage(systemName: "mappin.square")
-        let addLocation = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapAddLocationBarButton))
-        let zoom = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(goToYourLocation))
-        navigationItem.rightBarButtonItems = [addLocation, zoom]
-        let leftMenu = UIBarButtonItem(image: leftMenuButton, style: .plain, target: self, action: #selector(openLeftMenuButtonTapped))
-        let centerOverLocations = UIBarButtonItem(image: centerLocation, style: .plain, target: self, action: #selector(showLocations))
-        addLocation.tintColor = UIColor.systemGreen
-        zoom.tintColor = UIColor.blue
-        leftMenu.tintColor = UIColor.black
-        centerOverLocations.tintColor = UIColor.blue
-        navigationItem.leftBarButtonItems = [leftMenu, centerOverLocations]
-        locationManager.allowsBackgroundLocationUpdates = true
-        configureUI()
-        checkLocationServices()
-        fetchLocations()
+		mapView.addSubview(goToLocationButton)
+		mapView.addSubview(centerOverRegionsButton)
+		tableView.addSubview(addNewButton)
 		
+		configureUI()
+		checkLocationServices()
+		fetchLocations()
+		configureButtons()
+
+		addNewButton.addTarget(self, action: #selector(didTapAddLocationBarButton), for: .touchUpInside)
+		centerOverRegionsButton.addTarget(self, action: #selector(showLocations), for: .touchUpInside)
+		goToLocationButton.addTarget(self, action: #selector(goToYourLocation), for: .touchUpInside)
+
+		let leftMenuButton = UIImage(systemName: "text.justify.left")
+        let leftMenu = UIBarButtonItem(image: leftMenuButton, style: .plain, target: self, action: #selector(openLeftMenuButtonTapped))
+
+        navigationItem.leftBarButtonItem = leftMenu
+        locationManager.allowsBackgroundLocationUpdates = true
+       
         if locations.isEmpty { self.showEmptyAlert() }
         if !locations.isEmpty { showLocations() }
 		
 		performFetch()  // this is for NSFetchresultscontrolller
-		
     }
-	
 	
 	private func performFetch() {
 		do {
@@ -156,7 +155,7 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
 	}
     
     func showEmptyAlert() {
-        self.showAlert(withTitle: "No Locations!", message: "To add a Location, Tap the upper right + button!")
+        self.showAlert(withTitle: "No Locations!", message: "To add a Location, Tap the green + button!")
     }
 
     /// Centers the screen over All the Map annotations Perfectly
@@ -295,10 +294,33 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
     }
     
     // MARK: LAYOUT CONFIGURATION
+	
+	private func configureButtons() {
+		goToLocationButton.configuration = .tinted()
+		goToLocationButton.configuration?.baseForegroundColor = .systemBlue
+		goToLocationButton.configuration?.image = UIImage(systemName: "location.square")
+		goToLocationButton.configuration?.buttonSize = .medium
+		goToLocationButton.frame = CGRect(x: 300, y: 5, width: 50, height: 50)
+		goToLocationButton.configuration?.imagePadding = 6
+	
+		centerOverRegionsButton.configuration = .tinted()
+		centerOverRegionsButton.configuration?.baseForegroundColor = .red
+		centerOverRegionsButton.configuration?.image = UIImage(systemName: "mappin.square")
+		centerOverRegionsButton.configuration?.imagePadding = 6
+		centerOverRegionsButton.frame = CGRect(x: 5, y: 5, width: 50, height: 50)
+		
+		let largeConfig = UIImage.SymbolConfiguration(pointSize: 35, weight: .bold, scale: .large)
+		let largeBoldDoc = UIImage(systemName: "plus.circle.fill", withConfiguration: largeConfig)
+		addNewButton.setImage(largeBoldDoc, for: .normal)
+		addNewButton.configuration = .borderless()
+		addNewButton.configuration?.baseForegroundColor = .systemGreen
+		addNewButton.frame = CGRect(x: 272, y: 246, width: 100, height: 100)
+	}
+	
     private func configureUI() {
 
 		NSLayoutConstraint.activate([
-			tableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 10),
+			tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
 			tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
 			tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
 			tableView.bottomAnchor.constraint(equalTo: mapView.topAnchor, constant: -10)
