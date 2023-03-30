@@ -46,10 +46,11 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.tintColor = .black
         textField.textColor = .black
-        textField.backgroundColor = .darkGray
-        textField.textAlignment = .left
-        textField.attributedPlaceholder = NSAttributedString(string: " Enter Location Name via the map marker",
-            attributes: [NSAttributedString.Key.foregroundColor: UIColor.black])
+		textField.layer.cornerRadius = 6
+		textField.backgroundColor = .systemGray3						//" Enter Location Name via the map marker"
+        textField.textAlignment = .left								//"Enter map marker name..."
+        textField.attributedPlaceholder = NSAttributedString(string: " Enter map marker name...",
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray])
         textField.addTarget(self, action: #selector(didEnterNoteTextField), for: .editingChanged)
         return textField
         }()
@@ -77,11 +78,24 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         imageView.tintColor = .red
         return imageView
     }()
+	
+	private let textFieldBackingView: UIView = {
+		let backView = UIView()
+		backView.backgroundColor = .systemGray3
+		backView.translatesAutoresizingMaskIntoConstraints = false
+		return backView
+	}()
+		
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.addSubview(textFieldNote)
+		view.backgroundColor = .lightGray
+      
         view.addSubview(mapView)
+		
+		view.addSubview(textFieldBackingView)
+		textFieldBackingView.addSubview(textFieldNote)
+		
         mapView.delegate = self
         mapView.showsUserLocation = true
         mapView.addSubview(mappinImageView)
@@ -98,14 +112,14 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         let goToLocationImage = UIImage(systemName: "location.square.fill")
         let zoomButton = UIBarButtonItem(image: goToLocationImage, style: .plain, target: self, action: #selector(didTapGoToYourLocationBarButton))
         addRightButtonBar = UIBarButtonItem(image: addLocationImage, style: .plain, target: self, action: #selector(didTapSaveLocationBarButton))
-        zoomButton.tintColor = UIColor.blue
+		zoomButton.tintColor = .systemBlue
         addRightButtonBar.tintColor = UIColor.systemGreen
         navigationItem.rightBarButtonItems = [addRightButtonBar, zoomButton]
         navigationItem.rightBarButtonItem?.isEnabled = (locations.count < 20)
         navigationController?.navigationBar.backgroundColor = .darkGray
         addRightButtonBar.isEnabled = false
 		configureUI()
-        self.hideKeyboardWhenTappedAround()
+        //self.hideKeyboardWhenTappedAround()
 
         // MARK: - SEARCH CONTROLLER
 	    let searchResultsVC = SearchResultsVC()
@@ -120,14 +134,20 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
         searchResultsVC.mapView = mapView
 		
 		if isFirstLaunch() {
-			showAlert(withTitle: "Add your location 2 ways!", message: "Please add a location using the searchbar or by placing marker over desired location via the map and giving it a name!")
+			showAlert(withTitle: "You can add locations 2 ways.", message: "Use either the search bar or move the map. Use the keyboard to give it a name.")
 		}
     }
 	
 	override func viewWillAppear(_ animated: Bool) {
 		AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.portrait, andRotateTo: UIInterfaceOrientation.portrait)
+		textFieldNote.becomeFirstResponder()
 	}
-    
+	
+	override func viewDidAppear(_ animated: Bool) {
+		super.viewDidAppear(animated)
+		
+	}
+
     @objc func didTapGoToYourLocationBarButton() {
         print("DidTapZoomBarButton")
         mapView.zoomToLocation(mapView.userLocation.location)
@@ -152,16 +172,25 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 	   ///self.view.frame.origin.y = 0
        NSLayoutConstraint.activate([
            textFieldNote.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-           textFieldNote.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-           textFieldNote.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-           textFieldNote.heightAnchor.constraint(equalToConstant: 40),
+           textFieldNote.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+           textFieldNote.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+           textFieldNote.heightAnchor.constraint(equalToConstant: 45),
            textFieldNote.bottomAnchor.constraint(equalTo: mapView.topAnchor)
        ])
+	   
+	   NSLayoutConstraint.activate([
+		textFieldBackingView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+		textFieldBackingView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+		textFieldBackingView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+		textFieldBackingView.heightAnchor.constraint(equalToConstant: 45),
+		textFieldBackingView.bottomAnchor.constraint(equalTo: mapView.topAnchor)
+	   ])
+	   
        NSLayoutConstraint.activate([
            mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
            mapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
            mapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-           mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+           mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -200)
        ])
        NSLayoutConstraint.activate([
            mappinImageView.centerXAnchor.constraint(equalTo: mapView.centerXAnchor),
@@ -181,7 +210,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
     
     //MARK: - Save location from manual pan and zoom option
     @objc func didTapSaveLocationBarButton() {
-        let coordinate = mapView.centerCoordinate
+		let coordinate = mapView.centerCoordinate
         let latitude = coordinate.latitude
         let longitude = coordinate.longitude
         let location1 = CLLocation(latitude: latitude, longitude: longitude)
@@ -236,19 +265,19 @@ extension AddLocationVC: sendSearchDataBackDelegate {
     }
 }
 
-extension AddLocationVC {
-    func hideKeyboardWhenTappedAround() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(AddLocationVC.dismissKeyboard))
-        tap.cancelsTouchesInView = false
-        view.addGestureRecognizer(tap)
-    }
-    @objc func dismissKeyboard() {
-        NSLayoutConstraint.activate([
-            mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
-            mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-        view.endEditing(true)
-    }
-}
+//extension AddLocationVC {
+//    func hideKeyboardWhenTappedAround() {
+//        let tap = UITapGestureRecognizer(target: self, action: #selector(AddLocationVC.dismissKeyboard))
+//        tap.cancelsTouchesInView = false
+//        view.addGestureRecognizer(tap)
+//    }
+//    @objc func dismissKeyboard() {
+//        NSLayoutConstraint.activate([
+//            mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
+//            mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+//            mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+//            mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+//        ])
+//        view.endEditing(true)
+//    }
+//}
