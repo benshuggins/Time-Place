@@ -39,7 +39,7 @@ class DataManager {
 		   }
       }
     
-    /// Save a single Location
+    /// Save a single Location, saved in AddLocationVC
     func location(title: String, date: Date, identifier: String, latitude: Double, longitude: Double, radius: Double, placeMark: String) -> Location {
         let location = Location(context: context)
         location.title = title
@@ -68,10 +68,15 @@ class DataManager {
         return fetchedRegionEvents
     }
 
+	// This gets regionEvents from a location 
     func getRegionEvents(location: Location) -> [RegionEvent] {
         let context = context
         let request: NSFetchRequest<RegionEvent> = RegionEvent.fetchRequest()
         request.predicate = NSPredicate(format: "location = %@", location)
+		
+		let sortDescriptor = NSSortDescriptor(key: "enterRegionTime", ascending: false)
+		request.sortDescriptors = [sortDescriptor]
+		
         var fetchedRegionEvents: [RegionEvent] = []
         
         do {
@@ -82,7 +87,7 @@ class DataManager {
         }
         return fetchedRegionEvents
     }
-    
+	
     //MARK: - DELETE A LOCATION CORE DATA
     func deleteLocation(location: Location) {
         let context = context

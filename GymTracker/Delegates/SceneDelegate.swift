@@ -85,13 +85,16 @@ extension SceneDelegate {
         /// Here we have entered the region
         if state == CLRegionState.inside {
             enterT = Date()
-            let enterTimeFormat = format(date: enterT)
+            let enterTimeFormat = format(date: enterT)   // instance var holding the entrance time
             ///If the app is open (Looking at the map inside iPhone) then show an alert view informing users of entrance, exit, and total time inside region
             if UIApplication.shared.applicationState == .active {
-                //            let nc = NotificationCenter.default
-                //            nc.post(name: Notification.Name("UserLoggedIn"), object: nil)
-              //  window?.rootViewController?.showAlert(withTitle: currentLocation.title, message: "Entering at: \(enterTimeFormat)")
+				
+				// APP IS OPEN = ENTERING LOCATION
+                            let nc = NotificationCenter.default
+                            nc.post(name: Notification.Name("UserLoggedIn"), object: nil)
+                window?.rootViewController?.showAlert(withTitle: currentLocation.title, message: "Entering at: \(enterTimeFormat)")
             
+				// only send a local push notification if the app is physically closed
             } else {
                 let notificationContent = UNMutableNotificationContent()
                 notificationContent.title = "Entering: \(currentLocation.title ?? "")"
@@ -109,14 +112,14 @@ extension SceneDelegate {
                   }
                 }
             }
-            ///Exit the region
+            /// We have exited the region
         } else if state == CLRegionState.outside {
             let exitTime = Date()
             let exitTimeFormat = format(date: exitTime)
             let sectionDateS = Date()
             let sectionDate = dateFormatterSections.string(from: sectionDateS)
             var totalTimeString = ""
-            var totalRegionSeconds: Double = 0
+			var totalRegionSeconds: Double? = nil
           
             if enterT != nil {
                 let deltaT = exitTime.timeIntervalSince(enterT)
@@ -127,21 +130,31 @@ extension SceneDelegate {
                 totalTimeString = "No Entrance Time"
             }
             
+			// technically should this be something like
+			
+			//currentLocation.regionEvent = regionEventLocation  // like this : https://www.hackingwithswift.com/read/38/8/adding-core-data-entity-relationships-lightweight-vs-heavyweight-migration
+			
+			// Is it possible that the instance variable is messing with 
             /// Create Core data regionEvent object  and save
-            let regionEvent = RegionEvent(context: context) // CD init
-            regionEvent.enterRegionTime = enterT  //Core Data Enter
-            regionEvent.exitRegionTime = exitTime // Core Data Exit
-            regionEvent.totalRegionTime = totalTimeString //Core Data Total
-            regionEvent.sectionDate = sectionDate // String for section Date
-            regionEvent.totalRegionSeconds = totalRegionSeconds
-            regionEvent.regionIdentifier = currentLocation.identifier
-            currentLocation.addToRegionEvent(regionEvent) // Core Data add entire regionEvent object to CD
-            try! context.save()
+            let newRegionEvent = RegionEvent(context: context) // CD init
+			//currentLocation.regionEvent?.enterRegionTime = enterT
+			newRegionEvent.enterRegionTime = enterT  //Core Data Enter
+			newRegionEvent.exitRegionTime = exitTime // Core Data Exit
+			newRegionEvent.totalRegionTime = totalTimeString //Core Data Total
+			newRegionEvent.sectionDate = sectionDate // String for section Date
+			newRegionEvent.totalRegionSeconds = totalRegionSeconds ?? 0.0    // shoudl give a 0.0 for no time
+			newRegionEvent.regionIdentifier = currentLocation.identifier
+           // currentLocation. addToRegionEvent(regionEvent) // Core Data add entire regionEvent object to CD
+			currentLocation.addToRegionEvent(newRegionEvent)
+           
+			try! context.save()
             
+			/// If we are outside the region, with the app open then dont show the alert 
             if UIApplication.shared.applicationState == .active {
-                //            let nc = NotificationCenter.default
-                //            nc.post(name: Notification.Name("UserLoggedOut"), object: nil)
-              //  window?.rootViewController?.showAlert(withTitle: currentLocation.title, message: "E: \(exitTimeFormat), T: \(totalTimeString)")
+				//INSIDE THE APP: LEAVING
+                            let nc = NotificationCenter.default
+                            nc.post(name: Notification.Name("UserLoggedOut"), object: nil)
+                window?.rootViewController?.showAlert(withTitle: currentLocation.title, message: "E: \(exitTimeFormat), T: \(totalTimeString)")
             } else {
                 let notificationContent = UNMutableNotificationContent()
                 notificationContent.title = "Leaving: \(currentLocation.title ?? "")"

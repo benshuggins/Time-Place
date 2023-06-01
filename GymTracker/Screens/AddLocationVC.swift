@@ -45,7 +45,7 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
        let textField = UITextField()
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.tintColor = .black
-        textField.textColor = .black
+		textField.textColor = UIColor.lightGray
 		textField.layer.cornerRadius = 6
 		textField.backgroundColor = .systemGray3						//" Enter Location Name via the map marker"
         textField.textAlignment = .left								//"Enter map marker name..."
@@ -85,17 +85,24 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 		backView.translatesAutoresizingMaskIntoConstraints = false
 		return backView
 	}()
+	
+	private let keyBoardBackingView: UIView = {
+		let keyBackView = UIView()
+		keyBackView.backgroundColor = .systemGray3
+		keyBackView.translatesAutoresizingMaskIntoConstraints = false
+		return keyBackView
+	}()
 		
     
     override func viewDidLoad() {
         super.viewDidLoad()
 		view.backgroundColor = .lightGray
-      
         view.addSubview(mapView)
-		
 		view.addSubview(textFieldBackingView)
-		textFieldBackingView.addSubview(textFieldNote)
 		
+		view.addSubview(keyBoardBackingView)  
+		
+		textFieldBackingView.addSubview(textFieldNote)
         mapView.delegate = self
         mapView.showsUserLocation = true
         mapView.addSubview(mappinImageView)
@@ -126,12 +133,18 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 	    searchResultsVC.delegate = self
         searchController = UISearchController(searchResultsController: searchResultsVC)
         searchController.searchResultsUpdater = searchResultsVC as UISearchResultsUpdating
-        searchController.hidesNavigationBarDuringPresentation = true
+        searchController.hidesNavigationBarDuringPresentation = false  // true
         let searchBar = searchController.searchBar
         searchBar.sizeToFit()
-        searchBar.placeholder = "Search for a place to add"
+        searchBar.placeholder = "Search online for a place to add"
+		searchBar.showsCancelButton = false
         navigationItem.searchController = searchController
         searchResultsVC.mapView = mapView
+		///Hide the suggestion bar above the keyboard
+		textFieldNote.spellCheckingType = .no
+		textFieldNote.autocorrectionType = .no
+		searchBar.spellCheckingType = .no
+		searchBar.autocorrectionType = .no
 		
 		if isFirstLaunch() {
 			showAlert(withTitle: "You can add locations 2 ways.", message: "Use either the search bar or move the map. Use the keyboard to give it a name.")
@@ -141,11 +154,12 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
 	override func viewWillAppear(_ animated: Bool) {
 		AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.portrait, andRotateTo: UIInterfaceOrientation.portrait)
 		textFieldNote.becomeFirstResponder()
+		
+		//searchController.becomeFirstResponder()
 	}
 	
 	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
-		
 	}
 
     @objc func didTapGoToYourLocationBarButton() {
@@ -196,14 +210,20 @@ class AddLocationVC: UIViewController, MKMapViewDelegate, UITextFieldDelegate {
            mappinImageView.centerXAnchor.constraint(equalTo: mapView.centerXAnchor),
            mappinImageView.centerYAnchor.constraint(equalTo: mapView.centerYAnchor)
        ])
+	   
+	   NSLayoutConstraint.activate([
+		  keyBoardBackingView.topAnchor.constraint(equalTo: mapView.bottomAnchor),
+		  keyBoardBackingView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+		  keyBoardBackingView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+		  keyBoardBackingView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+	   ])
    }
 
     @objc func didEnterNoteTextField(_ textField: UITextField) {
-		
 		if isKeyBoardShowing == true {
 			configureUI()
 		}
-        let radiusSet = 40                                          
+        let radiusSet = 100
         let noteSet = !(textField.text?.isEmpty ?? true)
         addRightButtonBar.isEnabled = (radiusSet != 0) && noteSet
     }
@@ -265,19 +285,3 @@ extension AddLocationVC: sendSearchDataBackDelegate {
     }
 }
 
-//extension AddLocationVC {
-//    func hideKeyboardWhenTappedAround() {
-//        let tap = UITapGestureRecognizer(target: self, action: #selector(AddLocationVC.dismissKeyboard))
-//        tap.cancelsTouchesInView = false
-//        view.addGestureRecognizer(tap)
-//    }
-//    @objc func dismissKeyboard() {
-//        NSLayoutConstraint.activate([
-//            mapView.topAnchor.constraint(equalTo: textFieldNote.bottomAnchor),
-//            mapView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-//            mapView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-//            mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-//        ])
-//        view.endEditing(true)
-//    }
-//}

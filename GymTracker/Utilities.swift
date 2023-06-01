@@ -9,6 +9,7 @@ import UIKit
 import MapKit
 
 extension UIViewController {
+	// THIS IS FOR SHOWING AN ALERT WHILE THE APP IS OPEN MOSTLY FOR SIMULATOR TESTING
   func showAlert(withTitle title: String?, message: String?) {
     let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
     let action = UIAlertAction(title: "OK", style: .cancel, handler: nil)

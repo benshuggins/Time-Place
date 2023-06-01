@@ -6,15 +6,22 @@
 //
 // Build everything with appdelegate managedObjectContext
 
+// I am currently not using NSFetchResultscontroller and I wont
+
 import UIKit
 import MapKit
 import CoreLocation
 import CoreData
 
-class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
+class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate {
 	
-	var locations = [Location]() {
+	var locations = [Location]() {   // local
 		didSet {
+			
+			self.tableView.reloadData()
+			//self.tableView.beginUpdates()
+			//mapView.addOverlay(locations as! MKOverlay)
+		//	mapView.addOverlay(MKCircle(center: locations.coordinate, radius: locations.radius))
 			if locations.isEmpty { self.showEmptyAlert() }
 		}
 	}
@@ -75,7 +82,7 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
 	  fetchRequest.sortDescriptors = [sort1]
 	 fetchRequest.fetchBatchSize = 20
 
-	  let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: "title", cacheName: "Locations")
+		let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: "title", cacheName: "Locations")
 
 	  fetchedResultsController.delegate = self
 	  return fetchedResultsController
@@ -83,6 +90,7 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
 	
     override func viewDidLoad() {
         super.viewDidLoad()
+		AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.portrait, andRotateTo: UIInterfaceOrientation.portrait)
         //MARK: - Only show login screen once
         if defaults.bool(forKey: "First Launch") == true {
             print("Second or more app launch")
@@ -132,10 +140,12 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
         if locations.isEmpty { self.showEmptyAlert() }
         if !locations.isEmpty { showLocations() }
 		
-		performFetch()  // this is for NSFetchresultscontrolller
+		 performFetch()  // this is for NSFetchresultscontrolller
     }
 	
+	//THIS IS THE FETCH FOR THE TABLEVIEW
 	private func performFetch() {
+
 		do {
 			try fetchedResultsController.performFetch()
 			tableView.reloadData()
@@ -144,14 +154,21 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
 		}
 	}
 	
-	deinit {
-		fetchedResultsController.delegate = nil
-	}
+//
+//	deinit {
+//		fetchedResultsController.delegate = nil
+//	}
 	
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(true)
-		//tableView.reloadData()
+		AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.portrait, andRotateTo: UIInterfaceOrientation.portrait)
+		
 		if !locations.isEmpty { showLocations() }
+	}
+	
+	override func viewDidAppear(_ animated: Bool) {
+		super.viewDidAppear(true)
+		AppDelegate.AppUtility.lockOrientation(UIInterfaceOrientationMask.portrait, andRotateTo: UIInterfaceOrientation.portrait)
 	}
     
     func showEmptyAlert() {
@@ -184,13 +201,23 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
       return mapView.regionThatFits(region)
     }
     
-    // MARK: - Core Data Fetch
-    func fetchLocations() {
+    // MARK: - Core Data Fetch For the map!! I have 2 fetches one for tableView and one for the map
+  // This is for the map
+	func fetchLocations() {
+	
         do {
             self.locations = try context.fetch(Location.fetchRequest())
+			print("😅😅😅😅😅😅😅😅😅😅Locations Count: , \(locations.count)")
 			DispatchQueue.main.async {
                 self.mapView.addAnnotations(self.locations)
-				self.locations.forEach { self.add($0) }
+				//self.locations.forEach { self.add($0) }
+				
+				//self.locations.forEach { //self.locations.forEach { self.add($0) } }
+				
+				// this adds an overlay to the map when refetched!!!
+				for location in self.locations {
+					self.mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
+				}
             }
         }
         catch {
@@ -252,16 +279,6 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
       present(alert, animated: true, completion: nil)
     }
 	
-    //MARK: - ADDING A LOCATION
-    func add(_ location: Location) {
-        locations.append(location)
-		
-      mapView.addAnnotation(location)
-	
-      //updateGeotificationsCount()
-        mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
-		if !locations.isEmpty { showLocations() }
-    }
 	
     //MARK: - DELETING A LOCATION
     func remove(_ location: Location) {
@@ -294,7 +311,6 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
     }
     
     // MARK: LAYOUT CONFIGURATION
-	
 	private func configureButtons() {
 		goToLocationButton.configuration = .tinted()
 		goToLocationButton.configuration?.baseForegroundColor = .systemBlue
@@ -314,7 +330,7 @@ class MainMapVC: UIViewController, NSFetchedResultsControllerDelegate  {
 		addNewButton.setImage(largeBoldDoc, for: .normal)
 		addNewButton.configuration = .borderless()
 		addNewButton.configuration?.baseForegroundColor = .systemGreen
-		addNewButton.frame = CGRect(x: 272, y: 246, width: 100, height: 100)
+		addNewButton.frame = CGRect(x: 269, y: 250, width: 100, height: 100)
 	}
 	
     private func configureUI() {
@@ -419,6 +435,17 @@ func string(from placemark: CLPlacemark) -> String {
   }
   return line1 + "\n" + line2
 	}
+	
+	//MARK: - ADDING A LOCATION AND OVERLAY TO THE MAP
+	func add(_ location: Location) {
+		locations.append(location)     // local, when I should really save and pull?? FRC was making the problem
+		// call save here?
+		 
+	   mapView.addAnnotation(location)
+	  //updateGeotificationsCount()
+		mapView.addOverlay(MKCircle(center: location.coordinate, radius: location.radius))
+		if !locations.isEmpty { showLocations() }
+	}
 }
 //MARK: - CALL BACK FROM ADDLOCATIONVC
 /// send back data delegate
@@ -427,7 +454,7 @@ extension MainMapVC: AddLocationVCDelegate {                                    
         controller.dismiss(animated: true, completion: nil)
         location.clampRadius(maxRadius: locationManager.maximumRegionMonitoringDistance)
         startMonitoring(location: location) ///Call start monitoring function
-		add(location)
+		add(location)    					// I am calling add here on way back from the delegate
     }
 }
 
@@ -473,9 +500,14 @@ extension MainMapVC: MKMapViewDelegate {
           remove(location)
           stopMonitoring(location: location) /// Stop monitoring a region
               } else if control == view.rightCalloutAccessoryView {
-                  let detailVC = DetailLocationVC()
-                  detailVC.titleString = location.title!
-                  navigationController?.pushViewController(detailVC, animated: true)
+				  
+				  let logVC = LogVC()
+				  logVC.location = location
+				  navigationController?.pushViewController(logVC, animated: true)
+				  
+//                  let detailVC = DetailLocationVC()
+//                  detailVC.titleString = location.title!
+//                  navigationController?.pushViewController(detailVC, animated: true)
             }
         }
     }
@@ -509,92 +541,117 @@ extension MainMapVC {
 
 extension MainMapVC: UITableViewDelegate, UITableViewDataSource {
 	
+	
+	// currently the tableView is not using NSFRC
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		//let title1 = locations[indexPath.row].title
+		let title1 = locations[indexPath.row].title
 		let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as UITableViewCell
 	    
-		let location = fetchedResultsController.object(at: indexPath)
-		cell.textLabel?.text = location.title
+		//let location = fetchedResultsController.object(at: indexPath)
+		cell.textLabel?.text = title1//location.title
 		return cell
 	}
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		// return locations.count
-		let sectionInfo = fetchedResultsController.sections?[section]
-		return sectionInfo!.numberOfObjects
+		 return locations.count
+//		let sectionInfo = fetchedResultsController.sections?[section]
+//		return sectionInfo!.numberOfObjects
 	 }
+//	
+//	func numberOfSections(in tableView: UITableView) -> Int {
+//		//return fetchedResultsController.sections?.count ?? 2
+//		return 1
+//	}
+//
 	
-	func numberOfSections(in tableView: UITableView) -> Int {
-		return fetchedResultsController.sections?.count ?? 2
+	// 
+	
+	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+		//let location = fetchedResultsController.object(at: indexPath)
+		let logVC = LogVC()
+//		let indexPath = tableView.indexPathForSelectedRow!
+//
+//
+		let location = locations[indexPath.row]
+		logVC.location = location
+		let destinationTitle = location.title
+		logVC.title = destinationTitle
+
+		//detailVC.titleString = location.title!
+		navigationController?.pushViewController(logVC, animated: true)
+//
+//		let location = locations[indexPath.row]
+//		let detailVC = DetailLocationVC()
+//		detailVC.titleString = location.title ?? ""
+//		navigationController?.pushViewController(detailVC, animated: true)
 	}
-	
 }
 
 
 
 // Here is Core Data
-extension MainMapVC {
-	
-	func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-		print("*** controllerWillChangeContent")
-		tableView.beginUpdates()
-	  }
-
-	  func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,didChange anObject: Any,at indexPath: IndexPath?,
-		for type: NSFetchedResultsChangeType,
-		newIndexPath: IndexPath?) {
-		switch type {
-		case .insert:
-		  print("*** NSFetchedResultsChangeInsert (object)")
-		  tableView.insertRows(at: [newIndexPath!], with: .fade)
-
-		case .delete:
-		  print("*** NSFetchedResultsChangeDelete (object)")
-		  tableView.deleteRows(at: [indexPath!], with: .fade)
-			
-			//THIS MIGHT BE A GOOD PLACE TO CHECK ?
-
-		case .update:
-		  print("*** NSFetchedResultsChangeUpdate (object)")
-			if let cell = tableView.cellForRow(at: indexPath!) {
-			let location = controller.object(at: indexPath!) as! Location
-				  // cell.configure(for: singer)
-				cell.textLabel?.text = location.title
-		  }
-
-		case .move:
-		  print("*** NSFetchedResultsChangeMove (object)")
-		  tableView.deleteRows(at: [indexPath!], with: .fade)
-		  tableView.insertRows(at: [newIndexPath!], with: .fade)
-
-		@unknown default:
-		  print("*** NSFetchedResults unknown type")
-		}
-	  }
-
-	  func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo,
-		atSectionIndex sectionIndex: Int,
-		for type: NSFetchedResultsChangeType
-	  ) {
-		switch type {
-		case .insert:
-		  print("*** NSFetchedResultsChangeInsert (section)")
-		  tableView.insertSections(
-			IndexSet(integer: sectionIndex), with: .fade)
-		case .delete:
-		  print("*** NSFetchedResultsChangeDelete (section)")
-		  tableView.deleteSections(
-			IndexSet(integer: sectionIndex), with: .fade)
-		case .update:
-		  print("*** NSFetchedResultsChangeUpdate (section)")
-		case .move:
-		  print("*** NSFetchedResultsChangeMove (section)")
-		@unknown default:
-		  print("*** NSFetchedResults unknown type")
-		}
-	  }
-
-	  func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-		print("*** controllerDidChangeContent")
-		tableView.endUpdates()
-	  }
-}
+//extension MainMapVC {
+//
+//	func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+//		print("*** controllerWillChangeContent")
+//		tableView.beginUpdates()
+//	  }
+//
+//	  func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,didChange anObject: Any,at indexPath: IndexPath?,
+//		for type: NSFetchedResultsChangeType,
+//		newIndexPath: IndexPath?) {
+//		switch type {
+//		case .insert:
+//		  print("*** NSFetchedResultsChangeInsert (object)")
+//		  tableView.insertRows(at: [newIndexPath!], with: .fade)
+//
+//		case .delete:
+//		  print("*** NSFetchedResultsChangeDelete (object)")
+//		  tableView.deleteRows(at: [indexPath!], with: .fade)
+//
+//			//THIS MIGHT BE A GOOD PLACE TO CHECK ?
+//
+//		case .update:
+//		  print("*** NSFetchedResultsChangeUpdate (object)")
+//			if let cell = tableView.cellForRow(at: indexPath!) {
+//			let location = controller.object(at: indexPath!) as! Location
+//				  // cell.configure(for: singer)
+//				cell.textLabel?.text = location.title
+//		  }
+//
+//		case .move:
+//		  print("*** NSFetchedResultsChangeMove (object)")
+//		  tableView.deleteRows(at: [indexPath!], with: .fade)
+//		  tableView.insertRows(at: [newIndexPath!], with: .fade)
+//
+//		@unknown default:
+//		  print("*** NSFetchedResults unknown type")
+//		}
+//	  }
+//
+//	  func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo,
+//		atSectionIndex sectionIndex: Int,
+//		for type: NSFetchedResultsChangeType
+//	  ) {
+//		switch type {
+//		case .insert:
+//		  print("*** NSFetchedResultsChangeInsert (section)")
+//		  tableView.insertSections(
+//			IndexSet(integer: sectionIndex), with: .fade)
+//		case .delete:
+//		  print("*** NSFetchedResultsChangeDelete (section)")
+//		  tableView.deleteSections(
+//			IndexSet(integer: sectionIndex), with: .fade)
+//		case .update:
+//		  print("*** NSFetchedResultsChangeUpdate (section)")
+//		case .move:
+//		  print("*** NSFetchedResultsChangeMove (section)")
+//		@unknown default:
+//		  print("*** NSFetchedResults unknown type")
+//		}
+//	  }
+//
+//	  func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+//		print("*** controllerDidChangeContent")
+//		tableView.endUpdates()
+//	  }
+//}

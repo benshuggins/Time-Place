@@ -65,10 +65,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // MARK: - Core Data stack
     lazy var managedObjectContext: NSManagedObjectContext = self.persistentContainer.viewContext
-    lazy var persistentContainer: NSPersistentContainer = {
+    
+	lazy var persistentContainer: NSPersistentContainer = {
      
       let container = NSPersistentContainer(name: "DataModel")
       container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+		  
+		  
+		  // I added this
+		  self.persistentContainer.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+		  
         if let error = error as NSError? {
           fatalError("Unresolved error \(error), \(error.userInfo)")
         }
@@ -78,8 +84,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     // MARK: - Core Data Saving support
     func save () {
-      let context = persistentContainer.viewContext
-      if context.hasChanges {
+      let context = persistentContainer.viewContext   // passed into ViewContext
+      if context.hasChanges {							// only save it there are changes
         do {
           try context.save()
         } catch {

@@ -9,6 +9,8 @@ import CoreLocation
 import CoreData
 import MapKit
 
+// This is confusing am I using NSFRC or just NSFetch? 
+
 final class DetailLocationVC: UIViewController, UITableViewDelegate, UITableViewDataSource, NSFetchedResultsControllerDelegate {
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -25,7 +27,7 @@ final class DetailLocationVC: UIViewController, UITableViewDelegate, UITableView
 
      fetchRequest.fetchBatchSize = 20
 
-      let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: "sectionDate", cacheName: "RegionEventsCache")
+      let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: "sectionDate", cacheName: "RegionEventCache")
 
       fetchedResultsController.delegate = self
       return fetchedResultsController
@@ -49,12 +51,14 @@ final class DetailLocationVC: UIViewController, UITableViewDelegate, UITableView
             tableView.delegate = self
             tableView.dataSource = self
             tableView.frame = view.bounds
-            performFetch()
+           // performFetch()
      
+			 //Get the location from the title
             let thisLocation = fetchLocation(title: titleString)  //
-           /// fetch the RegionEvents that match this Location
-            regionEvents = fetchRegions(locationIdentifier: thisLocation.identifier)
-        }
+           // fetch the RegionEvents that match this Location
+            regionEvents = fetchRegions(locationIdentifier: thisLocation.identifier)  // this is unique
+       
+		}
     
     override func viewWillAppear(_ animated: Bool) {
        super.viewWillAppear(animated)
@@ -66,34 +70,36 @@ final class DetailLocationVC: UIViewController, UITableViewDelegate, UITableView
         AppUtility.lockOrientation(.all)
     }
     
-    private func performFetch() {
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            print("Error with fetchedResultsController \(error)")
-        }
-    }
-    
-    deinit {
-        fetchedResultsController.delegate = nil
-    }
+//    private func performFetch() {
+//        do {
+//            try fetchedResultsController.performFetch()
+//        } catch {
+//            print("Error with fetchedResultsController \(error)")
+//        }
+//    }
+//
+//    deinit {
+//        fetchedResultsController.delegate = nil
+//    }
+	
     /// Get the location that matches the title location that was passed to this VC
     func fetchLocation(title: String) -> Location {
-        
+
         do {
-        let request = Location.fetchRequest() as NSFetchRequest<Location>  
+        let request = Location.fetchRequest() as NSFetchRequest<Location>
             let pred = NSPredicate(format: "title == %@", titleString)
         request.predicate = pred
-            location = try context.fetch(request).first!
+			location = try context.fetch(request).first!
         } catch {
             print("Error: \(error)")
         }
         return location
     }
     
-    /// Fetches RegionEvents from a location identifier
+    /// Fetches RegionEvents from a location identifier  // this works but is not NSFetchResultsController
     private func fetchRegions(locationIdentifier: String) -> [RegionEvent] {
-        var fetchedRegionEvents = [RegionEvent]()
+       
+		var fetchedRegionEvents = [RegionEvent]()
         
                 do {
                    let request: NSFetchRequest<RegionEvent> = NSFetchRequest<RegionEvent>(entityName: "RegionEvent")
@@ -108,20 +114,24 @@ final class DetailLocationVC: UIViewController, UITableViewDelegate, UITableView
     }
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        return fetchedResultsController.sections!.count
+		return fetchedResultsController.sections?.count ?? 1
+		
+		//return regionEvents.count
+		
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let sectionInfo = fetchedResultsController.sections![section]
+	 let sectionInfo = fetchedResultsController.sections?[section]
       
         var total: Double = 0
        
-        let subCategory = sectionInfo.objects as? [RegionEvent]
+		let subCategory = sectionInfo?.objects as? [RegionEvent]
         for i in subCategory ?? [] {
             let name = i.sectionDate
             if name == i.sectionDate {
                     total += i.totalRegionSeconds
             }
+			
         }
 		
 		let timeTotal = TimeInterval(total)
@@ -129,7 +139,8 @@ final class DetailLocationVC: UIViewController, UITableViewDelegate, UITableView
         headerView.backgroundColor = .secondarySystemBackground
         headerView.layer.cornerRadius = 10
         let sectionDateLabel = UILabel(frame: CGRect(x: 5, y: 5, width: 170, height: headerView.frame.size.height-10))
-        sectionDateLabel.text = sectionInfo.name
+		sectionDateLabel.text = sectionInfo?.name
+	
         sectionDateLabel.textColor = .systemGray
         let totalLabel = UILabel(frame: CGRect(x: 50 + sectionDateLabel.frame.size.width, y: 5,width: 200, height: headerView.frame.size.height - 10))
         totalLabel.backgroundColor = .secondarySystemBackground
@@ -139,14 +150,15 @@ final class DetailLocationVC: UIViewController, UITableViewDelegate, UITableView
         headerView.addSubview(sectionDateLabel)
         return headerView
     }
+	
     
 	func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 40
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let sectionInfo = fetchedResultsController.sections![section]
-        return sectionInfo.numberOfObjects
+		let sectionInfo = fetchedResultsController.sections?[section]
+		return sectionInfo?.numberOfObjects ?? 1
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -154,10 +166,11 @@ final class DetailLocationVC: UIViewController, UITableViewDelegate, UITableView
     }
 
      func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-         
+//
+		 let regionEvent = regionEvents[indexPath.row]
          let cell = tableView.dequeueReusableCell(withIdentifier: DetailTableViewCell.identifier, for: indexPath) as? DetailTableViewCell
          
-         let regionEvent = fetchedResultsController.object(at: indexPath)
+       //  let regionEvent = fetchedResultsController.object(at: indexPath)
          cell?.configure(regionEvent: regionEvent)
          return cell!
     }
@@ -223,34 +236,34 @@ extension DetailLocationVC {
         print("*** NSFetchedResults unknown type")
       }
     }
-    
-        func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-          switch type {
-          case .insert:
-            print("*** NSFetchedResultsChangeInsert (object)")
-            tableView.insertRows(at: [newIndexPath!], with: .fade)
 
-          case .delete:
-            print("*** NSFetchedResultsChangeDelete (object)")
-            tableView.deleteRows(at: [indexPath!], with: .fade)
+	func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+	  switch type {
+	  case .insert:
+		print("*** NSFetchedResultsChangeInsert (object)")
+		tableView.insertRows(at: [newIndexPath!], with: .fade)
 
-          case .update:
-            print("*** NSFetchedResultsChangeUpdate (object)")
-            if let cell = tableView.cellForRow(at: indexPath!) as? DetailTableViewCell {
-              let regionEvent = controller.object(
-                at: indexPath!) as! RegionEvent
-                cell.configure(regionEvent: regionEvent)
-            }
+	  case .delete:
+		print("*** NSFetchedResultsChangeDelete (object)")
+		tableView.deleteRows(at: [indexPath!], with: .fade)
 
-          case .move:
-            print("*** NSFetchedResultsChangeMove (object)")
-            tableView.deleteRows(at: [indexPath!], with: .fade)
-            tableView.insertRows(at: [newIndexPath!], with: .fade)
+	  case .update:
+		print("*** NSFetchedResultsChangeUpdate (object)")
+		if let cell = tableView.cellForRow(at: indexPath!) as? DetailTableViewCell {
+		  let regionEvent = controller.object(
+			at: indexPath!) as! RegionEvent
+			cell.configure(regionEvent: regionEvent)
+		}
 
-          @unknown default:
-            print("*** NSFetchedResults unknown type")
-          }
-        }
+	  case .move:
+		print("*** NSFetchedResultsChangeMove (object)")
+		tableView.deleteRows(at: [indexPath!], with: .fade)
+		tableView.insertRows(at: [newIndexPath!], with: .fade)
+
+	  @unknown default:
+		print("*** NSFetchedResults unknown type")
+	  }
+	}
 
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
       print("*** controllerDidChangeContent")
